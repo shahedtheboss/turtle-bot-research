@@ -34,6 +34,9 @@ The agent interacts with its environment through a reinforcement learning loop:
 
 The central idea is simple: learn a useful navigation policy through experience rather than hard-coding every decision.
 
+<img width="1656" height="1026" alt="image" src="https://github.com/user-attachments/assets/520e12a2-90d9-4dd8-8e3f-09cfa8858e72" />
+
+
 ## System Architecture
 
 ```text
@@ -136,6 +139,9 @@ The reward structure is an important part of the experiment: changing it can inf
 ## The DQN Implementation
 
 The learning agent uses a neural network to estimate action values, or Q-values.
+
+<img width="1292" height="910" alt="Screenshot from 2026-10-21 05-04-30" src="https://github.com/user-attachments/assets/e4370aee-802d-4d37-b116-7712978f90fc" />
+
 
 The current network architecture is:
 
