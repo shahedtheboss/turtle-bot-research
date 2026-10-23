@@ -1,6 +1,6 @@
 # Deep Reinforcement Learning for TurtleBot3 Autonomous Navigation
 
-### Learning to Navigate. Learning to Avoid. Building Toward Autonomous Robotics.
+### Learning to Navigate. Learning to Avoid. Building Toward Autonomous Robotics.(A Research project pathway)
 
 A Deep Q-Network (DQN)-based autonomous navigation system for TurtleBot3, built using PyTorch, ROS 2, and Gazebo. The project explores how a mobile robot can learn goal-directed navigation and obstacle avoidance through interaction with a simulated environment and reward-driven learning.
 
