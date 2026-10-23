@@ -1,0 +1,64 @@
+-----start gazebo-----
+
+source /opt/ros/humble/setup.bash
+source ~/ros2_ws/install/setup.bash
+
+export TURTLEBOT3_MODEL=burger
+export DRLNAV_BASE_PATH="$HOME/ros2_ws"
+ros2 launch turtlebot3_gazebo turtlebot3_drl_stage4.launch.py
+
+
+-----source env-----
+source /opt/ros/humble/setup.bash
+
+ls ~/pytorch-env/bin/activate
+source ~/pytorch-env/bin/activate
+
+python -c "import torch; print('PyTorch:', torch.__version__); print('CUDA available:', torch.cuda.is_available())"
+python -c "import rclpy; print('ROS 2 Python OK')"
+
+
+----build file after editing code----
+cd ~/ros2_ws
+colcon build --packages-select mini_dqn_nav
+
+
+----build once and save continuosly----
+cd ~/ros2_ws
+source /opt/ros/humble/setup.bash
+colcon build --packages-select mini_dqn_nav --symlink-install
+source ~/ros2_ws/install/setup.bash
+
+----run environment file-----
+cd ~/ros2_ws
+source /opt/ros/humble/setup.bash
+
+colcon build --packages-select mini_dqn_nav
+source ~/ros2_ws/install/setup.bash
+
+ros2 run mini_dqn_nav environment
+
+
+----start training----
+
+source /opt/ros/humble/setup.bash
+source ~/ros2_ws/install/setup.bash
+source ~/pytorch-env/bin/activate
+export TURTLEBOT3_MODEL=burger
+export DRLNAV_BASE_PATH="$HOME/ros2_ws"
+python -m mini_dqn_nav.train
+
+----start evaluating----
+
+  source /opt/ros/humble/setup.bash
+  source ~/ros2_ws/install/setup.bash
+  source ~/pytorch-env/bin/activate
+  export TURTLEBOT3_MODEL=burger
+  python -m mini_dqn_nav.evaluate
+
+----reset bot position----
+
+source /opt/ros/humble/setup.bash
+ros2 service list | grep -E 'reset|set_entity_state'
+ros2 service call /reset_world std_srvs/srv/Empty "{}"
+
