@@ -5,6 +5,7 @@ from rclpy.node import Node
 from sensor_msgs.msg import LaserScan
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Twist
+from gazebo_msgs.srv import SetEntityState
 
 
 class RobotEnvironment(Node):
@@ -21,18 +22,21 @@ class RobotEnvironment(Node):
         self.goal_tolerance = 0.20       # Goal reached within 20 cm
         self.collision_distance = 0.15   # LiDAR-based obstacle warning
 
+        self.set_state_client = self.create_client(SetEntityState, '/set_entity_state')
+
         # Define the actions available to our future DQN agent.
         # Format: action_id -> (linear velocity, angular velocity)
         # These values define commands only; they do not move the robot yet.
 
         self.actions = {
             0: {'name': 'forward',      'linear_x': 0.15, 'angular_z':  0.0},
-            1: {'name': 'soft_forward_left', 'linear_x': 0.15, 'angular_z':  0.4},
-            2: {'name': 'soft_forward_right','linear_x': 0.15, 'angular_z': -0.4},
+            1: {'name': 'soft_forward_left', 'linear_x': 0.11, 'angular_z':  0.4},
+            2: {'name': 'soft_forward_right','linear_x': 0.11, 'angular_z': -0.4},
             3: {'name': 'forward_left', 'linear_x': 0.08, 'angular_z':  0.8},
             4: {'name': 'forward_right','linear_x': 0.08, 'angular_z': -0.8},
             5: {'name': 'hard_left',    'linear_x': 0.02, 'angular_z':  1.0},
             6: {'name': 'hard_right',   'linear_x': 0.02, 'angular_z': -1.0},
+            
         }
 
 
@@ -150,7 +154,7 @@ class RobotEnvironment(Node):
         # This means our LiDAR representation will contain 20 values,
         # regardless of how many raw measurements the sensor provides.
         """
-        num_sectors = 20
+        num_sectors = 50
 
         # Obtain the maximum range reported by this LiDAR message.
         # For example, if range_max is 3.5, the sensor's usable
@@ -453,21 +457,21 @@ class RobotEnvironment(Node):
     """
 
     def get_state(self):
-        """Build a 22-feature state: 20 LiDAR sectors + goal distance/angle."""
+        """Build a 52-feature state: 52 LiDAR sectors + goal distance/angle."""
 
         if self.latest_scan is None or self.latest_odom is None:
             return None
 
         goal_distance, relative_angle = self.get_goal_information()
 
-        if len(self.latest_scan) != 20:
+        if len(self.latest_scan) != 50:
             raise ValueError(
-                f"Expected 20 LiDAR sectors, got {len(self.latest_scan)}"
+                f"Expected 50 LiDAR sectors, got {len(self.latest_scan)}"
             )
 
         state = self.latest_scan + [goal_distance, relative_angle]
 
-        assert len(state) == 22
+        assert len(state) == 52
         return state
     """
     def calculate_reward(self, previous_goal_distance):
@@ -536,16 +540,16 @@ class RobotEnvironment(Node):
             return None, False, "waiting for sensor data"
 
         # Make sure the environment produces the expected state.
-        if len(state) != 22:
+        if len(state) != 52:
             raise ValueError(
-                f"Expected 22 state values, got {len(state)}"
+                f"Expected 52 state values, got {len(state)}"
             )
 
         # Extract the 20 LiDAR distances.
-        obstacle_distances = state[:20]
+        obstacle_distances = state[:50]
 
         # Goal distance is the 21st value (index 20).
-        current_goal_distance = state[20]
+        current_goal_distance = state[50]
 
         # First, check for a LiDAR-based collision warning.
         # Check whether the robot reached the goal first.
@@ -554,19 +558,30 @@ class RobotEnvironment(Node):
 
         # Otherwise, check for a LiDAR-based collision warning.
         if min(obstacle_distances) <= self.collision_distance:
-            return -30.0, True, "collision_warning"
+            return -50.0, True, "collision_warning"
 
-        # Penalize each additional step slightly.
+        # # Penalize each additional step slightly.
         reward = -0.1
 
-        # Reward progress toward the goal; penalize moving away.
-        progress = previous_goal_distance - current_goal_distance
-        if progress > 0:
-            reward += 7.0 * progress
-        else:
-            reward += 3.0 * progress
+        # # Reward progress toward the goal; penalize moving away.
+        # progress = previous_goal_distance - current_goal_distance
+        # if progress > 0:
+        #     reward += 7.0 * progress
+        # else:
+        #     reward += 3.0 * progress
         
         # reward += 7.0 * progress
+
+        progress = previous_goal_distance - current_goal_distance
+        reward += 5.0 * progress
+
+        # Small heading term: prefer facing the goal.
+        reward -= 0.05 * abs(state[51])
+
+        # Early warning before collision: 0 at 0.30 m, about -1 near 0.15 m.
+        nearest = min(obstacle_distances)
+        if nearest < 0.30:
+            reward -= (0.30 - nearest) / 0.15
 
         self.get_logger().info(
             f"Goal distance: {current_goal_distance:.3f} m, "
@@ -673,6 +688,11 @@ class RobotEnvironment(Node):
 
         self.get_logger().info("Stop command published.")
 
+    def normalize(self, s):
+        lidar = [min(d, 3.5) / 3.5 for d in s[:50]]
+        goal_dist = min(s[50] / 6.0, 1.0)     # 6.0 = rough max distance in your arena
+        return lidar + [goal_dist, s[51] / math.pi]
+
         
 
     ##################
@@ -683,7 +703,7 @@ class RobotEnvironment(Node):
         if state is None:
             raise RuntimeError("Sensor data is not ready.")
 
-        previous_goal_distance = state[5]
+        previous_goal_distance = state[50]
 
         # Record the current sensor message count before moving.
         previous_update_count = self.sensor_update_count
@@ -710,9 +730,27 @@ class RobotEnvironment(Node):
             previous_goal_distance
         )
 
-        return next_state, reward, terminated, reason
+        return self.normalize(next_state), reward, terminated, reason
     ##################
-  
+
+    def set_start(self, x, y, yaw, model_name='burger'):
+        """Teleport the robot (eval only)."""
+        if not self.set_state_client.wait_for_service(timeout_sec=2.0):
+            self.get_logger().error('/set_entity_state not available')
+            return False
+        req = SetEntityState.Request()
+        req.state.name = model_name
+        req.state.pose.position.x = float(x)
+        req.state.pose.position.y = float(y)
+        req.state.pose.orientation.z = math.sin(yaw / 2.0)
+        req.state.pose.orientation.w = math.cos(yaw / 2.0)
+        future = self.set_state_client.call_async(req)
+        deadline = time.monotonic() + 3.0
+        while rclpy.ok() and not future.done() and time.monotonic() < deadline:
+            rclpy.spin_once(self, timeout_sec=0.1)
+        return future.done()
+
+
 
 
 

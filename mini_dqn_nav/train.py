@@ -42,7 +42,7 @@ def reset_simulation(node):
 def main(args=None):
     rclpy.init(args=args)
     env = RobotEnvironment()
-    agent = DQNAgent(state_size=22, action_size=7)
+    agent = DQNAgent(state_size=52, action_size=7)
 
     episode_rewards = []
     episode_losses = []
@@ -50,12 +50,12 @@ def main(args=None):
     episode_outcomes = []
     epsilons = []
 
-    episodes = 120
-    max_steps =100
+    episodes = 300
+    max_steps =250
     target_update_every = 2
 
     model_path = os.path.expanduser(
-        "~/ros2_ws/src/mini_dqn_nav/mini_dqn_nav/models/dqn_model_7actions_20_lidars.pth"
+        "~/ros2_ws/src/mini_dqn_nav/mini_dqn_nav/models/fixed_dqn_model_7actions_20_lidars.pth"
     )
     try:
         #wait for initial lidar and odometry data
@@ -70,7 +70,7 @@ def main(args=None):
             rclpy.spin_once(env, timeout_sec=0.1)
 
         for episode in range(1,episodes+1):
-            state = env.get_state()
+            state = env.normalize(env.get_state())
             episode_reward = 0.0
             losses = []
             ended = False
@@ -87,11 +87,12 @@ def main(args=None):
                 next_state, reward, terminated, reason = env.step(action)
 
                 #Store the experience in the replay memory and learn from a random sample of experiences
-                done = terminated or (step == max_steps - 1)
-                agent.remember(state, action, reward, next_state, done)
+                # done = terminated or (step == max_steps - 1)
+                agent.remember(state, action, reward, next_state, terminated)
                 loss = agent.learn()
                 if loss is not None:
                     losses.append(loss)
+                    agent.decay_epsilon()
                 state = next_state
                 episode_reward += reward
 
@@ -103,7 +104,7 @@ def main(args=None):
                     break
 
             # These updates happen ONCE per episode.
-            agent.decay_epsilon()
+            # agent.decay_epsilon()
 
             # Calculate mean loss BEFORE recording it.
             mean_loss = (
@@ -120,8 +121,8 @@ def main(args=None):
             )
             epsilons.append(agent.epsilon)
 
-            if episode % target_update_every == 0:
-                agent.update_target()
+            # if episode % target_update_every == 0:
+            #     agent.update_target()
 
             # Print the episode summary ONCE, after its steps finish.
             env.get_logger().info(

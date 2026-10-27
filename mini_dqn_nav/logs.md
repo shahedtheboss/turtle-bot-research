@@ -36,6 +36,8 @@ The initial model was evaluated using greedy action selection, with exploration 
 
 The original five-action model and its checkpoint were retained as the baseline for subsequent comparisons.
 
+ ### Bug = Bot was taking repeated reverse actions and finishing episodes wiht step expiring during evaluation --- Fixed by removing reverse intially
+
 ## 2. Environment and reward design
 
 The custom environment uses five LiDAR sectors: front, front-left, front-right, left, and right. The nearest reading within each sector is used to represent nearby obstacles.
@@ -43,15 +45,21 @@ The custom environment uses five LiDAR sectors: front, front-left, front-right, 
 The reward and termination configuration includes:
 
 - Goal-reaching reward: `+100`
-- Obstacle-proximity termination penalty: `-30`
+- Obstacle-proximity termination penalty: `-30` (changed from -100 to fix goals to reach in obstucted paths)
 - Per-step penalty: `-0.1`
-- Progress reward: `+7 × distance progress`
+- Progress reward: `+7 × distance progress` 
+## Bug-- repeatedly bumping into corners fixed by changing intial +5 to +7
 - Goal tolerance: approximately `0.20 m`
 - LiDAR collision-warning threshold: changed from `0.20 m` to approximately `0.08 m`
 
 The collision-warning threshold is a LiDAR-based termination rule; it does not actively prevent the robot from approaching an obstacle. It should not be described as a physical collision detector or a safety controller.
 
 The goal remains fixed for the current experiments. Variable goals have not been included in the present scope.
+Train Results:
+![alt text](image.png)
+
+Eval:
+![alt text](image-1.png)
 
 ## 3. Recent DQN upgrades
 
@@ -93,6 +101,11 @@ The batch size was increased from 64 to 128 as part of the revised training conf
 
 This means each learning update samples 128 transitions from replay memory rather than 64. The change may affect gradient estimates, memory usage, and learning dynamics, so its effect should be measured experimentally.
 
+Results:
+Train ![alt text](image-2.png)
+Evaluate ![alt text](../eval_v2.png)
+
+
 ### 3.4 Double DQN
 
 The learning target was identified for modification from standard DQN to Double DQN.
@@ -119,21 +132,9 @@ This modification is intended to reduce overestimation of action values. It does
 
 **Implementation status:** The Double DQN code change should be verified in the current `agent.py` before the experiment is labeled as completed.
 
-## 4. Changes that remain experimental or planned
+## 3.5 Updated learn() function 
 
-The following are not assumed to be implemented merely because they were discussed:
-
-- AdamW or RMSprop optimizer comparisons.
-- A learning-rate change from `0.001` to `0.0003`.
-- Prioritized Experience Replay.
-- Dueling DQN.
-- A separate LiDAR-based safety filter.
-- Variable goal positions.
-- Evaluation across unseen obstacle layouts.
-
-These should be introduced as separate experiments rather than combined into the same run.
-
-## 5. Recommended experimental comparison
+## 4. Recommended experimental comparison
 
 The experiments should distinguish the effects of individual changes:
 
@@ -147,7 +148,7 @@ The experiments should distinguish the effects of individual changes:
 
 The original model should remain available for comparison. Training conditions, environment, goal, and evaluation protocol should be held constant wherever possible.
 
-## 6. Evaluation metrics
+## 8. Evaluation metrics
 
 The evaluation should report:
 
@@ -184,7 +185,15 @@ Use wider LiDAR scans around 20 distance scans and 2 goal relative information(o
         - we will select the minimum distance from each sector.
         -
         - The list comprehension runs once for every sector.
-## 9.. calculate_reward() — there's a priority issue
+
+    Results
+    Train
+    ![alt text](image-3.png)
+
+    Evaluate
+    ![alt text](../train_DDQN_22scans.png)
+
+## 9. calculate_reward() — there's a priority issue
     Look at your current order:
     if min(obstacle_distances) <= self.collision_distance:    return -30.0, True, "collision_warning"if current_goal_distance <= self.goal_tolerance:    return 100.0, True, "goal_reached"
 
@@ -198,6 +207,93 @@ Use wider LiDAR scans around 20 distance scans and 2 goal relative information(o
 
 
     This fixes the priority issue, but it won't necessarily fix the 0% success rate if the robot isn't actually reaching the goal.
+
+    if distance postive -> 7 times reward
+    negative ->3 times penalty
+
+    ALL IN 120 EPISODES AND 100 STEPS
+
+    Results
+    Train:
+    ![alt text](../new_reward_pen_DDQN_22state_train.png)
+    Evaluate:
+    ![alt text](../new_reward_pen_DDQN_22state_eval.png)
+
+## 10. Inrease LiDAR and action state
+    -LiDAR sttae 50
+    -Input state 52
+    -action 11
+
+## 10. Change epsilon
+    -Change epsilon values from 
+    -Decay per steop instead of per episode
+
+## Crucial Fixes and Changes
+environment.py
+    Added normalize(), which scales LiDAR by 3.5, goal distance by 6.0 and angle by π.
+    step() now returns self.normalize(next_state) instead of the raw state.
+    Added a set_start() teleport helper using SetEntityState.
+    Rewrote the non-terminal reward: -0.1 step cost, symmetric 5.0 * progress (replacing the 7×/3× asymmetric version), -0.05 * |angle| heading term, and a proximity penalty below 0.30 m.
+    Raised the collision terminal penalty from -30 to -50.
+    Reduced the action set from 11 actions to 7 (removed the reverse and extra slow actions).
+train.py
+    DQNAgent(state_size=52, action_size=11) changed to action_size=7.
+    Moved agent.decay_epsilon() into the step loop, called only when loss is not None.
+    Commented out the old per-episode agent.decay_epsilon().
+    Increased episodes from 100 to about 300 (inferred from your plot, which shows 300 episodes).
+    agent.py
+    epsilon_decay changed from 0.99 to 0.9995.
+    Default action_size in DQNAgent.__init__ changed from 11 to 7.
+    Added a 2000-transition warmup in the active learn() (inferred: epsilon stays at 1.0 until about episode 45 in your plot).
+evaluate.py
+    Added the constants EVAL_STARTS, TRAIN_SPAWN_X/Y and GOAL_X/Y.
+    Added the align_goal_to_start() function.
+    DQNAgent(state_size=22, action_size=7) changed to state_size=52.
+    Added a reset, teleport and goal alignment before the loop so episode 1 starts from an eval pose.
+    Added state = env.normalize(state) after the if state is None: block (first version was misplaced inside the block).
+    Replaced the hard-coded (-0.6, 0.9, 0.0) teleport with EVAL_STARTS[episode % len(EVAL_STARTS)], and added align_goal_to_start(...) after wait_for_state.
+    Changed EVAL_STARTS to [(0.0, 0.0, 0.0)] to test from the training start.
+Build and run
+    Rebuilt the package with colcon build --packages-select mini_dqn_nav --symlink-install after the stale-build error (inferred from the fact that eval ran afterwards).
+Not confirmed in the files you sent
+
+    These were still missing in the last versions I saw, so check each one:
+
+    state[20] changed to state[50] in step(). Your plot suggests this was fixed afterwards, but I haven’t seen the file.
+    state[21] changed to state[51] in the reward logging line.
+    env.normalize(env.get_state()) for the first state of each episode in train.py.
+    Storing terminated instead of done in agent.remember(...).
+    Step-based target updates (learn_steps, update every 500 steps), and removing the episode-based update.
+    Lower learning rate (0.0003) and best-checkpoint saving.
+
+## 10.Phase 2 — Improve the learning signal.
+    - Normalized the 20 LiDAR distances, goal distance and relative angle consistently.
+    - Added PER, including importance-sampling weights and priority updates.
+    - Keep Double DQN and Smooth L1 loss for the first comparison.
+
+## 4. Changes that remain experimental or planned
+
+The following are not assumed to be implemented merely because they were discussed:
+
+    - AdamW or RMSprop optimizer comparisons.
+    - A learning-rate change from `0.001` to `0.0003`.
+    - Prioritized Experience Replay.
+    - Dueling DQN.
+    - A separate LiDAR-based safety filter.
+    - Variable goal positions.
+    - Evaluation across unseen obstacle layouts.
+
+    These should be introduced as separate experiments rather than combined into the same run.
+
+        Phase 3 — Improve navigation generalization.
+    - Begin with relatively simple obstacle configurations and progressively increase difficulty.
+    - Randomize starting poses after the agent demonstrates basic competence.
+    - Evaluate on fixed, held-out starting positions so you can tell whether the robot has learned general navigation rather than memorized one route.
+    Phase 4 — Compare architectural and return improvements.
+    - Test Dueling DQN.
+    - Then test N-step returns.
+    - Change one major component at a time so you know which improvement actually helps.
+
 ## 7. Research direction
 
 The project is evolving from a basic DQN navigation implementation toward a controlled investigation of Double DQN, action-space design, and potentially safety-aware navigation.

@@ -2,7 +2,6 @@
 
 source /opt/ros/humble/setup.bash
 source ~/ros2_ws/install/setup.bash
-
 export TURTLEBOT3_MODEL=burger
 export DRLNAV_BASE_PATH="$HOME/ros2_ws"
 ros2 launch turtlebot3_gazebo turtlebot3_drl_stage4.launch.py

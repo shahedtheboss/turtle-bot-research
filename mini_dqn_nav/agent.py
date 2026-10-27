@@ -14,11 +14,11 @@ class QNetwork(nn.Module):
         super().__init__()
 
         self.network = nn.Sequential(
-            nn.Linear(state_size, 256),
+            nn.Linear(state_size, 1024),
             nn.ReLU(),
-            nn.Linear(256, 256),
+            nn.Linear(1024, 1024),
             nn.ReLU(),
-            nn.Linear(256, action_size)
+            nn.Linear(1024, action_size)
         )
 
     def forward(self, x):
@@ -26,7 +26,8 @@ class QNetwork(nn.Module):
 
 
 class DQNAgent():
-    def __init__(self, state_size=22, action_size=7):
+    def __init__(self, state_size=52, action_size=7):
+        self.learn_steps = 0
         self.state_size = state_size
         self.action_size = action_size
 
@@ -50,7 +51,7 @@ class DQNAgent():
 
         self.epsilon = 1.0
         self.epsilon_min = 0.05
-        self.epsilon_decay = 0.99
+        self.epsilon_decay = 0.9995
 
     def select_action(self, state):
 
@@ -159,7 +160,9 @@ class DQNAgent():
           This avoids trying to sample a batch larger than the
           number of experiences currently available.
           """
-          if len(self.memory) < self.batch_size:
+        #   if len(self.memory) < self.batch_size:
+        #       return
+          if len(self.memory) < max(self.batch_size, 2000):   # warmup: no learning until 2000 transitions
               return
       
           """
@@ -194,8 +197,8 @@ class DQNAgent():
       
           states:
               Converts the states into float32 values.
-              For batch_size=128 and state_size=22:
-                  shape = [128, 22]
+              For batch_size=128 and state_size=52:
+                  shape = [128, 52]
       
           actions:
               Contains the discrete action indices, such as 0 to 6.
@@ -339,7 +342,7 @@ class DQNAgent():
               All tensors in this expression have shape [batch_size].
               """
               target_q = rewards + self.gamma * next_q * (1 - dones)
-      
+        
           """
           SECTION 6: CALCULATE THE LOSS
       
@@ -402,6 +405,10 @@ class DQNAgent():
           If there weren't enough replay experiences, the function
           returned None at the beginning and performed no update.
           """
+          self.learn_steps += 1                 # count optimization steps
+          if self.learn_steps % 500 == 0:       # hard target update every 500 steps
+              self.update_target()
+
           return float(loss.item())
 
 
