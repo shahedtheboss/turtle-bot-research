@@ -172,53 +172,6 @@ The implementation builds on core DQN components and adds two improvements:
 
 The goal is not merely to run a neural network, but to understand and integrate the complete reinforcement learning pipeline.
 
-## My Contributions
-
-This project represents my hands-on work in translating reinforcement learning theory into a functioning robotics simulation.
-
-### Implementation and Integration
-
-- Developed and integrated a DQN-based navigation implementation using Python and PyTorch.
-- Updated the observation representation to 52 features: 50 LiDAR readings and 2 goal-relative/odometry features.
-- Worked with a seven-action discrete movement space.
-- Integrated the learning agent with ROS 2 and TurtleBot3 simulation in Gazebo.
-- Implemented and benchmarked Double DQN and Dueling Double DQN.
-- Integrated training, model checkpointing, and a separate greedy evaluation workflow.
-
-### Parameter Experimentation and Environment Design
-
-A key part of this project was exploring how the environment and learning configuration influence navigation behavior.
-
-- **Action-space design:** Worked with the discrete action space, including forward movement, curved turns, and sharper turns, to give the agent different ways to maneuver.
-- **Reward and penalty tuning:** Worked with goal-reaching rewards, collision penalties, step costs, and progress-based rewards to shape the navigation objective.
-- **Goal-position changes:** Changed the target coordinates to explore navigation toward different locations and make the task more challenging.
-- **Difficulty and behavior:** Used the simulation to investigate how changes in navigation goals and movement choices affect the agent's behavior.
-
-These experiments helped me understand that a DQN agent's performance depends not only on its neural network, but also on the action space, reward function, and environment in which it learns.
-
-### Debugging and Experimentation
-
-Building a working RL system required more than implementing the algorithm.
-
-During development, I encountered and investigated issues including:
-
-- Training crashes caused by an uninitialized loss variable when an episode ended before a loss was recorded.
-- Incorrect loss-logging order, which caused the training plot to display misleading zero-loss values.
-- Environment and software integration issues involving PyTorch, ROS 2, and Gazebo.
-- The need to distinguish improving reward trends from verified navigation success.
-
-These experiences reinforced an important lesson: a working training loop is not sufficient evidence of a successful learning system. Evaluation, debugging, and reproducible measurements are essential.
-
-## Open-Source Acknowledgment
-
-This project was informed by:
-
-[DQN Navigation and Obstacle Avoidance — Suhas Nagaraj](https://github.com/suhasnagaraj99/DQN-Navigation-and-Obstacle-Avoidance)
-
-I used the project as a reference for the theoretical structure and working infrastructure while developing my own intermediate implementation and working through its integration and debugging challenges.
-
-The reference is acknowledged here to distinguish the original work from my implementation and planned extensions.
-
 ## Training and Evaluation
 
 Training and evaluation are treated as separate stages.
@@ -251,8 +204,8 @@ In these recorded runs, Dueling Double DQN reached the goal in 36 more training 
 
 **Episode Reward and Moving Average**
 
-![Double DQN Episode Reward](<img width="1300" height="900" alt="image" src="https://github.com/user-attachments/assets/3a412340-188d-4964-bced-8e6253af2031" />
-)
+![Double DQN Episode Reward]<img width="1300" height="900" alt="image" src="https://github.com/user-attachments/assets/3a412340-188d-4964-bced-8e6253af2031" />
+
 
 
 
@@ -303,6 +256,44 @@ The implementation uses a ROS 2 workspace and a Python virtual environment conta
 - Gazebo and the required TurtleBot3 simulation packages
 - Python virtual environment with PyTorch and the project dependencies
 - A configured ROS 2 workspace containing the project package
+
+
+## My Contributions
+
+This project represents my hands-on work in translating reinforcement learning theory into a functioning robotics simulation.
+
+### Implementation and Integration
+
+- Developed and integrated a DQN-based navigation implementation using Python and PyTorch.
+- Updated the observation representation to 52 features: 50 LiDAR readings and 2 goal-relative/odometry features.
+- Worked with a seven-action discrete movement space.
+- Integrated the learning agent with ROS 2 and TurtleBot3 simulation in Gazebo.
+- Implemented and benchmarked Double DQN and Dueling Double DQN.
+- Integrated training, model checkpointing, and a separate greedy evaluation workflow.
+
+### Parameter Experimentation and Environment Design
+
+A key part of this project was exploring how the environment and learning configuration influence navigation behavior.
+
+- **Action-space design:** Worked with the discrete action space, including forward movement, curved turns, and sharper turns, to give the agent different ways to maneuver.
+- **Reward and penalty tuning:** Worked with goal-reaching rewards, collision penalties, step costs, and progress-based rewards to shape the navigation objective.
+- **Goal-position changes:** Changed the target coordinates to explore navigation toward different locations and make the task more challenging.
+- **Difficulty and behavior:** Used the simulation to investigate how changes in navigation goals and movement choices affect the agent's behavior.
+
+These experiments helped me understand that a DQN agent's performance depends not only on its neural network, but also on the action space, reward function, and environment in which it learns.
+
+### Debugging and Experimentation
+
+Building a working RL system required more than implementing the algorithm.
+
+During development, I encountered and investigated issues including:
+
+- Training crashes caused by an uninitialized loss variable when an episode ended before a loss was recorded.
+- Incorrect loss-logging order, which caused the training plot to display misleading zero-loss values.
+- Environment and software integration issues involving PyTorch, ROS 2, and Gazebo.
+- The need to distinguish improving reward trends from verified navigation success.
+
+These experiences reinforced an important lesson: a working training loop is not sufficient evidence of a successful learning system. Evaluation, debugging, and reproducible measurements are essential.
 
 ### Build
 
