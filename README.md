@@ -226,10 +226,12 @@ During evaluation, the trained policy selects greedy actions without intentional
 | Algorithm | Successful episodes | Evaluation success rate |
 |---|---:|---:|
 | Double DQN | 28/30 | 93.3% |
+| Dueling Double DQN | 30/30 | 100% |
+
+**Double DQN**
 <img width="1400" height="900" alt="image" src="https://github.com/user-attachments/assets/6cba30ff-ce58-4541-aa10-4411bdc88b09" />
 
-
-| Dueling Double DQN | 30/30 | 100% |
+**Dueling Double DQN**
 <img width="1400" height="900" alt="image" src="https://github.com/user-attachments/assets/bdbd8469-ede3-4862-b095-6180700212b2" />
 
 The recorded 30/30 Dueling Double DQN result was obtained at the tested start position `(0.2, 0.2)`. The robot's initial position was also changed in an additional test to make evaluation more challenging; no separate numerical result is reported here for that changed-position test.
