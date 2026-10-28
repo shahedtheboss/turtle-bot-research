@@ -23,6 +23,54 @@ class QNetwork(nn.Module):
 
     def forward(self, x):
         return self.network(x)
+    
+
+class DuelingQNetwork(nn.Module):
+    def __init__(self, state_size, action_size):
+        super().__init__()
+
+        # Shared feature extractor:
+        # learns useful representations of the robot's state.
+        self.feature_layer = nn.Sequential(
+            nn.Linear(state_size, 128),
+            nn.ReLU(),
+            nn.Linear(128, 128),
+            nn.ReLU()
+        )
+
+        # Value stream: estimates V(s), one value per state.
+        self.value_stream = nn.Sequential(
+            nn.Linear(128, 64),
+            nn.ReLU(),
+            nn.Linear(64, 1)
+        )
+
+        # Advantage stream: estimates A(s, a), one value per action.
+        self.advantage_stream = nn.Sequential(
+            nn.Linear(128, 64),
+            nn.ReLU(),
+            nn.Linear(64, action_size)
+        )
+
+    def forward(self, state):
+        # state: [batch_size, state_size]
+        features = self.feature_layer(state)
+
+        # Value: [batch_size, 1]
+        value = self.value_stream(features)
+
+        # Advantage: [batch_size, action_size]
+        advantage = self.advantage_stream(features)
+
+        # Center advantages so their mean is zero per state.
+        # This makes the value/advantage decomposition identifiable.
+        advantage_mean = advantage.mean(dim=1, keepdim=True)
+
+        # Broadcast value across actions and combine both streams.
+        q_values = value + (advantage - advantage_mean)
+
+        # Output: [batch_size, action_size]
+        return q_values
 
 
 class DQNAgent():
@@ -35,9 +83,19 @@ class DQNAgent():
             "cuda" if torch.cuda.is_available() else "cpu"
             )
 
-        self.policy_net = QNetwork(state_size, action_size).to(self.device)
-        self.target_net = QNetwork(state_size, action_size).to(self.device)
+        #For DQN and DDQN
+        # self.policy_net = QNetwork(state_size, action_size).to(self.device)
+        # self.target_net = QNetwork(state_size, action_size).to(self.device)
 
+        #Dueling DQN
+        self.policy_net = DuelingQNetwork(
+            state_size, action_size
+        ).to(self.device)
+        self.target_net = DuelingQNetwork(
+            state_size, action_size
+        ).to(self.device)
+
+       
         self.target_net.load_state_dict(self.policy_net.state_dict())
         self.target_net.eval()
 
@@ -456,6 +514,21 @@ class DQNAgent():
 
 
 
+#Test Dueling net
+
+# state_size = 52  # Replace with your actual observation size
+# action_size = 7
+
+# model = DuelingQNetwork(state_size, action_size)
+
+# dummy_states = torch.randn(4, state_size)
+# q_values = model(dummy_states)
+
+# print("Input shape:", dummy_states.shape)
+# print("Output shape:", q_values.shape)
+# print("Q-values:", q_values)
+
+# assert q_values.shape == (4, action_size)
 
 
 

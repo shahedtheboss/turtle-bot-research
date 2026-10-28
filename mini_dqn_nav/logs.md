@@ -265,11 +265,24 @@ Not confirmed in the files you sent
     Storing terminated instead of done in agent.remember(...).
     Step-based target updates (learn_steps, update every 500 steps), and removing the episode-based update.
     Lower learning rate (0.0003) and best-checkpoint saving.
+Results: train ![alt text](image-4.png)
+         test ![alt text](../Graphs/eval_300ep_DDQN_fixed_reward.png) ![alt text](../Graphs/eval_300ep_DDQN_fixed_reward(0.2,0.2).png)
 
-## 10.Phase 2 — Improve the learning signal.
-    - Normalized the 20 LiDAR distances, goal distance and relative angle consistently.
-    - Added PER, including importance-sampling weights and priority updates.
-    - Keep Double DQN and Smooth L1 loss for the first comparison.
+Metric	    
+Episodes	    300
+Goals reached	134
+Success rate	44.7%
+    
+## Implemented Dueling Double DQN
+ -128 neuron 2 layer Linear
+ -128 to 64 neuron value stream
+ -64 to 1 advantage stream
+Results- train ![alt text](../Graphs/Dueling_dqn_train_300ep.png)
+
+Metric
+Episodes		300
+Goals reached	170
+Success rate	56.7%
 
 ## 4. Changes that remain experimental or planned
 
@@ -294,6 +307,10 @@ The following are not assumed to be implemented merely because they were discuss
     - Then test N-step returns.
     - Change one major component at a time so you know which improvement actually helps.
 
+
+## 10.Phase 2 — Improve the learning signal.
+    -(Done) Normalized the 20 LiDAR distances, goal distance and relative angle consistently.
+    - Added PER, including importance-sampling weights and priority updates.
 ## 7. Research direction
 
 The project is evolving from a basic DQN navigation implementation toward a controlled investigation of Double DQN, action-space design, and potentially safety-aware navigation.
