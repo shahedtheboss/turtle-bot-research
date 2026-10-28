@@ -1,6 +1,7 @@
+
 # Deep Reinforcement Learning for TurtleBot3 Autonomous Navigation
 
-### Learning to Navigate. Learning to Avoid. Building Toward Autonomous Robotics.(A Research project pathway)
+### Learning to Navigate. Learning to Avoid. Building Toward Autonomous Robotics. (A Research Project Pathway)
 
 A Deep Q-Network (DQN)-based autonomous navigation system for TurtleBot3, built using PyTorch, ROS 2, and Gazebo. The project explores how a mobile robot can learn goal-directed navigation and obstacle avoidance through interaction with a simulated environment and reward-driven learning.
 
@@ -36,7 +37,6 @@ The central idea is simple: learn a useful navigation policy through experience 
 
 <img width="1656" height="1026" alt="image" src="https://github.com/user-attachments/assets/520e12a2-90d9-4dd8-8e3f-09cfa8858e72" />
 
-
 ## System Architecture
 
 ```text
@@ -54,11 +54,11 @@ The central idea is simple: learn a useful navigation policy through experience 
                         |
                         v
                 State Representation
-             [5 LiDAR sectors, distance,
-                 relative goal angle]
+          [50 LiDAR readings + 2 goal-relative/
+                 odometry-related features]
                         |
                         v
-                 DQN Policy Network
+              Dueling Double DQN Network
                         |
                         v
                Epsilon-Greedy Action
@@ -88,42 +88,37 @@ The central idea is simple: learn a useful navigation policy through experience 
 |---|---|
 | Programming language | Python |
 | Deep learning | PyTorch |
-| Reinforcement learning | Deep Q-Network (DQN) |
+| Reinforcement learning | Double DQN and Dueling Double DQN |
 | Robotics middleware | ROS 2 Humble |
 | Simulation | Gazebo |
 | Robot platform | TurtleBot3 Burger |
 | Obstacle sensing | LiDAR |
 | Optimization | Gradient descent with Adam |
-| Experience learning | Replay memory and target network |
+| Experience learning | Replay memory and target network; PER planned next |
 | Visualization | Matplotlib |
 
 ## State, Actions, and Rewards
 
-### 1. State representation
+### 1. State Representation
 
-The agent receives a seven-dimensional state:
+The current agent uses a **52-dimensional observation**:
 
-- Five LiDAR sectors representing nearby obstacle distances.
-- Distance to the target.
-- Relative angle between the robot's heading and the target.
+- **50 LiDAR readings** representing nearby obstacle distances.
+- **2 goal-relative/odometry features** describing the robot's relationship to the target.
 
-This compact representation provides information about immediate obstacles and the robot's goal without requiring raw camera images or a large visual perception model.
+This representation provides obstacle and goal information without requiring raw camera images or a large visual perception model.
 
-### 2. Discrete action space
+### 2. Discrete Action Space
 
-The agent chooses among five movement actions:
+The agent chooses among **seven discrete movement actions**. Each action maps to a configured linear and angular velocity command sent to the robot through ROS 2.
 
-| Action | Behavior |
+| Action space | Description |
 |---|---|
-| 0 | Move forward |
-| 1 | Move forward while turning left |
-| 2 | Move forward while turning right |
-| 3 | Turn left sharply |
-| 4 | Turn right sharply |
+| 7 discrete actions | Different configured movement and turning commands for navigation |
 
-Each action maps to a linear and angular velocity command sent to the robot through ROS 2.
+The exact velocity assigned to each action is defined in the environment implementation.
 
-### 3. Reward design
+### 3. Reward Design
 
 The reward function encourages progress toward the goal while penalizing undesirable outcomes.
 
@@ -142,38 +137,38 @@ The learning agent uses a neural network to estimate action values, or Q-values.
 
 <img width="1292" height="910" alt="Screenshot from 2026-10-21 05-04-30" src="https://github.com/user-attachments/assets/e4370aee-802d-4d37-b116-7712978f90fc" />
 
-
-The current network architecture is:
+The current improved agent uses a **Dueling Double DQN** setup:
 
 ```text
-Input: 7 state features
+Input: 52 observation features
           |
           v
-Fully Connected Layer: 128 neurons
+     Shared feature layers
           |
           v
-        ReLU
-          |
-          v
-Fully Connected Layer: 128 neurons
-          |
-          v
-        ReLU
-          |
-          v
-Output: 5 action values
+     +----------+-----------+
+     |                      |
+     v                      v
+  Value stream        Advantage stream
+     |                      |
+     +----------+-----------+
+                |
+                v
+   Combine value and advantages
+                |
+                v
+      Output: 7 action values
 ```
 
-The implementation includes several core DQN components:
+The implementation builds on core DQN components and adds two improvements:
 
 - **Policy network:** Estimates the Q-value of each available action.
 - **Target network:** Provides more stable targets during learning.
-- **Experience replay:** Stores transitions and samples random mini-batches to reduce correlation between consecutive experiences.
-- **Epsilon-greedy exploration:** Balances random exploration with choosing the highest-valued action.
-- **Bellman target:** Estimates the return from the immediate reward and discounted future value.
-- **Smooth L1 loss:** Measures the discrepancy between predicted Q-values and target values.
-- **Gradient clipping:** Limits excessively large gradient norms during optimization.
-- **Adam optimizer:** Updates the policy network parameters.
+- **Double DQN target calculation:** The policy network selects the best next action, while the target network evaluates that action, helping reduce Q-value overestimation.
+- **Dueling architecture:** Separately estimates state value and the relative advantages of available actions before combining them into action values.
+- **Experience replay:** Stores transitions and samples mini-batches to reduce correlation between consecutive experiences.
+- **Epsilon-greedy exploration:** Balances exploration with selecting the highest-valued action.
+- **Smooth L1 loss, gradient clipping, and Adam:** Support policy-network optimization.
 
 The goal is not merely to run a neural network, but to understand and integrate the complete reinforcement learning pipeline.
 
@@ -181,15 +176,16 @@ The goal is not merely to run a neural network, but to understand and integrate 
 
 This project represents my hands-on work in translating reinforcement learning theory into a functioning robotics simulation.
 
-### Implementation and integration
+### Implementation and Integration
 
-- Developed an intermediate DQN navigation implementation using Python and PyTorch.
-- Implemented the seven-feature state representation and five-action movement space.
-- Integrated the learning agent with a ROS 2 environment and TurtleBot3 simulation in Gazebo.
-- Worked with reward-based learning, experience replay, target-network updates, and epsilon-greedy exploration.
+- Developed and integrated a DQN-based navigation implementation using Python and PyTorch.
+- Updated the observation representation to 52 features: 50 LiDAR readings and 2 goal-relative/odometry features.
+- Worked with a seven-action discrete movement space.
+- Integrated the learning agent with ROS 2 and TurtleBot3 simulation in Gazebo.
+- Implemented and benchmarked Double DQN and Dueling Double DQN.
 - Integrated training, model checkpointing, and a separate greedy evaluation workflow.
 
-### Parameter experimentation and environment design
+### Parameter Experimentation and Environment Design
 
 A key part of this project was exploring how the environment and learning configuration influence navigation behavior.
 
@@ -200,7 +196,7 @@ A key part of this project was exploring how the environment and learning config
 
 These experiments helped me understand that a DQN agent's performance depends not only on its neural network, but also on the action space, reward function, and environment in which it learns.
 
-### Debugging and experimentation
+### Debugging and Experimentation
 
 Building a working RL system required more than implementing the algorithm.
 
@@ -233,29 +229,68 @@ During training, the agent explores using an epsilon-greedy policy, stores exper
 
 Training visualizations track:
 
-- Episode reward.
-- Moving-average reward.
+- Episode reward and moving-average reward.
 - Mean DQN loss.
 - Exploration rate (epsilon).
 - Steps per episode.
 
 These metrics help diagnose learning behavior, but none should be interpreted in isolation.
 
+#### Training Results
+
+| Algorithm | Training episodes | Goals reached | Training success rate |
+|---|---:|---:|---:|
+| Double DQN | 300 | 134 | 44.7% |
+| Dueling Double DQN | 300 | 170 | 56.7% |
+
+In these recorded runs, Dueling Double DQN reached the goal in 36 more training episodes, a 12-percentage-point increase in observed training success rate. This is a comparison of the recorded runs, not a multi-seed statistical evaluation.
+
+#### Double DQN Training Graphs
+
+<!-- Replace the placeholders below with the actual GitHub image URLs for your Double DQN graphs. -->
+
+**Episode Reward and Moving Average**
+
+![Double DQN Episode Reward](<img width="1300" height="900" alt="image" src="https://github.com/user-attachments/assets/3a412340-188d-4964-bced-8e6253af2031" />
+)
+
+
+
+
+#### Dueling Double DQN Training Graphs
+
+<img width="1300" height="900" alt="image" src="https://github.com/user-attachments/assets/c84430a2-878f-4a2f-a8dd-e9b331f8aeb0" />
+
+
+
+
 ### Evaluation
 
-During evaluation, the trained policy selects greedy actions without intentional epsilon-based exploration.
+During evaluation, the trained policy selects greedy actions without intentional epsilon-based exploration.**Also different initial position (0.2,0.2) were used for increasing challenge during navigation.**
 
-The evaluation workflow is designed to measure:
+#### Recorded Evaluation Results
+
+| Algorithm | Successful episodes | Evaluation success rate |
+|---|---:|---:|
+| Double DQN | 28/30 | 93.3% |
+<img width="1400" height="900" alt="image" src="https://github.com/user-attachments/assets/6cba30ff-ce58-4541-aa10-4411bdc88b09" />
+
+
+| Dueling Double DQN | 30/30 | 100% |
+<img width="1400" height="900" alt="image" src="https://github.com/user-attachments/assets/bdbd8469-ede3-4862-b095-6180700212b2" />
+
+The recorded 30/30 Dueling Double DQN result was obtained at the tested start position `(0.2, 0.2)`. The robot's initial position was also changed in an additional test to make evaluation more challenging; no separate numerical result is reported here for that changed-position test.
+
+These are preliminary simulation results from a limited number of episodes. They do not establish robust generalization across all starting positions or environments.
+
+
+The evaluation workflow tracks:
 
 - Goal-reaching success rate.
 - Collision count.
 - Timeout count.
 - Average episode reward.
 - Average steps per episode.
-
-The current evaluation is an initial simulation experiment, not a claim of robust or deployment-ready autonomous navigation.
-
-**Experimental results:** Numerical results will be added after validating the trained checkpoint and completing the evaluation runs.
 
 ## Running the Project
 
@@ -281,7 +316,7 @@ colcon build --packages-select mini_dqn_nav
 source ~/ros2_ws/install/setup.bash
 ```
 
-### Configure the environment
+### Configure the Environment
 
 ```bash
 source ~/pytorch-env/bin/activate
@@ -292,7 +327,7 @@ export DRLNAV_BASE_PATH="$HOME/ros2_ws"
 
 Start the configured Gazebo world and ensure the simulation is running before launching training or evaluation.
 
-### Train the agent
+### Train the Agent
 
 ```bash
 python -m mini_dqn_nav.train
@@ -300,7 +335,7 @@ python -m mini_dqn_nav.train
 
 Training saves model checkpoints according to the configured checkpoint path.
 
-### Evaluate the trained policy
+### Evaluate the Trained Policy
 
 Run the evaluation entry point with the existing trained checkpoint configured in the evaluation script. The evaluation should use the same network architecture and state/action dimensions as training.
 
@@ -312,33 +347,33 @@ This implementation is a starting point, not the final objective.
 
 My longer-term goal is to investigate how reinforcement learning methods can improve autonomous robot navigation in terms of reliability, efficiency, and generalization.
 
-### Planned directions
+### Planned Directions
 
-**1. Reliable baseline evaluation**
+**1. Reliable Baseline Evaluation**
 
 Establish reproducible evaluation across multiple episodes and report success rate, collision rate, episode reward, and navigation efficiency.
 
-**2. Reward-function investigation**
+**2. Reward-Function Investigation**
 
 Study how progress rewards, collision penalties, and time penalties affect learned behavior. Investigate reward designs that discourage oscillation and unnecessary movement.
 
-**3. Hyperparameter experiments**
+**3. Hyperparameter Experiments**
 
 Evaluate the effects of learning rate, discount factor, replay batch size, exploration decay, and target-network update frequency.
 
-**4. DQN improvements**
+**4. DQN Improvements**
 
-Explore Double DQN to reduce Q-value overestimation, and investigate prioritized experience replay or dueling network architectures where appropriate.
+Double DQN and the Dueling network architecture have been implemented and tested in the current experimental workflow. Next, implement Prioritized Experience Replay (PER), then explore Rainbow DQN, which combines several DQN improvements.
 
 **5. Generalization**
 
-Test whether a policy learned in one environment can navigate different obstacle configurations and goal locations without relying on a single fixed scenario.
+Continue testing at changed initial robot positions and different obstacle configurations. Compare algorithms under matched conditions and report episode counts and outcomes for each scenario.
 
-**6. Comparative experiments**
+**6. Comparative Experiments**
 
 Compare the baseline DQN against improved variants using the same environment, training budget, and evaluation protocol.
 
-**7. Advanced navigation research**
+**7. Advanced Navigation Research**
 
 Investigate more advanced DRL approaches, potentially including PPO and other algorithms, depending on the limitations observed in the baseline.
 
@@ -364,4 +399,4 @@ Feedback, suggestions, and discussions about improving the navigation policy are
 
 ---
 
-**Topics:** Deep Reinforcement Learning · DQN · Autonomous Navigation · TurtleBot3 · ROS 2 · Gazebo · PyTorch · Obstacle Avoidance · Robotics Research
+**Topics:** Deep Reinforcement Learning · DQN · Double DQN · Dueling DQN · TurtleBot3 · ROS 2 · Gazebo · PyTorch · Obstacle Avoidance · Robotics Research
