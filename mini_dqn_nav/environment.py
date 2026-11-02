@@ -1,6 +1,7 @@
 import math
 import time
 import rclpy
+import random
 from rclpy.node import Node
 from sensor_msgs.msg import LaserScan
 from nav_msgs.msg import Odometry

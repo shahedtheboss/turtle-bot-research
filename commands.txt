@@ -61,3 +61,16 @@ source /opt/ros/humble/setup.bash
 ros2 service list | grep -E 'reset|set_entity_state'
 ros2 service call /reset_world std_srvs/srv/Empty "{}"
 
+
+----git push-----
+
+cd /home/shahed/ros2_ws/src/turtle-bot-research-upload
+rsync -av \
+  --exclude='.git/' \
+  --exclude='__pycache__/' \
+  /home/shahed/ros2_ws/src/mini_dqn_nav/ \
+  /home/shahed/ros2_ws/src/turtle-bot-research-upload/
+  git status --short
+  git add -A
+  git commit -m "Update DQN navigation code"
+  git push origin main

@@ -19,7 +19,7 @@ TRAIN_SPAWN_X, TRAIN_SPAWN_Y = 0.0, 0.0
 GOAL_X, GOAL_Y = 2.0, -2.0
 
 MODEL_PATH = os.path.expanduser(
-    "~/ros2_ws/src/mini_dqn_nav/mini_dqn_nav/models/fixed_dqn_model_7actions_20_lidars.pth"
+    "~/ros2_ws/src/mini_dqn_nav/mini_dqn_nav/models/rainbow_dqn_model_7actions_20_lidars.pth"
 )
 NUM_EPISODES = 30
 MAX_STEPS = 100

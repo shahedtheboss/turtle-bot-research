@@ -1,15 +1,28 @@
 import os
 import time
-
+import torch
 import rclpy
 from std_srvs.srv import Empty
-
+import random
 from mini_dqn_nav.environment import RobotEnvironment
 from mini_dqn_nav.agent import DQNAgent
 
 import matplotlib.pyplot as plt
 import numpy as np
 from collections import Counter
+
+
+def set_seed(seed):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+
+
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+
+
+    print("Random seed", seed)
 
 
 def reset_simulation(node):
@@ -42,6 +55,9 @@ def reset_simulation(node):
 def main(args=None):
     rclpy.init(args=args)
     env = RobotEnvironment()
+
+    SEED = 42
+    set_seed(SEED)
     agent = DQNAgent(state_size=52, action_size=7)
 
     episode_rewards = []
@@ -55,7 +71,7 @@ def main(args=None):
     target_update_every = 2
 
     model_path = os.path.expanduser(
-        "~/ros2_ws/src/mini_dqn_nav/mini_dqn_nav/models/fixed_dqn_model_7actions_20_lidars.pth"
+        "~/ros2_ws/src/mini_dqn_nav/mini_dqn_nav/models/rainbow_dqn_model_7actions_20_lidars.pth"
     )
     try:
         #wait for initial lidar and odometry data
