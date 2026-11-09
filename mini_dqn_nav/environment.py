@@ -11,6 +11,9 @@ from gazebo_msgs.srv import SetEntityState
 
 class RobotEnvironment(Node):
 
+    NUM_SECTORS = 50  # Number of LiDAR sectors for state representation
+    MAX_LIDAR = 3.5  # Maximum LiDAR range in meters
+
     def __init__(self):
         super().__init__('robot_environment')
 
@@ -22,6 +25,28 @@ class RobotEnvironment(Node):
         # Initial termination thresholds.
         self.goal_tolerance = 0.20       # Goal reached within 20 cm
         self.collision_distance = 0.15   # LiDAR-based obstacle warning
+
+        self.goal_reward = 100.0
+        self.collision_penalty = -25.0
+        self.step_penalty = -0.1    
+        self.progress_gain = 5.0
+        self.heading_penalty = 0.05
+        self.warning_distance = 0.30
+
+        self.action_duration = 0.5  # Duration for each action in seconds
+
+        self.start_world = (0.0, 0.0, 0.0)  # Default starting position (x, y, yaw)
+        self.odom_origin = None  # To store the initial odometry position for relative calculations
+
+        #No-progress cutoff: episode ends not a true terminal
+        self.best_goal_distance = None
+        self.steps_since_progress = 0
+        self.max_no_progress_steps = 60  # Terminate if no progress for 60 steps
+        self.min_progress = 0.05
+
+        #Diadnostic for training log
+        self.last_goal_distance = float('nan')
+        self.last_min_lidar = float('nan')
 
         self.set_state_client = self.create_client(SetEntityState, '/set_entity_state')
 
@@ -72,7 +97,7 @@ class RobotEnvironment(Node):
     def scan_callback(self, msg):
         self.latest_scan = self.process_scan(msg)
         self.sensor_update_count += 1
-        self.print_observation()
+        # self.print_observation()
 
     def odom_callback(self, msg):
         self.sensor_update_count += 1
@@ -155,7 +180,7 @@ class RobotEnvironment(Node):
         # This means our LiDAR representation will contain 20 values,
         # regardless of how many raw measurements the sensor provides.
         """
-        num_sectors = 50
+        num_sectors = self.NUM_SECTORS  
 
         # Obtain the maximum range reported by this LiDAR message.
         # For example, if range_max is 3.5, the sensor's usable
@@ -353,7 +378,7 @@ class RobotEnvironment(Node):
                 #
                 # We will choose the minimum only after all readings
                 # have been processed.
-                sector_readings[sector_index].append(distance)
+                sector_readings[sector_index].append(min(distance, max_range))
 
         """
         # ---------------------------------------------------------
@@ -378,10 +403,10 @@ class RobotEnvironment(Node):
         # The list comprehension repeats this operation for all
         # 20 sectors, producing exactly 20 features.
         """
-        features = [
-            min(readings) if readings else max_range
-            for readings in sector_readings
-        ]
+        # features = [
+        #     min(readings) if readings else max_range
+        #     for readings in sector_readings
+        # ]
 
         """
         # ---------------------------------------------------------
@@ -401,10 +426,57 @@ class RobotEnvironment(Node):
         # This function returns only the LiDAR features, not the
         # complete DQN state.
         """
-        return features
+        # return features
+        return [min(r) if r else max_range for r in sector_readings]
 
+    @staticmethod
+    def _yaw(q):
+        """""
+        Convert a quaternion to a yaw angle in radians.
+        """
+        return math.atan2(
+            2.0 * (q.w * q.z + q.x * q.y),
+            1.0 - 2.0 * (q.y * q.y + q.z * q.z)
+        )
 
+    def get_world_pose(self):
+        """
+        Get the robot's current position and orientation in the world frame.
 
+        Returns:
+            (x, y, yaw): Tuple containing the robot's x and y coordinates
+                         and its yaw angle in radians.
+        """
+        p = self.latest_odom.pose.pose
+        ox, oy, oyaw = p.position.x, p.position.y, self._yaw(p.orientation)
+
+        if self.odom_origin is None:
+            self.odom_origin = (ox, oy, oyaw)
+        x0 , y0, yaw0 = self.odom_origin
+
+        # Motion since episode start, expressed in the starting frame.
+        dx, dy = ox - x0, oy - y0
+        c, s = math.cos(-yaw0), math.sin(-yaw0)
+        rx, ry = c * dx - s * dy, s * dx + c * dy
+ 
+        # Place that motion in the world frame, from the true start pose.
+        sx, sy, syaw = self.start_world
+        c, s = math.cos(syaw), math.sin(syaw)
+        wx = sx + c * rx - s * ry
+        wy = sy + s * rx + c * ry
+        yaw = oyaw - yaw0 + syaw
+        return wx, wy, math.atan2(math.sin(yaw), math.cos(yaw))
+
+    def get_goal_information(self):
+        x, y, yaw = self.get_world_pose()
+        dx, dy = self.goal_x - x, self.goal_y - y
+        bearing = math.atan2(dy, dx)
+        relative_angle = math.atan2(
+            math.sin(bearing - yaw), math.cos(bearing - yaw)
+        )
+        return math.hypot(dx, dy), relative_angle
+    
+    """
     def get_goal_information(self):
 
         odom = self.latest_odom
@@ -436,7 +508,21 @@ class RobotEnvironment(Node):
         )
 
         return goal_distance, relative_angle
-
+    """
+    def begin_episode(self, start=(0.0, 0.0, 0.0), settle_sec=0.5):
+        """
+        Call right after every Gazebo reset or teleport.
+        `start` is the TRUE world pose (x, y, yaw) of the robot now.
+        """
+        end = time.monotonic() + settle_sec
+        while rclpy.ok() and time.monotonic() < end:
+            rclpy.spin_once(self, timeout_sec=0.05)
+ 
+        self.start_world = tuple(float(v) for v in start)
+        p = self.latest_odom.pose.pose
+        self.odom_origin = (p.position.x, p.position.y, self._yaw(p.orientation))
+        self.best_goal_distance = None
+        self.steps_since_progress = 0
     """
     # def get_state(self):
     #     #Build the seven-feature state for the future DQN.#
@@ -465,9 +551,9 @@ class RobotEnvironment(Node):
 
         goal_distance, relative_angle = self.get_goal_information()
 
-        if len(self.latest_scan) != 50:
+        if len(self.latest_scan) != self.NUM_SECTORS:
             raise ValueError(
-                f"Expected 50 LiDAR sectors, got {len(self.latest_scan)}"
+                f"Expected {self.NUM_SECTORS} LiDAR sectors, got {len(self.latest_scan)}"
             )
 
         state = self.latest_scan + [goal_distance, relative_angle]
@@ -541,11 +627,11 @@ class RobotEnvironment(Node):
             return None, False, "waiting for sensor data"
 
         # Make sure the environment produces the expected state.
-        if len(state) != 52:
-            raise ValueError(
-                f"Expected 52 state values, got {len(state)}"
-            )
-
+        # if len(state) != 52:
+        #     raise ValueError(
+        #         f"Expected 52 state values, got {len(state)}"
+        #     )
+        """ 
         # Extract the 20 LiDAR distances.
         obstacle_distances = state[:50]
 
@@ -589,7 +675,28 @@ class RobotEnvironment(Node):
             f"Relative angle: {state[21]:.3f} rad, "
             f"Min LiDAR distance: {min(obstacle_distances):.3f} m"
         )       
-
+        """
+        lidar = state[:50]
+        goal_distance = state[50]
+        relative_angle = state[51]
+        nearest = min(lidar)
+ 
+        if goal_distance <= self.goal_tolerance:
+            return self.goal_reward, True, "goal_reached"
+        if nearest <= self.collision_distance:
+            return self.collision_penalty, True, "collision_warning"
+ 
+        progress = previous_goal_distance - goal_distance
+        reward = self.step_penalty
+        reward += self.progress_gain * progress
+        reward -= self.heading_penalty * abs(relative_angle)
+ 
+        # Early warning before a collision (0 at 0.30 m, about -1 at 0.15 m).
+        if nearest < self.warning_distance:
+            reward -= (
+                (self.warning_distance - nearest)
+                / (self.warning_distance - self.collision_distance)
+            )
         return reward, False, "continue"
 
 
@@ -645,11 +752,14 @@ class RobotEnvironment(Node):
 
 
 
-    def execute_action_for_duration(self, action_id, duration=1):
+    def execute_action_for_duration(self, action_id, duration=None):
         """
         Execute a discrete action for a specified duration,
         process sensor callbacks while moving, and then stop.
         """
+
+        if duration is None:
+            duration = self.action_duration
 
         # SECTION 1: Validate the requested action.
         if action_id not in self.actions:
@@ -665,10 +775,10 @@ class RobotEnvironment(Node):
         command.linear.x = float(action['linear_x'])
         command.angular.z = float(action['angular_z'])
 
-        self.get_logger().info(
-            f"Executing action {action_id}: "
-            f"{action['name']} for {duration:.2f} seconds"
-        )
+        # self.get_logger().info(
+        #     f"Executing action {action_id}: "
+        #     f"{action['name']} for {duration:.2f} seconds"
+        # )
 
         # SECTION 3: Publish the movement command.
         self.cmd_vel_pub.publish(command)
@@ -687,11 +797,11 @@ class RobotEnvironment(Node):
             # Do not publish the movement command again afterward.
             self.publish_stop()
 
-        self.get_logger().info("Stop command published.")
+        # self.get_logger().info("Stop command published.")
 
     def normalize(self, s):
-        lidar = [min(d, 3.5) / 3.5 for d in s[:50]]
-        goal_dist = min(s[50] / 6.0, 1.0)     # 6.0 = rough max distance in your arena
+        lidar = [min(d, self.MAX_LIDAR) / self.MAX_LIDAR for d in s[:50]]
+        goal_dist = min(s[50] / 6.0, 1.0)     # 6.0 = rough max distance in the arena
         return lidar + [goal_dist, s[51] / math.pi]
 
         
@@ -710,13 +820,13 @@ class RobotEnvironment(Node):
         previous_update_count = self.sensor_update_count
 
         # Execute the selected action.
-        self.execute_action_for_duration(action_id, duration=1.0)
+        self.execute_action_for_duration(action_id)
 
         # Wait for new sensor data after the action.
-        deadline = time.monotonic() + 2.0
+        deadline = time.monotonic() + 0.1
 
         while rclpy.ok() and time.monotonic() < deadline:
-            rclpy.spin_once(self, timeout_sec=0.05)
+            rclpy.spin_once(self, timeout_sec=0.02)
 
             if self.sensor_update_count > previous_update_count:
                 break
@@ -727,9 +837,24 @@ class RobotEnvironment(Node):
         if next_state is None:
             raise RuntimeError("Could not obtain the next state.")
 
-        reward, terminated, reason = self.calculate_reward(
-            previous_goal_distance
-        )
+        reward, terminated, reason = self.calculate_reward(previous_goal_distance)
+
+        # Update diagnostic information for training logs.
+        goal_distance = next_state[50]
+        self.last_goal_distance = goal_distance
+        self.last_min_lidar = min(next_state[:50])
+ 
+        # No-progress cut-off (the training script treats this as truncation).
+        if not terminated:
+            # Check if the robot has made sufficient progress toward the goal.
+            if (self.best_goal_distance is None
+                    or goal_distance < self.best_goal_distance - self.min_progress):
+                self.best_goal_distance = goal_distance
+                self.steps_since_progress = 0
+            else:
+                self.steps_since_progress += 1
+                if self.steps_since_progress >= self.max_no_progress_steps:
+                    terminated, reason = True, "no_progress"
 
         return self.normalize(next_state), reward, terminated, reason
     ##################
@@ -745,10 +870,17 @@ class RobotEnvironment(Node):
         req.state.pose.position.y = float(y)
         req.state.pose.orientation.z = math.sin(yaw / 2.0)
         req.state.pose.orientation.w = math.cos(yaw / 2.0)
+
         future = self.set_state_client.call_async(req)
         deadline = time.monotonic() + 3.0
         while rclpy.ok() and not future.done() and time.monotonic() < deadline:
             rclpy.spin_once(self, timeout_sec=0.1)
+
+        # Check if the service call completed successfully.
+        ok = future.done()
+        if ok:
+            self.begin_episode(start=(x, y, yaw))
+
         return future.done()
 
 
@@ -757,46 +889,33 @@ class RobotEnvironment(Node):
 
 
 def main(args=None):
+    """Quick sanity test: five forward steps; goal distance should fall."""
     rclpy.init(args=args)
     node = RobotEnvironment()
-
+ 
     try:
-        # Wait until both LiDAR and odometry are available.
         deadline = time.monotonic() + 5.0
-
         while rclpy.ok() and node.get_state() is None:
             if time.monotonic() >= deadline:
-                node.get_logger().error(
-                    "Sensor timeout. Cancelling movement."
-                )
+                node.get_logger().error("Sensor timeout. Cancelling movement.")
                 return
-
             rclpy.spin_once(node, timeout_sec=0.1)
-
-        before = node.latest_odom.pose.pose.position
-        start_x, start_y = before.x, before.y
-
-        node.get_logger().info(
-            f"Before: x={start_x:.3f}, y={start_y:.3f}"
-        )
-
-        # One short forward action, followed by an automatic stop.
-        node.execute_action_for_duration(0, duration=0.3)
-
-        # Allow odometry to update.
-        deadline = time.monotonic() + 1.0
-        while rclpy.ok() and time.monotonic() < deadline:
-            rclpy.spin_once(node, timeout_sec=0.1)
-
-        after = node.latest_odom.pose.pose.position
-
-        node.get_logger().info(
-            f"After: x={after.x:.3f}, y={after.y:.3f}"
-        )
-        node.get_logger().info(
-            f"Change: dx={after.x - start_x:.3f} m, "
-            f"dy={after.y - start_y:.3f} m"
-        )
+ 
+        node.begin_episode(start=(0.0, 0.0, 0.0))
+        previous = node.get_state()[50]
+        node.get_logger().info(f"Start goal distance: {previous:.3f} m")
+ 
+        for i in range(5):
+            _, reward, terminated, reason = node.step(0)
+            current = node.last_goal_distance
+            node.get_logger().info(
+                f"step {i + 1}: goal_dist={current:.3f} "
+                f"(change {previous - current:+.3f} m) reward={reward:.2f} "
+                f"min_lidar={node.last_min_lidar:.2f} {reason}"
+            )
+            previous = current
+            if terminated:
+                break
 
     except KeyboardInterrupt:
         pass

@@ -45,7 +45,15 @@ source ~/ros2_ws/install/setup.bash
 source ~/pytorch-env/bin/activate
 export TURTLEBOT3_MODEL=burger
 export DRLNAV_BASE_PATH="$HOME/ros2_ws"
-python -m mini_dqn_nav.train
+python -m mini_dqn_nav.train   # ARCHIVED: moved to inital_codes/train_DDDQN.py, no longer runs as a module
+
+
+source /opt/ros/humble/setup.bash
+source ~/ros2_ws/install/setup.bash
+source ~/pytorch-env/bin/activate
+export TURTLEBOT3_MODEL=burger
+export DRLNAV_BASE_PATH="$HOME/ros2_ws"
+python -m mini_dqn_nav.train_rainbow
 
 ----start evaluating----
 
@@ -53,7 +61,16 @@ python -m mini_dqn_nav.train
   source ~/ros2_ws/install/setup.bash
   source ~/pytorch-env/bin/activate
   export TURTLEBOT3_MODEL=burger
-  python -m mini_dqn_nav.evaluate
+  # ARCHIVED: python -m mini_dqn_nav.evaluate  (moved to inital_codes/evaluate_DDDQN.py)
+
+----start rainbow evaluation (final checkpoint)----
+
+  source /opt/ros/humble/setup.bash
+  source ~/ros2_ws/install/setup.bash
+  source ~/pytorch-env/bin/activate
+  export TURTLEBOT3_MODEL=burger
+  cd ~/ros2_ws/src/mini_dqn_nav
+  python -m mini_dqn_nav.rainbow_evaluate
 
 ----reset bot position----
 
