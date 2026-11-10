@@ -253,6 +253,127 @@ The evaluation workflow tracks:
 - Average episode reward.
 - Average steps per episode.
 
+## Rainbow DQN Results (November 2026)
+
+Rainbow DQN combines six DQN improvements: Double DQN, Dueling networks, NoisyNet exploration, C51 distributional values, prioritized experience replay, and 3-step returns.
+
+| File | Role |
+|---|---|
+| `mini_dqn_nav/agent_rainbow.py` | Rainbow agent |
+| `mini_dqn_nav/train_rainbow.py` | Training loop |
+| `mini_dqn_nav/rainbow_evaluate.py` | Greedy evaluation |
+
+### Changes from the earlier DDQN setup
+
+| Setting | Earlier DDQN runs | Rainbow |
+|---|---|---|
+| Observation | 52 features | 52 features (50 LiDAR, goal distance, goal angle) |
+| Actions | 7 discrete | 7 discrete |
+| Action duration | 1.0 s | 0.5 s |
+| Reward | Changed across runs (see the log) | +100 goal, −25 collision, −0.1 per step, +5.0 × progress, −0.05 × \|goal angle\|, warning ramp below 0.30 m |
+| Stall handling | Not used | Episode ends after 60 steps with no progress of 0.05 m (counted as a truncation) |
+
+### Training (300 episodes)
+
+| Outcome | Episodes | Share |
+|---|---:|---:|
+| Goal reached | ≈225 | ≈75% |
+| Collision warning | ≈65 | ≈22% |
+| No progress | ≈10 | ≈3% |
+| Timeout | 0 | 0% |
+
+Values are read from the training graph (`Graphs/rainbow_0.5s_train.png`), so they are approximate. Training uses NoisyNet exploration, and the first 100 episodes use a scripted guide. These numbers are not the greedy success rate.
+
+### Greedy evaluation
+
+Final checkpoint, 50 episodes, held-out start (0.2, 0.2, 0), goal (2, −2):
+
+| Successful | Collisions | Timeouts | Success rate | Average reward | Average steps |
+|---:|---:|---:|---:|---:|---:|
+| 50 | 0 | 0 | 100% | 107.05 | 47.84 |
+
+The 95% Wilson interval is about 93–100%. The plot is in [`Graphs/rainbow_0.5s_eval.png`](Graphs/rainbow_0.5s_eval.png).
+
+The average of 47.84 steps is close to the roughly 38-step straight-line minimum.
+
+### Comparison at the same start pose
+
+| Algorithm | Start | Episodes | Successful | Collisions | Success rate |
+|---|---|---:|---:|---:|---:|
+| Double DQN (fixed reward) | (0.2, 0.2) | 30 | 28 | 2 | 93.3% |
+| Dueling Double DQN | (0.2, 0.2) | 30 | 30 | 0 | 100% |
+| Rainbow DQN | (0.2, 0.2, 0) | 50 | 50 | 0 | 100% |
+
+These runs use different episode counts, seeds, and environment or reward versions. This is not a controlled comparison. The 100% results cannot separate the algorithms.
+
+### Other evaluation runs in the log
+
+| Run | Model | Episodes | Successful | Collisions | Start | Notes |
+|---|---|---:|---:|---:|---|---|
+| New reward | DDQN, new reward | 20 | 7 | 13 | Not stated | Graph `new_reward_pen_DDQN_22state_eval.png` |
+| eval_v2 | DQN (not stated) | 20 | 20 | 0 | Not stated | Graph `eval_v2.png` |
+| Evaluate | DQN (not stated) | 20 | 20 | 0 | Not stated | Graph `Evaluate.png` |
+
+### Rainbow commands
+
+```bash
+source /opt/ros/humble/setup.bash
+source ~/ros2_ws/install/setup.bash
+source ~/pytorch-env/bin/activate
+export TURTLEBOT3_MODEL=burger
+export DRLNAV_BASE_PATH="$HOME/ros2_ws"
+python -m mini_dqn_nav.train_rainbow
+```
+
+```bash
+source /opt/ros/humble/setup.bash
+source ~/ros2_ws/install/setup.bash
+source ~/pytorch-env/bin/activate
+export TURTLEBOT3_MODEL=burger
+cd ~/ros2_ws/src/mini_dqn_nav
+python -m mini_dqn_nav.rainbow_evaluate
+```
+
+Start Gazebo first, as described in the Running the Project section.
+
+The current evaluation script only evaluates the final checkpoint. The best-by-eval checkpoint has not been evaluated yet.
+
+The Planned Directions item 4 above was written before the Rainbow work. Rainbow is now implemented and evaluated, as this section describes.
+
+---
+
+## Project Log
+
+The full experiment log is split into two files:
+
+- [`mini_dqn_nav/logs.md`](mini_dqn_nav/logs.md): tables covering the experiment register, evaluation runs, training results, architecture and reward history, the bug-fix log, Rainbow details, discrepancies, and open items.
+- [`mini_dqn_nav/old_logs.md`](mini_dqn_nav/old_logs.md): the original prose log, kept unchanged.
+
+---
+
+## Known Discrepancies
+
+These are recorded in [`mini_dqn_nav/logs.md`](mini_dqn_nav/logs.md), section 8.
+
+| # | Conflict | Action |
+|---|---|---|
+| D1 | The log says the network is 256 wide. The live Dueling network uses 128. | Confirm which network each checkpoint used |
+| D2 | The log says 120 episodes for the new-reward run. The graph shows 200. | Check the training config |
+| D3 | It is not stated whether the E1 and E3 goal counts are training or evaluation. | Check each source |
+| D4 | The Rainbow change log says "untested in Gazebo". Training and evaluation have both run. | Superseded |
+| D5 | Training assumes the robot starts at (0, 0) after each reset. Not verified. | Check the spawn pose in the launch file |
+
+---
+
+## Next Step: DDPG
+
+Rainbow DQN is trained and evaluated. The next algorithm is DDPG. It needs continuous velocity actions, an actor network, and a critic network, so the environment's action interface has to change. DDPG has not been implemented yet.
+
+---
+
+**Topics:** Deep Reinforcement Learning · DQN · Double DQN · Dueling DQN · TurtleBot3 · ROS 2 · Gazebo · PyTorch · Obstacle Avoidance · Robotics Research
+
+
 ## Running the Project
 
 The implementation uses a ROS 2 workspace and a Python virtual environment containing PyTorch.
@@ -398,122 +519,3 @@ Feedback, suggestions, and discussions about improving the navigation policy are
 
 ---
 
-## Rainbow DQN Results (November 2026)
-
-Rainbow DQN combines six DQN improvements: Double DQN, Dueling networks, NoisyNet exploration, C51 distributional values, prioritized experience replay, and 3-step returns.
-
-| File | Role |
-|---|---|
-| `mini_dqn_nav/agent_rainbow.py` | Rainbow agent |
-| `mini_dqn_nav/train_rainbow.py` | Training loop |
-| `mini_dqn_nav/rainbow_evaluate.py` | Greedy evaluation |
-
-### Changes from the earlier DDQN setup
-
-| Setting | Earlier DDQN runs | Rainbow |
-|---|---|---|
-| Observation | 52 features | 52 features (50 LiDAR, goal distance, goal angle) |
-| Actions | 7 discrete | 7 discrete |
-| Action duration | 1.0 s | 0.5 s |
-| Reward | Changed across runs (see the log) | +100 goal, −25 collision, −0.1 per step, +5.0 × progress, −0.05 × \|goal angle\|, warning ramp below 0.30 m |
-| Stall handling | Not used | Episode ends after 60 steps with no progress of 0.05 m (counted as a truncation) |
-
-### Training (300 episodes)
-
-| Outcome | Episodes | Share |
-|---|---:|---:|
-| Goal reached | ≈225 | ≈75% |
-| Collision warning | ≈65 | ≈22% |
-| No progress | ≈10 | ≈3% |
-| Timeout | 0 | 0% |
-
-Values are read from the training graph (`Graphs/rainbow_0.5s_train.png`), so they are approximate. Training uses NoisyNet exploration, and the first 100 episodes use a scripted guide. These numbers are not the greedy success rate.
-
-### Greedy evaluation
-
-Final checkpoint, 50 episodes, held-out start (0.2, 0.2, 0), goal (2, −2):
-
-| Successful | Collisions | Timeouts | Success rate | Average reward | Average steps |
-|---:|---:|---:|---:|---:|---:|
-| 50 | 0 | 0 | 100% | 107.05 | 47.84 |
-
-The 95% Wilson interval is about 93–100%. The plot is in [`Graphs/rainbow_0.5s_eval.png`](Graphs/rainbow_0.5s_eval.png).
-
-The average of 47.84 steps is close to the roughly 38-step straight-line minimum.
-
-### Comparison at the same start pose
-
-| Algorithm | Start | Episodes | Successful | Collisions | Success rate |
-|---|---|---:|---:|---:|---:|
-| Double DQN (fixed reward) | (0.2, 0.2) | 30 | 28 | 2 | 93.3% |
-| Dueling Double DQN | (0.2, 0.2) | 30 | 30 | 0 | 100% |
-| Rainbow DQN | (0.2, 0.2, 0) | 50 | 50 | 0 | 100% |
-
-These runs use different episode counts, seeds, and environment or reward versions. This is not a controlled comparison. The 100% results cannot separate the algorithms.
-
-### Other evaluation runs in the log
-
-| Run | Model | Episodes | Successful | Collisions | Start | Notes |
-|---|---|---:|---:|---:|---|---|
-| New reward | DDQN, new reward | 20 | 7 | 13 | Not stated | Graph `new_reward_pen_DDQN_22state_eval.png` |
-| eval_v2 | DQN (not stated) | 20 | 20 | 0 | Not stated | Graph `eval_v2.png` |
-| Evaluate | DQN (not stated) | 20 | 20 | 0 | Not stated | Graph `Evaluate.png` |
-
-### Rainbow commands
-
-```bash
-source /opt/ros/humble/setup.bash
-source ~/ros2_ws/install/setup.bash
-source ~/pytorch-env/bin/activate
-export TURTLEBOT3_MODEL=burger
-export DRLNAV_BASE_PATH="$HOME/ros2_ws"
-python -m mini_dqn_nav.train_rainbow
-```
-
-```bash
-source /opt/ros/humble/setup.bash
-source ~/ros2_ws/install/setup.bash
-source ~/pytorch-env/bin/activate
-export TURTLEBOT3_MODEL=burger
-cd ~/ros2_ws/src/mini_dqn_nav
-python -m mini_dqn_nav.rainbow_evaluate
-```
-
-Start Gazebo first, as described in the Running the Project section.
-
-The current evaluation script only evaluates the final checkpoint. The best-by-eval checkpoint has not been evaluated yet.
-
-The Planned Directions item 4 above was written before the Rainbow work. Rainbow is now implemented and evaluated, as this section describes.
-
----
-
-## Project Log
-
-The full experiment log is split into two files:
-
-- [`mini_dqn_nav/logs.md`](mini_dqn_nav/logs.md): tables covering the experiment register, evaluation runs, training results, architecture and reward history, the bug-fix log, Rainbow details, discrepancies, and open items.
-- [`mini_dqn_nav/old_logs.md`](mini_dqn_nav/old_logs.md): the original prose log, kept unchanged.
-
----
-
-## Known Discrepancies
-
-These are recorded in [`mini_dqn_nav/logs.md`](mini_dqn_nav/logs.md), section 8.
-
-| # | Conflict | Action |
-|---|---|---|
-| D1 | The log says the network is 256 wide. The live Dueling network uses 128. | Confirm which network each checkpoint used |
-| D2 | The log says 120 episodes for the new-reward run. The graph shows 200. | Check the training config |
-| D3 | It is not stated whether the E1 and E3 goal counts are training or evaluation. | Check each source |
-| D4 | The Rainbow change log says "untested in Gazebo". Training and evaluation have both run. | Superseded |
-| D5 | Training assumes the robot starts at (0, 0) after each reset. Not verified. | Check the spawn pose in the launch file |
-
----
-
-## Next Step: DDPG
-
-Rainbow DQN is trained and evaluated. The next algorithm is DDPG. It needs continuous velocity actions, an actor network, and a critic network, so the environment's action interface has to change. DDPG has not been implemented yet.
-
----
-
-**Topics:** Deep Reinforcement Learning · DQN · Double DQN · Dueling DQN · TurtleBot3 · ROS 2 · Gazebo · PyTorch · Obstacle Avoidance · Robotics Research
