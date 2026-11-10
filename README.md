@@ -3,6 +3,20 @@
 
 ### Learning to Navigate. Learning to Avoid. Building Toward Autonomous Robotics. (A Research Project Pathway)
 
+## 🧰 Stacks Used
+
+[![Python](https://img.shields.io/badge/Python-🐍-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-🔥-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/)
+[![ROS 2 Humble](https://img.shields.io/badge/ROS_2-Humble-22314E?logo=ros&logoColor=white)](https://docs.ros.org/en/humble/)
+[![Gazebo](https://img.shields.io/badge/Gazebo-🌍-FF6F00)](https://gazebosim.org/)
+[![TurtleBot3](https://img.shields.io/badge/TurtleBot3-Burger-2CA5E0)](https://emanual.robotis.com/docs/en/platform/turtlebot3/overview/)
+[![LiDAR](https://img.shields.io/badge/LiDAR-📡-6A1B9A)](#state-actions-and-rewards)
+[![Matplotlib](https://img.shields.io/badge/Matplotlib-📊-11557C?logo=matplotlib&logoColor=white)](https://matplotlib.org/)
+[![Ubuntu 22.04](https://img.shields.io/badge/Ubuntu-22.04-E95420?logo=ubuntu&logoColor=white)](https://releases.ubuntu.com/22.04/)
+
+This project combines Python and PyTorch for deep reinforcement learning, ROS 2 Humble and Gazebo for robotics simulation, TurtleBot3 Burger with LiDAR for navigation, and Matplotlib for experiment visualization on Ubuntu 22.04.
+
+
 A Deep Q-Network (DQN)-based autonomous navigation system for TurtleBot3, built using PyTorch, ROS 2, and Gazebo. The project explores how a mobile robot can learn goal-directed navigation and obstacle avoidance through interaction with a simulated environment and reward-driven learning.
 
 **Current stage:** Intermediate working implementation | Simulation-based experimentation | Research-oriented development
