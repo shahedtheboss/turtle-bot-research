@@ -26,15 +26,15 @@ Each row is one evaluation run. Success rate is over the episodes listed. Confid
 
 | Run | Source | Model | Episodes | Success | Collisions | Timeouts | Success % | 95% CI | Start pose | Notes |
 |---|---|---|---|---|---|---|---|---|---|---|
-| R1 | Graph `Dueling_dqn_eval_300ep.png` | Dueling DDQN | 30 | 30 | 0 | 0 | 100.0 | 88–100 | Training start (0, 0, 0) | Steps 20–24 |
-| R2 | Graph `eval_300ep_DDQN_fixed_reward.png` | DDQN, fixed reward | 30 | 30 | 0 | 0 | 100.0 | 88–100 | (0, 0, 0) | Steps 23–33 |
+| R1 | Graph `Dueling_dqn_eval_300ep.png` | Dueling DDQN | 30 | 30 | 0 | 0 | 100.0 | 88–100 | (0.2, 0.2, 0), per original README | Steps 20–24 |
+| R2 | Graph `eval_300ep_DDQN_fixed_reward.png` | DDQN, fixed reward | 30 | 30 | 0 | 0 | 100.0 | 88–100 | Not stated | Steps 23–33 |
 | R3 | Graph `eval_300ep_DDQN_fixed_reward(0.2,0.2).png` | DDQN, fixed reward | 30 | 28 | 2 | 0 | 93.3 | 79–98 | (0.2, 0.2, 0) | Held-out start |
 | R4 | Graph `new_reward_pen_DDQN_22state_eval.png` | DDQN, new reward | 20 | 7 | 13 | 0 | 35.0 | 18–57 | Not stated | Steps 18–36 |
 | R5 | Graph `eval_v2.png` | DQN (model not stated) | 20 | 20 | 0 | 0 | 100.0 | 84–100 | Not stated | Steps 21–23 |
 | R6 | Graph `Evaluate.png` | DQN (model not stated) | 20 | 20 | 0 | 0 | 100.0 | 84–100 | Not stated | Steps 21–22 |
 | R7 | Terminal `SUMMARY`, 10 Nov 2026 | Rainbow, final checkpoint | 50 | 50 | 0 | 0 | 100.0 | 93–100 | Held-out (0.2, 0.2, 0) | Avg reward 107.05, avg steps 47.84. Graph `Graphs/rainbow_0.5s_eval.png` |
 
-**Reading these rows.** Every row is greedy. The fixed start means episodes are close to repeats, so a 100% row shows the policy works from that start, not that it generalises. Only R3 and R7 use the held-out start.
+**Reading these rows.** Every row is greedy. The fixed start means episodes are close to repeats, so a 100% row shows the policy works from that start, not that it generalises. R1, R3 and R7 use the held-out start (0.2, 0.2, 0), per the original README and the file names. The start of R2, R4, R5 and R6 is not stated in the sources.
 
 ---
 
@@ -110,7 +110,7 @@ Tables above reflect the code as it stands. Earlier rows are from the log text.
 | Episodes | 50 (changed from 30 to narrow the interval) |
 | Result | 50 goals, 0 collisions, 0 timeouts, 100%, avg reward 107.05, avg steps 47.84 |
 | Interpretation | Every episode reached the goal, with steps close to the roughly 38-step straight-line minimum. The fixed start makes episodes near-repeats, so this is evidence from one start only. |
-| Comparability | Not comparable with the (0, 0, 0) DQN/DDQN rows, because the start pose, environment and reward all changed. |
+| Comparability | Same start as R1 and R3, but episode counts, seeds, and the environment and reward versions differ. The 100% rows cannot separate the algorithms. |
 
 ---
 
@@ -132,6 +132,7 @@ Tables above reflect the code as it stands. Earlier rows are from the log text.
 |---|---|---|
 | 1 | Evaluate best-by-eval Rainbow checkpoint (`_best.pth`) | Not started |
 | 2 | Evaluate Rainbow at training start (0, 0, 0) for comparison with the DQN rows | Not started |
+| 2a | Correct R1 start pose in this table (earlier draft said (0, 0, 0); corrected to (0.2, 0.2, 0) per original README) | Done |
 | 3 | Verify spawn pose (D5) | Not started |
 | 4 | Offline tests for C51 projection and n-step aggregation | Not started |
 | 5 | Resolve D1, D2, D3 | Not started |
