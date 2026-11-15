@@ -44,7 +44,7 @@ class RobotEnvironment(Node):
         self.max_no_progress_steps = 60  # Terminate if no progress for 60 steps
         self.min_progress = 0.05
 
-        #Diadnostic for training log
+        #Diagnostic for training log
         self.last_goal_distance = float('nan')
         self.last_min_lidar = float('nan')
 
@@ -143,7 +143,7 @@ class RobotEnvironment(Node):
     
     def process_scan(self, msg):
         """
-        Convert the raw LiDAR scan into exactly 20 features.
+        Convert the raw LiDAR scan into exactly 50 features.
 
         INPUT:
             msg: A ROS 2 LaserScan message containing:
@@ -153,7 +153,7 @@ class RobotEnvironment(Node):
                 - range_max: maximum measurement range
 
         OUTPUT:
-            A Python list containing 20 values.
+            A Python list containing 50 values.
             Each value represents the minimum valid distance
             detected within one angular sector.
 
@@ -213,7 +213,7 @@ class RobotEnvironment(Node):
                 f"Invalid LiDAR maximum range: {max_range}"
             )
 
-            # Return a list with exactly 20 elements to preserve
+            # Return a list with exactly 50 elements to preserve
             # the expected output length.
             #
             # IMPORTANT:
@@ -825,9 +825,11 @@ class RobotEnvironment(Node):
         # Wait for new sensor data after the action.
         deadline = time.monotonic() + 0.1
 
+        # Wait for a new sensor update or until the timeout expires.
         while rclpy.ok() and time.monotonic() < deadline:
             rclpy.spin_once(self, timeout_sec=0.02)
 
+            # If the sensor update count has increased, we have new data.
             if self.sensor_update_count > previous_update_count:
                 break
 
@@ -844,7 +846,11 @@ class RobotEnvironment(Node):
         self.last_goal_distance = goal_distance
         self.last_min_lidar = min(next_state[:50])
  
-        # No-progress cut-off (the training script treats this as truncation).
+        """
+        This section implements a "no-progress" termination condition. If the robot fails to make sufficient progress 
+        toward the goal for a specified number of consecutive steps, the episode is terminated early. 
+        This encourages the agent to actively pursue the goal rather than getting stuck or wandering aimlessly. 
+        """
         if not terminated:
             # Check if the robot has made sufficient progress toward the goal.
             if (self.best_goal_distance is None
@@ -852,7 +858,9 @@ class RobotEnvironment(Node):
                 self.best_goal_distance = goal_distance
                 self.steps_since_progress = 0
             else:
+                # Increment the counter for steps without sufficient progress.
                 self.steps_since_progress += 1
+                # If the robot has exceeded the maximum allowed steps without progress, terminate the episode.
                 if self.steps_since_progress >= self.max_no_progress_steps:
                     terminated, reason = True, "no_progress"
 
