@@ -80,10 +80,18 @@ cleanup() {
 trap cleanup EXIT
 
 echo "[slot $SLOT] waiting for Gazebo (/scan)..."
-if ! timeout 90 ros2 topic echo /scan --once > /dev/null 2>&1; then
-    echo "[slot $SLOT] Gazebo did not publish /scan within 90 s; see $GZ_LOG" >&2
-    exit 1
-fi
+# ---- CHANGED CODE (smoke test 2026-11-15): poll until /scan delivers a message ----
+# Reason: `ros2 topic echo` exits at once with an error while /scan does not exist yet
+# (it cannot resolve the message type), so a single call failed after ~1 s, not 90 s.
+deadline=$(( $(date +%s) + 120 ))
+until timeout 10 ros2 topic echo /scan --once --no-daemon > /dev/null 2>&1; do
+    if [ "$(date +%s)" -ge "$deadline" ]; then
+        echo "[slot $SLOT] Gazebo did not publish /scan within 120 s; see $GZ_LOG" >&2
+        exit 1
+    fi
+    sleep 2
+done
+echo "[slot $SLOT] Gazebo ready"
 sleep 3   # let odometry and the clock start too
 
 # ---- TRAIN_MODULE (set at the top) picks the study ----
