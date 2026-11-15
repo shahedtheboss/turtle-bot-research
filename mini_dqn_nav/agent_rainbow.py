@@ -30,7 +30,17 @@ class NoisyLinear(nn.Module):
         self.bias_sigma = nn.Parameter(torch.empty(out_features))
         self.register_buffer("bias_epsilon", torch.empty(out_features))
 
+        """ 
+        Initializes the weights and biases of the NoisyNet layer.
+        The weights and biases are initialized using a uniform distribution, 
+        with the range determined by the number of input features. The standard deviation 
+        of the noise is also initialized based on the number of input features
 
+        How this works: The weights and biases are initialized using a uniform distribution, 
+        with the range determined by the number of input features. The standard deviation of the noise is also initialized 
+        based on the number of input features. This ensures that the initial weights and biases are not too large or too small, 
+        which can help stabilize training.
+        """
         bound = 1/np.sqrt(in_features)
         nn.init.uniform_(self.weight_mu, -bound, bound)
         nn.init.uniform_(self.bias_mu, -bound, bound)
@@ -82,7 +92,20 @@ class NoisyLinear(nn.Module):
 class RainbowNetwork(nn.Module):
     """
     Rainbow DQN network architecture with NoisyNet and C51 distributional output.
+
+    The RainbowNetwork class implements a neural network architecture
+    for the Rainbow DQN algorithm, which combines several improvements to the 
+    original DQN algorithm. The network takes in a state representation and outputs 
+    a distribution over possible future rewards for each action.
+    The network consists of a shared feature extractor, followed by separate value and advantage streams. 
+    The value stream estimates the expected future reward for each action, while the advantage stream estimates 
+    how much better or worse each action is compared to the average action. The outputs of the value and advantage 
+    streams are combined to produce the final output distribution over future rewards for each action.
+    The NoisyLinear layers introduce noise into the network's weights, which encourages exploration and helps prevent the agent 
+    from getting stuck in local optima. The C51 distributional output allows the network to model the full distribution of future rewards, 
+    rather than just the expected value, which can improve performance in certain environments.
     """
+   
 
     def __init__(self, state_size, action_size, num_atoms=51, hidden=256):
         super().__init__()
@@ -112,7 +135,15 @@ class RainbowNetwork(nn.Module):
             -1, self.action_size, self.num_atoms
         )
         return value + advantage - advantage.mean(dim=1, keepdim=True)
-
+    """""
+    The reset_noise method is called to generate new noise 
+    for the weights and biases of the NoisyLinear layers in the network. 
+    This is done by calling the reset_noise method of each NoisyLinear layer in the network, 
+    which generates new noise tensors for the weights and biases. The new noise is then used to perturb the weights and biases 
+    of the layers during training, which encourages exploration and helps prevent the agent from getting stuck in local optima. 
+    The reset_noise method is typically called at the beginning of each training episode, so that the agent explores different parts 
+    of the state space and learns a more robust policy.
+    """
     def reset_noise(self):
         for layer in (self.value_hidden, self.value_out,
                       self.adv_hidden, self.adv_out):
