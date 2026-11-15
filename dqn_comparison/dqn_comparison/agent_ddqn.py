@@ -7,7 +7,7 @@ action and the TARGET network evaluates it, which reduces max-operator overestim
     y  = r + gamma * (1 - terminal) * Q_target(s', a*)
 """
 
-from rainbow_ablation.paper1.agent_dqn import DQNAgent
+from dqn_comparison.agent_dqn import DQNAgent
 
 
 class DDQNAgent(DQNAgent):

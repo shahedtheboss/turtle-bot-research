@@ -1,4 +1,4 @@
-"""Unit tests for Paper 1 agents (item 5.7). Run: python3 -m pytest rainbow_ablation/test/test_paper1_agents.py -q
+"""Unit tests for Paper 1 agents (item 5.7). Run: python3 -m pytest dqn_comparison/test/test_agents.py -q
 
 They check, on tiny hand-made batches, that each agent computes the target its paper
 defines, that epsilon follows the linear schedule, and that only true terminals are stored
@@ -9,9 +9,9 @@ import numpy as np
 import pytest
 import torch
 
-from rainbow_ablation.paper1.agent_dqn import DQNAgent
-from rainbow_ablation.paper1.agent_ddqn import DDQNAgent
-from rainbow_ablation.paper1.agent_d3qn import D3QNAgent, DuelingQNetwork
+from dqn_comparison.agent_dqn import DQNAgent
+from dqn_comparison.agent_ddqn import DDQNAgent
+from dqn_comparison.agent_d3qn import D3QNAgent, DuelingQNetwork
 
 
 class Fixed(torch.nn.Module):
@@ -110,7 +110,7 @@ def test_save_records_algo(tmp_path):
 
 # ---------------- NEW CODE ADDED (review fix 12): Rainbow wrapper, evaluate loader, guide schedule ----------------
 def test_rainbow_wrapper_interface(tmp_path):
-    from rainbow_ablation.paper1.agent_rainbow import build_rainbow
+    from dqn_comparison.agent_rainbow import build_rainbow
     a = build_rainbow()
     act, was_random = a.select_action(np.zeros(52))
     assert 0 <= act < 7 and was_random is False
@@ -123,8 +123,8 @@ def test_rainbow_wrapper_interface(tmp_path):
 
 @pytest.mark.parametrize("name", ["dqn", "ddqn", "d3qn", "rainbow"])
 def test_evaluate_loader_rebuilds_same_policy(tmp_path, name):
-    from rainbow_ablation.evaluate import load_greedy_agent
-    from rainbow_ablation.paper1.train import AGENTS, probe_states
+    from dqn_comparison.evaluate import load_greedy_agent
+    from dqn_comparison.train import AGENTS, probe_states
     a = AGENTS[name]()
     p = tmp_path / f"{name}.pth"
     a.save(str(p))
@@ -134,7 +134,7 @@ def test_evaluate_loader_rebuilds_same_policy(tmp_path, name):
 
 
 def test_evaluate_loader_rejects_unknown_algo(tmp_path):
-    from rainbow_ablation.evaluate import load_greedy_agent
+    from dqn_comparison.evaluate import load_greedy_agent
     p = tmp_path / "x.pth"
     torch.save({"algo": "ppo"}, str(p))
     with pytest.raises(ValueError):
@@ -142,7 +142,7 @@ def test_evaluate_loader_rejects_unknown_algo(tmp_path):
 
 
 def test_guided_probability_schedule():
-    from rainbow_ablation.paper1.train import guided_probability
+    from dqn_comparison.train import guided_probability
     assert guided_probability(1, False) == 0.0 and guided_probability(150, False) == 0.0
     assert guided_probability(1, True) == pytest.approx(0.8)
     assert guided_probability(100, True) == pytest.approx(0.1)
@@ -150,7 +150,7 @@ def test_guided_probability_schedule():
 
 
 def test_parse_args_arms():
-    from rainbow_ablation.paper1.train import parse_args
+    from dqn_comparison.train import parse_args
     a = parse_args(["x", "--arm", "d3qn_g"])
     assert (a.algo, a.guide, a.arm) == ("d3qn", "on", "d3qn_g")
     b = parse_args(["x", "--algo", "rainbow"])

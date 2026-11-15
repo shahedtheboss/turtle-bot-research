@@ -9,7 +9,7 @@ Shapes: features [B, 256]; V [B, 1]; A [B, 7]; Q [B, 7].
 
 import torch.nn as nn
 
-from rainbow_ablation.paper1.agent_ddqn import DDQNAgent
+from dqn_comparison.agent_ddqn import DDQNAgent
 
 
 class DuelingQNetwork(nn.Module):

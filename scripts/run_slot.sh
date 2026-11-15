@@ -13,18 +13,20 @@
 set -eo pipefail
 
 if [ $# -lt 3 ]; then
-    echo "usage: [TRAIN_MODULE=rainbow_ablation.paper1.train] $0 SLOT(1-3) ARM SEED [extra flags]" >&2
-    echo "  ablation arms: G N R;  paper1 arms: dqn ddqn d3qn d3qn_g rainbow rainbow_g" >&2
+    echo "usage: [TRAIN_MODULE=dqn_comparison.guided_ablation.train] $0 SLOT(1-3) ARM SEED [extra flags]" >&2
+    echo "  DQN comparison arms (default): dqn ddqn d3qn d3qn_g rainbow rainbow_g;  guided ablation arms: G N R" >&2
     exit 1
 fi
 SLOT=$1; ARM=$2; SEED=$3; shift 3
 case "$SLOT" in 1|2|3) ;; *) echo "SLOT must be 1, 2 or 3" >&2; exit 1 ;; esac
 
 # ---- NEW CODE ADDED (review fix 10): check the arm matches the training module BEFORE booting Gazebo ----
-if [ "${TRAIN_MODULE:-rainbow_ablation.train}" = "rainbow_ablation.paper1.train" ]; then
-    case "$ARM" in dqn|ddqn|d3qn|d3qn_g|rainbow|rainbow_g) ;; *) echo "paper1 ARM must be dqn ddqn d3qn d3qn_g rainbow rainbow_g" >&2; exit 1 ;; esac
+# ---- CHANGED CODE (2026-11-15 rename): the DQN comparison is now the default study ----
+TRAIN_MODULE="${TRAIN_MODULE:-dqn_comparison.train}"
+if [ "$TRAIN_MODULE" = "dqn_comparison.train" ]; then
+    case "$ARM" in dqn|ddqn|d3qn|d3qn_g|rainbow|rainbow_g) ;; *) echo "ARM must be dqn ddqn d3qn d3qn_g rainbow rainbow_g (for the guided ablation set TRAIN_MODULE=dqn_comparison.guided_ablation.train)" >&2; exit 1 ;; esac
 else
-    case "$ARM" in G|N|R) ;; *) echo "ablation ARM must be G, N or R (for Paper 1 set TRAIN_MODULE=rainbow_ablation.paper1.train)" >&2; exit 1 ;; esac
+    case "$ARM" in G|N|R) ;; *) echo "guided ablation ARM must be G, N or R" >&2; exit 1 ;; esac
 fi
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -44,8 +46,8 @@ source "$HOME/pytorch-env/bin/activate"
 
 # Work out the run folder the same way train.py does, to store the Gazebo log there.
 RUN_NAME="${ARM}_s${SEED}"
-# ---- CHANGED CODE: Paper 1 writes to results_paper1 by default ----
-if [ "${TRAIN_MODULE:-}" = "rainbow_ablation.paper1.train" ]; then RESULTS_DIR="results_paper1"; else RESULTS_DIR="results"; fi
+# ---- CHANGED CODE: DQN comparison writes to results/, guided ablation to results_ablation/ ----
+if [ "$TRAIN_MODULE" = "dqn_comparison.train" ]; then RESULTS_DIR="results"; else RESULTS_DIR="results_ablation"; fi
 args=("$@")
 for ((i = 0; i < ${#args[@]}; i++)); do
     case "${args[$i]}" in
@@ -84,6 +86,5 @@ if ! timeout 90 ros2 topic echo /scan --once > /dev/null 2>&1; then
 fi
 sleep 3   # let odometry and the clock start too
 
-# ---- NEW CODE ADDED: TRAIN_MODULE picks the study (Paper 1: rainbow_ablation.paper1.train) ----
-TRAIN_MODULE="${TRAIN_MODULE:-rainbow_ablation.train}"
+# ---- TRAIN_MODULE (set at the top) picks the study ----
 python3 -m "$TRAIN_MODULE" --arm "$ARM" --seed "$SEED" "$@"

@@ -7,8 +7,8 @@ checkpoint and simulator state.
 
 # ---------------- CHANGED: examples match train.py's results/<run>/<run>_* layout ----------------
 Examples (run from the repo root after sourcing ROS, install/setup.bash and the venv):
-  python3 -m rainbow_ablation.evaluate --model results/G_s1/G_s1_model_final.pth --episodes 50 --label G_s1 --out-csv results/G_s1/G_s1_final_eval.csv
-  python3 -m rainbow_ablation.evaluate --policy heuristic --episodes 50 --label H --out-csv results/H/H_final_eval.csv
+  python3 -m dqn_comparison.evaluate --model results/G_s1/G_s1_model_final.pth --episodes 50 --label G_s1 --out-csv results/G_s1/G_s1_final_eval.csv
+  python3 -m dqn_comparison.evaluate --policy heuristic --episodes 50 --label H --out-csv results/H/H_final_eval.csv
 # ---------------- END CHANGED ----------------
 """
 
@@ -32,9 +32,9 @@ from gazebo_msgs.msg import EntityState
 from gazebo_msgs.srv import SetEntityState
 from geometry_msgs.msg import Twist
 
-from rainbow_ablation.agent import RainbowDQNAgent
-from rainbow_ablation.environment import RobotEnvironment
-from rainbow_ablation.train import heuristic_action
+from dqn_comparison.rainbow_core import RainbowDQNAgent
+from dqn_comparison.environment import RobotEnvironment
+from dqn_comparison.common import heuristic_action
 
 MAX_STEPS = 250                     # same episode cap as training
 ROBOT_NAME = "turtlebot3_burger"    # entity name in the running Gazebo world
@@ -166,9 +166,9 @@ def load_greedy_agent(path, device=None):
     # Old checkpoints have no "algo" and are Rainbow, so they keep loading as before.
     algo = ckpt.get("algo", "rainbow")
     if algo in ("dqn", "ddqn", "d3qn"):
-        from rainbow_ablation.paper1.agent_dqn import DQNAgent
-        from rainbow_ablation.paper1.agent_ddqn import DDQNAgent
-        from rainbow_ablation.paper1.agent_d3qn import D3QNAgent
+        from dqn_comparison.agent_dqn import DQNAgent
+        from dqn_comparison.agent_ddqn import DDQNAgent
+        from dqn_comparison.agent_d3qn import D3QNAgent
         cls = {"dqn": DQNAgent, "ddqn": DDQNAgent, "d3qn": D3QNAgent}[algo]
         agent = cls(ckpt["state_size"], ckpt["action_size"], **ckpt.get("cfg", {}))   # review fix 6
         agent.policy_net.load_state_dict(ckpt["policy_net"])

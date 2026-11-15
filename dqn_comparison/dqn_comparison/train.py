@@ -3,14 +3,14 @@
 One loop for every method (paper1_change_plan.md item 1-T), so logging, budget, resets and
 evaluation are identical and only the algorithm (and guide) differs.
 
-    python3 -m rainbow_ablation.paper1.train --arm d3qn --seed 1
-    python3 -m rainbow_ablation.paper1.train --algo rainbow --guide on --seed 2
+    python3 -m dqn_comparison.train --arm d3qn --seed 1
+    python3 -m dqn_comparison.train --algo rainbow --guide on --seed 2
 
 Arms (shorthand for --algo/--guide):
     dqn, ddqn, d3qn, rainbow      -> guide off
     d3qn_g, rainbow_g             -> guide on (0.8 -> 0.1 over 100 episodes, 15% noise)
 
-Output: <results-dir>/<arm>_s<seed>/<run>_{episodes.csv, evals.csv, training.png,
+Output (default results/): <results-dir>/<arm>_s<seed>/<run>_{episodes.csv, evals.csv, training.png,
 run_meta.json, model_final.pth, model_best.pth}.
 
 Based on rainbow_ablation/train.py (the ablation study's loop). Helpers that are already
@@ -34,19 +34,22 @@ from rclpy.qos import QoSProfile, ReliabilityPolicy
 from rosgraph_msgs.msg import Clock
 
 # ---------------- NEW CODE ADDED: reuse the tested helpers from the ablation loop ----------------
-# Reason: same reset, start pose, guide, heuristic and logging helpers for both papers.
-from rainbow_ablation.train import (
+# Reason: same reset, start pose, guide, heuristic and logging helpers for both papers
+# (dqn_comparison/common.py since the 2026-11-15 rename; was rainbow_ablation/train.py).
+from dqn_comparison.common import (
     set_seed, prepare_episode, heuristic_action, goal_for_episode, git_info, write_json,
     MAX_STEPS, UPDATES_PER_STEP, START_POSE, FINAL_GOAL,
     GUIDED_START, GUIDED_END, GUIDED_EPISODES, GUIDED_NOISE,
 )
-import matplotlib.pyplot as plt     # backend already set to Agg by rainbow_ablation.train
+import matplotlib
+matplotlib.use("Agg")             # CHANGED: set here (the old import of the ablation loop used to do it)
+import matplotlib.pyplot as plt
 # ---------------- END NEW CODE ----------------
-from rainbow_ablation.environment import RobotEnvironment
-from rainbow_ablation.paper1.agent_dqn import DQNAgent
-from rainbow_ablation.paper1.agent_ddqn import DDQNAgent
-from rainbow_ablation.paper1.agent_d3qn import D3QNAgent
-from rainbow_ablation.paper1.agent_rainbow import build_rainbow
+from dqn_comparison.environment import RobotEnvironment
+from dqn_comparison.agent_dqn import DQNAgent
+from dqn_comparison.agent_ddqn import DDQNAgent
+from dqn_comparison.agent_d3qn import D3QNAgent
+from dqn_comparison.agent_rainbow import build_rainbow
 
 
 SEED = 1
@@ -192,7 +195,7 @@ def parse_args(argv):
     p.add_argument("--eval-every", type=int, default=EVAL_EVERY)
     p.add_argument("--eval-episodes", type=int, default=EVAL_EPISODES)
     p.add_argument("--run-name", help="default: <arm>_s<seed>, e.g. d3qn_g_s1")
-    p.add_argument("--results-dir", default="results_paper1")
+    p.add_argument("--results-dir", default="results")
     p.add_argument("--overwrite", action="store_true")
     args = p.parse_args(remove_ros_args(argv)[1:])
     if args.arm:

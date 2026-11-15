@@ -1,6 +1,6 @@
-"""Paper 1 analysis: tables and figures from results_paper1/ (item 5.6).
+"""Paper 1 analysis: tables and figures from results/ (item 5.6).
 
-    python3 -m rainbow_ablation.paper1.analyze --results-dir results_paper1
+    python3 -m dqn_comparison.analyze --results-dir results
 
 Reads every run folder <arm>_s<seed>/ (run_meta.json, *_episodes.csv, *_evals.csv and,
 if present, *_final_eval.csv from evaluate.py) plus optional H/ and H_eta/ baselines.
@@ -104,7 +104,7 @@ def load_runs(results_dir):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--results-dir", default="results_paper1")
+    ap.add_argument("--results-dir", default="results")
     args = ap.parse_args()
     out = os.path.join(args.results_dir, "summary")
     os.makedirs(out, exist_ok=True)

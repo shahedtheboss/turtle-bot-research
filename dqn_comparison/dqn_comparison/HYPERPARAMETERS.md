@@ -1,4 +1,4 @@
-# Paper 1 hyperparameters (item 5.9)
+# DQN comparison hyperparameters (Paper 1, item 5.9)
 
 These settings are **shared, not tuned per method**. Every run also records its exact values in `run_meta.json` under `hyperparameters`.
 

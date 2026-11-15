@@ -1,7 +1,7 @@
 """Rainbow DQN agent for Paper 1 (Hessel et al. 2018).
 
 The learning code is NOT copied: it is the same RainbowDQNAgent used in the pilot and in
-the ablation study (rainbow_ablation/agent.py; logic identical to mini_dqn_nav/agent_rainbow.py).
+the ablation study (now dqn_comparison/rainbow_core.py, was rainbow_ablation/agent.py; logic identical to mini_dqn_nav/agent_rainbow.py).
 This thin subclass only adds the interface Paper 1's shared train/evaluate code expects,
 so Rainbow's algorithm stays exactly as it was (no silent change).
 """
@@ -9,7 +9,7 @@ so Rainbow's algorithm stays exactly as it was (no silent change).
 import numpy as np
 import torch
 
-from rainbow_ablation.agent import RainbowDQNAgent as _BaseRainbow
+from dqn_comparison.rainbow_core import RainbowDQNAgent as _BaseRainbow
 
 
 class RainbowAgent(_BaseRainbow):

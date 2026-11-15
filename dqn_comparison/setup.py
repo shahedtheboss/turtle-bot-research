@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-package_name = 'rainbow_ablation'
+package_name = 'dqn_comparison'
 
 setup(
     name=package_name,
@@ -15,7 +15,7 @@ setup(
     zip_safe=True,
     maintainer='shahed',
     maintainer_email='shahedshahadat0123@gmail.com',
-    description='Rainbow DQN guided-exploration ablation study (TurtleBot3, ROS 2 Humble, Gazebo)',
+    description='DQN / DDQN / D3QN / Rainbow comparison for TurtleBot3 navigation (ROS 2 Humble, Gazebo)',
     license='MIT',
     extras_require={'test': ['pytest']},
     entry_points={'console_scripts': []},
