@@ -120,7 +120,13 @@ About 10 minutes into a 6-run batch, check:
 
 If either fails, stop slots 4–6 (Ctrl+C) and run them later. Interrupted runs keep their folders; re-run them with `--run-name <arm>_s<seed>_rerun`.
 
-**Unattended: run all remaining batches automatically** (`scripts/run_queue.sh`). It blocks suspend, idle sleep and the lid switch while it runs. It waits for any running batch to finish, checks there's enough free RAM, then runs batches 3–6 one after another, skipping runs whose folder already exists. Start it detached, so it survives closing the terminal:
+**Unattended, recommended: slot pool** (`scripts/run_pool.sh`, in use since 2026-11-16 15:02). It keeps up to 6 runs going and starts the **next pre-registered run as soon as any slot frees up** and RAM allows, so a slow run (e.g. unguided Rainbow) doesn't leave 5 slots idle. It blocks suspend, idle sleep and the lid switch, skips runs that already have results, and leaves hand-started runs alone. Start it detached:
+```bash
+cd ~/turtle-bot-research && setsid nohup scripts/run_pool.sh > log/queue/pool_nohup.out 2>&1 < /dev/null &
+```
+Progress: `tail -f ~/turtle-bot-research/log/queue/pool.log`. Preview: `DRY_RUN=1 scripts/run_pool.sh`. **Stop it** with `pkill -f "bash scripts/run_pool.sh"`. (Careful: a bare `pkill -f run_pool.sh` inside a longer shell command also kills that shell.)
+
+**Older alternative, batch by batch** (`scripts/run_queue.sh`) It blocks suspend, idle sleep and the lid switch while it runs. It waits for any running batch to finish, checks there's enough free RAM, then runs batches 3–6 one after another, skipping runs whose folder already exists. Start it detached, so it survives closing the terminal:
 ```bash
 cd ~/turtle-bot-research && setsid nohup scripts/run_queue.sh > log/queue/nohup.out 2>&1 < /dev/null &
 ```
