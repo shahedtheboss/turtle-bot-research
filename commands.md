@@ -60,7 +60,7 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest dqn_comparison/test/test_agen
 ```
 
 ## 5. 3-slot smoke test (about 10 min)
-Close any GUI Gazebo first. Each slot starts its own headless Gazebo, with ROS domain 30 + slot and Gazebo port 11345 + slot, so the slots can't interfere. Use one terminal per slot; a plain terminal is fine, because the script sources everything itself.
+Close any GUI Gazebo first. Each slot (1–6) starts its own headless Gazebo, with ROS domain 30 + slot and Gazebo port 11345 + slot, so the slots can't interfere. Use one terminal per slot; a plain terminal is fine, because the script sources everything itself.
 ```bash
 cd ~/turtle-bot-research && RAINBOW_PARALLEL=3 scripts/run_slot.sh 1 dqn 1 --episodes 5 --eval-every 5 --run-name smoke_dqn --results-dir results_smoke
 ```
@@ -81,22 +81,41 @@ What to check:
 git add -A && git commit -m "DQN comparison: final code before study runs" && git tag comparison-prereg-v1 && git push && git push --tags
 ```
 
-## 7. Study batches (6 arms × 3 seeds = 18 runs = 6 batches of 3, about 2 h each)
-Run each batch's 3 commands in 3 terminals. Output goes to `results/<arm>_s<seed>/`.
+## 7. Study batches (6 arms × 3 seeds = 18 runs)
+Batch 1 ran 3 at a time. From batch 2 on, run **6 at a time**: one seed of all 6 arms, each in its own terminal. Measured load is about 0.4 CPU core and 1.65 GB RAM per run, so 6 fit. Output goes to `results/<arm>_s<seed>/`.
 
-| Batch | Slot 1 | Slot 2 | Slot 3 |
-|---|---|---|---|
-| 1 | dqn 1 | ddqn 1 | d3qn 1 |
-| 2 | d3qn_g 1 | rainbow 1 | rainbow_g 1 |
-| 3 | ddqn 2 | d3qn 2 | dqn 2 |
-| 4 | rainbow 2 | rainbow_g 2 | d3qn_g 2 |
-| 5 | d3qn 3 | dqn 3 | ddqn 3 |
-| 6 | rainbow_g 3 | d3qn_g 3 | rainbow 3 |
+| Batch | Parallel | Slot 1 | Slot 2 | Slot 3 | Slot 4 | Slot 5 | Slot 6 |
+|---|---|---|---|---|---|---|---|
+| 1 (done/running) | 3 | dqn 1 | ddqn 1 | d3qn 1 | – | – | – |
+| 2 | 6 | dqn 2 | ddqn 2 | d3qn 2 | d3qn_g 2 | rainbow 2 | rainbow_g 2 |
+| 3 | 6 | rainbow_g 3 | rainbow 3 | d3qn_g 3 | d3qn 3 | ddqn 3 | dqn 3 |
+| 4 | 3 | d3qn_g 1 | rainbow 1 | rainbow_g 1 | – | – | – |
 
-Example (batch 1, slot 1):
+Batch 2, all six commands (one terminal each):
 ```bash
-cd ~/turtle-bot-research && RAINBOW_PARALLEL=3 scripts/run_slot.sh 1 dqn 1
+cd ~/turtle-bot-research && RAINBOW_PARALLEL=6 scripts/run_slot.sh 1 dqn 2
 ```
+```bash
+cd ~/turtle-bot-research && RAINBOW_PARALLEL=6 scripts/run_slot.sh 2 ddqn 2
+```
+```bash
+cd ~/turtle-bot-research && RAINBOW_PARALLEL=6 scripts/run_slot.sh 3 d3qn 2
+```
+```bash
+cd ~/turtle-bot-research && RAINBOW_PARALLEL=6 scripts/run_slot.sh 4 d3qn_g 2
+```
+```bash
+cd ~/turtle-bot-research && RAINBOW_PARALLEL=6 scripts/run_slot.sh 5 rainbow 2
+```
+```bash
+cd ~/turtle-bot-research && RAINBOW_PARALLEL=6 scripts/run_slot.sh 6 rainbow_g 2
+```
+About 10 minutes into a 6-run batch, check:
+- `rtf` ≥ 0.95 in every `*_episodes.csv`;
+- free RAM > 2 GB (`free -g`).
+
+If either fails, stop slots 4–6 (Ctrl+C) and run them later. Interrupted runs keep their folders; re-run them with `--run-name <arm>_s<seed>_rerun`.
+
 If a run crashes, keep its folder (it's data, so note it in `reports/logs.md`) and re-run it under a new name:
 ```bash
 cd ~/turtle-bot-research && RAINBOW_PARALLEL=3 scripts/run_slot.sh 1 dqn 1 --run-name dqn_s1_rerun

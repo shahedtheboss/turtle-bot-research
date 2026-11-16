@@ -1,24 +1,25 @@
 #!/usr/bin/env bash
-# Run one training run in its own isolated, headless Gazebo ("slot").
+# Run one training run in its own isolated, headless Gazebo ("slot"); up to 6 slots.
 #
 #   scripts/run_slot.sh SLOT ARM SEED [extra train.py flags...]
 #   scripts/run_slot.sh 1 N 1
 #   scripts/run_slot.sh 2 G 1 --episodes 5 --eval-every 5 --run-name smoke_G_slot2 --results-dir results_smoke
 #
 # Each slot gets its own ROS 2 domain (topics/services cannot cross) and its own
-# Gazebo master port, so up to 3 runs can share the laptop. The script starts
+# Gazebo master port, so up to 6 runs can share the laptop. The script starts
 # gzserver without the GUI, waits for /scan, trains, then stops ONLY its own
 # Gazebo (also on Ctrl+C or a crash). The Gazebo log is copied into the run folder.
 
 set -eo pipefail
 
 if [ $# -lt 3 ]; then
-    echo "usage: [TRAIN_MODULE=dqn_comparison.guided_ablation.train] $0 SLOT(1-3) ARM SEED [extra flags]" >&2
+    echo "usage: [TRAIN_MODULE=dqn_comparison.guided_ablation.train] $0 SLOT(1-6) ARM SEED [extra flags]" >&2
     echo "  DQN comparison arms (default): dqn ddqn d3qn d3qn_g rainbow rainbow_g;  guided ablation arms: G N R" >&2
     exit 1
 fi
 SLOT=$1; ARM=$2; SEED=$3; shift 3
-case "$SLOT" in 1|2|3) ;; *) echo "SLOT must be 1, 2 or 3" >&2; exit 1 ;; esac
+# CHANGED CODE (2026-11-16): slots 1-6 (was 1-3). Measured: ~0.4 CPU core and ~1.65 GB RAM per run, so 6 fit in 15.6 GB RAM.
+case "$SLOT" in 1|2|3|4|5|6) ;; *) echo "SLOT must be 1-6" >&2; exit 1 ;; esac
 
 # ---- NEW CODE ADDED (review fix 10): check the arm matches the training module BEFORE booting Gazebo ----
 # ---- CHANGED CODE (2026-11-15 rename): the DQN comparison is now the default study ----
