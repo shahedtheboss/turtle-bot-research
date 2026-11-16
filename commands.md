@@ -81,7 +81,7 @@ What to check:
 git add -A && git commit -m "DQN comparison: final code before study runs" && git tag comparison-prereg-v1 && git push && git push --tags
 ```
 
-## 7. Study batches (6 arms × 3 seeds = 18 runs)
+## 7. Study batches (6 arms × 5 seeds = 30 runs)
 Batch 1 ran 3 at a time. From batch 2 on, run **6 at a time**: one seed of all 6 arms, each in its own terminal. Measured load is about 0.4 CPU core and 1.65 GB RAM per run, so 6 fit. Output goes to `results/<arm>_s<seed>/`.
 
 | Batch | Parallel | Slot 1 | Slot 2 | Slot 3 | Slot 4 | Slot 5 | Slot 6 |
@@ -90,6 +90,10 @@ Batch 1 ran 3 at a time. From batch 2 on, run **6 at a time**: one seed of all 6
 | 2 | 6 | dqn 2 | ddqn 2 | d3qn 2 | d3qn_g 2 | rainbow 2 | rainbow_g 2 |
 | 3 | 6 | rainbow_g 3 | rainbow 3 | d3qn_g 3 | d3qn 3 | ddqn 3 | dqn 3 |
 | 4 | 3 | d3qn_g 1 | rainbow 1 | rainbow_g 1 | – | – | – |
+| 5 | 6 | ddqn 4 | dqn 4 | rainbow_g 4 | rainbow 4 | d3qn_g 4 | d3qn 4 |
+| 6 | 6 | d3qn_g 5 | rainbow_g 5 | dqn 5 | ddqn 5 | d3qn 5 | rainbow 5 |
+
+Seeds 4–5 (batches 5–6) were added by the pre-registration amendment `comparison-prereg-v1.1` (2026-11-16), before any final result was seen. 5 seeds per arm, 30 runs in total.
 
 Batch 2, all six commands (one terminal each):
 ```bash
@@ -126,9 +130,9 @@ python3 -m dqn_comparison.train --arm d3qn --seed 1
 ```
 
 ## 8. Final evaluation (section 2 Gazebo plus a section 1 terminal)
-All 18 runs, 50 greedy episodes each (5 poses × 10):
+All 30 runs, 50 greedy episodes each (5 poses × 10):
 ```bash
-for R in dqn_s1 ddqn_s1 d3qn_s1 d3qn_g_s1 rainbow_s1 rainbow_g_s1 dqn_s2 ddqn_s2 d3qn_s2 d3qn_g_s2 rainbow_s2 rainbow_g_s2 dqn_s3 ddqn_s3 d3qn_s3 d3qn_g_s3 rainbow_s3 rainbow_g_s3; do python3 -m dqn_comparison.evaluate --model results/$R/${R}_model_final.pth --episodes 50 --label $R --out-csv results/$R/${R}_final_eval.csv --plot results/$R/${R}_final_eval.png; done
+for S in 1 2 3 4 5; do for A in dqn ddqn d3qn d3qn_g rainbow rainbow_g; do R=${A}_s${S}; python3 -m dqn_comparison.evaluate --model results/$R/${R}_model_final.pth --episodes 50 --label $R --out-csv results/$R/${R}_final_eval.csv --plot results/$R/${R}_final_eval.png; done; done
 ```
 Heuristic baselines:
 ```bash
