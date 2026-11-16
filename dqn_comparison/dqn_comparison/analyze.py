@@ -85,6 +85,79 @@ def e_star(evals, censor):
     return censor, True
 
 
+# ---------------- NEW CODE ADDED (2026-11-17): planned-contrast tests ----------------
+# Reason: experiment_plan.md §7 / paper_writing_plan.md Tab 4 promise exact one-sided
+# permutation tests with effect size A for 4 planned contrasts; they were not implemented.
+# Implemented after training (stated in the paper); contrasts and directions follow the
+# pre-stated hypotheses H1-H3. Lower E* = learns sooner = better.
+
+def vargha_delaney_a(x, y):
+    """A = P(X < Y) + 0.5 P(X == Y): probability a random X run learns SOONER than a random Y run.
+
+    0.5 = no difference, 1.0 = X always sooner. Thresholds: 0.56 small, 0.64 medium, 0.71 large.
+    """
+    x, y = list(x), list(y)
+    if not x or not y:
+        return float("nan")
+    wins = sum((xi < yj) + 0.5 * (xi == yj) for xi in x for yj in y)
+    return wins / (len(x) * len(y))
+
+
+def exact_perm_test_unpaired(x, y):
+    """Exact permutation test on ranks (= exact Mann-Whitney), statistic A(x, y).
+
+    Enumerates every way to split the pooled values into groups of len(x) and len(y)
+    (5 vs 5: C(10,5) = 252 splits). Returns (A, p_one_sided, p_two_sided):
+      p_one_sided = share of splits with A >= observed (H: x learns sooner),
+      p_two_sided = share of splits with |A - 0.5| >= |observed - 0.5|.
+    """
+    from itertools import combinations
+    pooled = list(x) + list(y)
+    n, k = len(pooled), len(x)
+    a_obs = vargha_delaney_a(x, y)
+    eps = 1e-12
+    ge = two = total = 0
+    for idx in combinations(range(n), k):
+        s = set(idx)
+        a = vargha_delaney_a([pooled[i] for i in idx], [pooled[i] for i in range(n) if i not in s])
+        total += 1
+        ge += a >= a_obs - eps
+        two += abs(a - 0.5) >= abs(a_obs - 0.5) - eps
+    return a_obs, ge / total, two / total
+
+
+def exact_perm_test_paired(x, y):
+    """Exact paired sign-flip test on per-seed differences d = y - x (> 0: x learns sooner).
+
+    Under H0 each difference is equally likely + or -, so all 2^n sign patterns are
+    enumerated (5 pairs: 32). Statistic = mean difference.
+    Returns (mean_diff, p_one_sided, p_two_sided).
+    """
+    from itertools import product
+    d = [float(b) - float(a) for a, b in zip(x, y)]
+    obs = float(np.mean(d))
+    eps = 1e-12
+    ge = two = total = 0
+    for signs in product((1, -1), repeat=len(d)):
+        m = float(np.mean([s * v for s, v in zip(signs, d)]))
+        total += 1
+        ge += m >= obs - eps
+        two += abs(m) >= abs(obs) - eps
+    return obs, ge / total, two / total
+
+
+def holm(pvals):
+    """Holm-Bonferroni adjusted p-values (same order as the input)."""
+    m = len(pvals)
+    order = sorted(range(m), key=lambda i: pvals[i])
+    adj, running = [0.0] * m, 0.0
+    for rank, i in enumerate(order):
+        running = max(running, min(1.0, (m - rank) * pvals[i]))
+        adj[i] = running
+    return adj
+# ---------------- END NEW CODE ----------------
+
+
 def load_runs(results_dir):
     runs = []
     for meta_path in sorted(glob.glob(os.path.join(results_dir, "*", "*_run_meta.json"))):
@@ -202,6 +275,46 @@ def main():
         with open(os.path.join(out, "per_pose.csv"), "w", newline="") as f:
             w = csv.DictWriter(f, fieldnames=list(pose_rows[0])); w.writeheader(); w.writerows(pose_rows)
 
+    # ---------------- NEW CODE ADDED (2026-11-17): planned contrasts on E* ----------------
+    # Only COMPLETED runs (a running run would look censored). Censored runs keep E* = censor
+    # value; the rank-based test only uses "slowest", not the arbitrary number.
+    done = [r for r in run_rows if r["status"] == "completed"]
+    est = {a: {int(r["seed"]): int(r["E_star"]) for r in done if r["arm"] == a} for a in ORDER}
+    unguided = [a for a in ("dqn", "ddqn", "d3qn", "rainbow") if len(est[a]) >= 2]
+    # "Best unguided" = lowest median E*, ties -> lower mean -> ORDER. Chosen on the same data,
+    # which favours the unguided side, i.e. conservative against H3.
+    best_ung = min(unguided, key=lambda a: (float(np.median(list(est[a].values()))),
+                                            float(np.mean(list(est[a].values()))), ORDER.index(a))) \
+        if unguided else None
+    planned = [("C1", "rainbow_g", "rainbow", "unpaired", "H2: guide speeds up Rainbow"),
+               ("C2", "d3qn_g", "d3qn", "unpaired", "H2: guide speeds up D3QN"),
+               ("C3", "ddqn", "dqn", "paired", "H1: DDQN at least as fast as DQN"),
+               ("C4", "rainbow_g", best_ung, "unpaired", f"H3: guided Rainbow beats best unguided ({best_ung})")]
+    contrast_rows = []
+    for cid, xa, ya, kind, hyp in planned:
+        if ya is None or len(est[xa]) < 2 or len(est[ya]) < 2:
+            continue
+        if kind == "paired":
+            seeds = sorted(set(est[xa]) & set(est[ya]))
+            x = [est[xa][s] for s in seeds]; y = [est[ya][s] for s in seeds]
+            stat, p1, p2 = exact_perm_test_paired(x, y)
+            stat_name = "mean E* difference (Y - X)"
+        else:
+            x = list(est[xa].values()); y = list(est[ya].values())
+            stat, p1, p2 = exact_perm_test_unpaired(x, y)
+            stat_name = "A (rank statistic)"
+        contrast_rows.append({
+            "id": cid, "hypothesis": hyp, "X": xa, "Y": ya, "test": kind,
+            "n_X": len(x), "n_Y": len(y), "E_star_X": " ".join(map(str, x)), "E_star_Y": " ".join(map(str, y)),
+            "A_X_sooner": round(vargha_delaney_a(x, y), 3), "statistic": stat_name, "stat_value": round(stat, 3),
+            "p_one_sided": round(p1, 4), "p_two_sided_exploratory": round(p2, 4)})
+    for r, ph in zip(contrast_rows, holm([r["p_one_sided"] for r in contrast_rows])):
+        r["p_holm"] = round(ph, 4)
+    if contrast_rows:
+        with open(os.path.join(out, "contrasts.csv"), "w", newline="") as f:
+            w = csv.DictWriter(f, fieldnames=list(contrast_rows[0])); w.writeheader(); w.writerows(contrast_rows)
+    # ---------------- END NEW CODE ----------------
+
     # ---------- figures ----------
     colors = dict(zip(ORDER, plt.cm.tab10.colors))
     for xkey, fname, xlabel in (("episode", "curves_vs_episode.png", "Training episode"),
@@ -285,6 +398,21 @@ def main():
         bad = [r["run"] for r in run_rows if r["git_dirty"] or r["status"] != "completed"]
         f.write(", ".join(bad) if bad else "none")
         f.write("\n")
+        # ---------------- NEW CODE ADDED (2026-11-17): planned-contrast table ----------------
+        if contrast_rows:
+            f.write("\n## Planned contrasts on E* (lower = learns sooner)\n\n")
+            f.write("| ID | Hypothesis | X vs Y | Test | E* X | E* Y | A (X sooner) | p one-sided | p Holm | p two-sided (exploratory) |\n")
+            f.write("|---|---|---|---|---|---|---|---|---|---|\n")
+            for r in contrast_rows:
+                f.write(f"| {r['id']} | {r['hypothesis']} | {r['X']} vs {r['Y']} | {r['test']} | {r['E_star_X']} | "
+                        f"{r['E_star_Y']} | {r['A_X_sooner']} | {r['p_one_sided']} | {r['p_holm']} | "
+                        f"{r['p_two_sided_exploratory']} |\n")
+            f.write("\nExact tests: unpaired = all C(n,k) label splits on ranks (5 vs 5: min p = 1/252); "
+                    "paired = all 2^n sign flips of per-seed differences (5 pairs: min p = 1/32). "
+                    "One-sided direction = the hypothesis; Holm over the one-sided p's. Two-sided p is "
+                    "exploratory. Censored E* = never learned within the budget (ranked slowest). "
+                    "Test code written after training; contrasts and directions are the pre-stated ones.\n")
+        # ---------------- END NEW CODE ----------------
     print("Wrote", out)
 
 
