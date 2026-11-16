@@ -122,7 +122,7 @@ def git_info():
         commit = subprocess.check_output(
             ["git", "rev-parse", "HEAD"], cwd=here, text=True).strip()
         dirty = bool(subprocess.check_output(
-            ["git", "status", "--porcelain"], cwd=here, text=True).strip())
+            ["git", "status", "--porcelain", "--untracked-files=no"], cwd=here, text=True).strip())   # CHANGED (2026-11-16): untracked run outputs (results/) are not code changes
         return commit, dirty
     except Exception:
         return "unknown", None
