@@ -120,6 +120,19 @@ About 10 minutes into a 6-run batch, check:
 
 If either fails, stop slots 4–6 (Ctrl+C) and run them later. Interrupted runs keep their folders; re-run them with `--run-name <arm>_s<seed>_rerun`.
 
+**Unattended: run all remaining batches automatically** (`scripts/run_queue.sh`). It blocks suspend, idle sleep and the lid switch while it runs. It waits for any running batch to finish, checks there's enough free RAM, then runs batches 3–6 one after another, skipping runs whose folder already exists. Start it detached, so it survives closing the terminal:
+```bash
+cd ~/turtle-bot-research && setsid nohup scripts/run_queue.sh > log/queue/nohup.out 2>&1 < /dev/null &
+```
+Follow progress, and confirm the sleep block is active:
+```bash
+tail -f ~/turtle-bot-research/log/queue/queue.log
+```
+```bash
+systemd-inhibit --list | grep dqn_comparison
+```
+Preview without starting anything: `DRY_RUN=1 scripts/run_queue.sh`. Stop everything: `pkill -f run_queue.sh; pkill -f run_slot.sh`.
+
 If a run crashes, keep its folder (it's data, so note it in `reports/logs.md`) and re-run it under a new name:
 ```bash
 cd ~/turtle-bot-research && RAINBOW_PARALLEL=3 scripts/run_slot.sh 1 dqn 1 --run-name dqn_s1_rerun
