@@ -175,6 +175,11 @@ mkdir -p results/H && python3 -m dqn_comparison.evaluate --policy heuristic --ep
 mkdir -p results/H_eta && python3 -m dqn_comparison.evaluate --policy heuristic --guide-noise 0.15 --seed 1 --episodes 50 --label H_eta --out-csv results/H_eta/H_eta_final_eval.csv
 ```
 
+**Auto-suspend when everything is finished** (no inhibitor of its own; cancel by killing its PID):
+```bash
+setsid nohup scripts/suspend_when_done.sh > log/queue/suspend_watch.out 2>&1 < /dev/null &
+```
+
 ## 9. Analysis (tables and figures in `results/summary/`)
 ```bash
 python3 -m dqn_comparison.analyze --results-dir results
