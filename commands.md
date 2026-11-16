@@ -149,6 +149,20 @@ python3 -m dqn_comparison.train --arm d3qn --seed 1
 ```
 
 ## 8. Final evaluation (section 2 Gazebo plus a section 1 terminal)
+
+**Recommended: evaluation pool (shares the 6 slots with training).** Each run is evaluated as soon as its training completes and a slot is free. Training and evaluation together never exceed 6 Gazebos. It also does H and H_eta. Each evaluation is exactly the command below, run in its own isolated headless slot (`scripts/run_eval_slot.sh SLOT RUN`).
+```bash
+DRY_RUN=1 scripts/run_eval_pool.sh        # see which runs are READY / waiting
+```
+```bash
+setsid nohup scripts/run_eval_pool.sh > log/queue/eval_pool_nohup.out 2>&1 < /dev/null &
+```
+```bash
+tail -f log/queue/eval_pool.log           # progress; one log per run: log/queue/eval_<run>.out
+```
+Stop: `pgrep -af run_eval_pool` and kill the pool's PID (not `pkill -f` from a shell whose command line contains the pattern).
+
+**Manual alternative (one Gazebo, sequential, about 15–25 h):**
 All 30 runs, 50 greedy episodes each (5 poses × 10):
 ```bash
 for S in 1 2 3 4 5; do for A in dqn ddqn d3qn d3qn_g rainbow rainbow_g; do R=${A}_s${S}; python3 -m dqn_comparison.evaluate --model results/$R/${R}_model_final.pth --episodes 50 --label $R --out-csv results/$R/${R}_final_eval.csv --plot results/$R/${R}_final_eval.png; done; done
