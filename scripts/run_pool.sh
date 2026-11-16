@@ -23,12 +23,15 @@ MAX_SLOTS=6
 RAM_PER_RUN_MB=1400
 RAM_MARGIN_MB=1500
 
-# Pre-registered order (commands.md §7: batch 3, batch 4, batch 5, batch 6), as arm:seed.
+# Run order, as arm:seed. Pre-registered batch order (commands.md §7), EXCEPT that the
+# unguided Rainbow runs (slowest, ~1.5 min/episode) are moved to the end (user request,
+# 2026-11-16 15:50) so all other arms finish first. Runs with existing results are skipped.
 PENDING=(
-  rainbow_g:3 rainbow:3 d3qn_g:3 d3qn:3 ddqn:3 dqn:3
-  d3qn_g:1 rainbow:1 rainbow_g:1
-  ddqn:4 dqn:4 rainbow_g:4 rainbow:4 d3qn_g:4 d3qn:4
-  d3qn_g:5 rainbow_g:5 dqn:5 ddqn:5 d3qn:5 rainbow:5
+  rainbow_g:3 d3qn_g:3 d3qn:3 ddqn:3 dqn:3
+  d3qn_g:1 rainbow_g:1
+  ddqn:4 dqn:4 rainbow_g:4 d3qn_g:4 d3qn:4
+  d3qn_g:5 rainbow_g:5 dqn:5 ddqn:5 d3qn:5
+  rainbow:3 rainbow:1 rainbow:4 rainbow:5
 )
 
 log() { echo "[$(date '+%F %T')] $*" | tee -a "$PLOG"; }
