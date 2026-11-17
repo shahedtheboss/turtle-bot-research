@@ -230,6 +230,26 @@ def nearest_wall(x, y, boxes):
     return best
 
 
+# ---------------- NEW CODE ADDED (2026-11-17): cylinder-aware obstacle attribution
+# The cylinders were static in every run (plugins never loaded), so a collision can be
+# attributed to the nearest obstacle surface - wall box or cylinder (r = 0.16 m) - from the
+# episode's end position alone. Wall names become readable centre coordinates.
+CYL_R = 0.16
+
+
+def nearest_obstacle(x, y, boxes, cylinders):
+    """(label, kind, distance in m) of the nearest obstacle surface to the end point."""
+    name, d = nearest_wall(x, y, boxes)
+    wall = next(b for b in boxes if b[0] == name)
+    best = (f"wall ({wall[1]:g}, {wall[2]:g})" if name.startswith("inner") else "outer wall", "wall", d)
+    for cx, cy in cylinders:
+        dc = max(float(np.hypot(x - cx, y - cy)) - CYL_R, 0.0)
+        if dc < best[2]:
+            best = (f"cylinder ({cx:g}, {cy:g})", "cylinder", dc)
+    return best
+# ---------------- END NEW CODE
+
+
 # ---------------------------------------------------------------- main
 def main():
     warnings.filterwarnings("ignore", category=RuntimeWarning)   # nanmean of all-NaN columns
@@ -404,8 +424,9 @@ def main():
         for e in eps:
             if e["outcome"] == "goal_reached":
                 continue
-            name, d = nearest_wall(float(e["end_x"]), float(e["end_y"]), boxes)
-            fail_rows.append((a, int(e["pose_index"]), e["outcome"], name, d))
+            name, kind, d = nearest_obstacle(float(e["end_x"]), float(e["end_y"]), boxes,
+                                             [p[0] for p in paths])
+            fail_rows.append((a, int(e["pose_index"]), e["outcome"], name, d, kind))
     fig.legend(*axes.flat[0].get_legend_handles_labels(), loc="lower center", ncol=6, frameon=False,
                fontsize=7)
     fig.subplots_adjust(bottom=0.1)
@@ -586,18 +607,24 @@ def main():
     write_table(out, "tab_sample_eff", hdr, rows)
 
     # ================================================================ failure-mode table
-    hdr = ["Arm", "goal", "collision", "no progress", "timeout", "collisions near a wall (<0.25 m)", "most common wall"]
+    # CHANGED (2026-11-17): collisions attributed to walls OR static cylinders (was walls only)
+    NEAR = 0.25
+    hdr = ["Arm", "goal", "collision", "no progress", "timeout",
+           f"collisions within {NEAR} m of wall / cylinder / neither", "most common obstacle"]
     rows = []
     for a in labels:
         eps = H[a] if a in H else [e for r in A[a] for e in r["final"]]
         cnt = {k: sum(e["outcome"] == k for e in eps) for k in OUTCOME_SHORT}
         cw = [f for f in fail_rows if f[0] == a and f[2] == "collision_warning"]
-        nw = [f for f in cw if f[4] < 0.25]
-        top = max(set(f[3] for f in nw), key=[f[3] for f in nw].count) if nw else "--"
+        nwall = sum(f[4] < NEAR and f[5] == "wall" for f in cw)
+        ncyl = sum(f[4] < NEAR and f[5] == "cylinder" for f in cw)
+        near = [f[3] for f in cw if f[4] < NEAR]
+        top = max(set(near), key=near.count) + f" ({near.count(max(set(near), key=near.count))})" if near else "--"
         rows.append([LABEL[a], cnt["goal_reached"], cnt["collision_warning"], cnt["no_progress"], cnt["timeout"],
-                     f"{len(nw)}/{len(cw)}", top])
+                     f"{nwall} / {ncyl} / {len(cw) - nwall - ncyl}", top])
     write_table(out, "tab_failures", hdr, rows,
-                [[r[0].replace("%", r"\%"), r[1], r[2], r[3], r[4], r[5], r[6].replace("_", r"\_")] for r in rows])
+                [[r[0].replace("%", r"\%"), r[1], r[2], r[3], r[4], r[5],
+                  r[6].replace("(-", "($-$").replace(", -", ", $-$")] for r in rows])
     write_table(out, "tab_per_pose", ["Arm"] + [f"P{j}" for j in range(5)],
                 [[LABEL[a]] + [f"{M[i, j]:.2f}" for j in range(5)] for i, a in enumerate(labels)],
                 [[LABEL[a].replace("%", r"\%")] + [f"{M[i, j]:.2f}" for j in range(5)] for i, a in enumerate(labels)])
@@ -628,7 +655,7 @@ def main():
                  f"{np.mean([r['random_share'] for r in R]):.3f} | {np.mean([r['meta']['rtf_mean'] for r in R]):.3f} | "
                  f"{min(r['meta']['rtf_min'] for r in R):.3f} | {np.mean([r['meta']['wall_time_h'] for r in R]):.2f} |")
     N.append("\n## Failure modes (final evaluation)\n")
-    N.append("| Arm | goal | collision | no progress | timeout | coll. near wall | top wall |\n|---|---|---|---|---|---|---|")
+    N.append("| Arm | goal | collision | no progress | timeout | coll. wall / cyl. / neither (<0.25 m) | most common obstacle |\n|---|---|---|---|---|---|---|")
     for r in rows:
         N.append("| " + " | ".join(str(c) for c in r) + " |")
     with open(os.path.join(out, "numbers.md"), "w") as f:
