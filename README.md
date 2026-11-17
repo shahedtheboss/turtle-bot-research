@@ -6,7 +6,7 @@ Value-based deep reinforcement learning for mapless LiDAR goal navigation of a T
 
 | Study | Question | Code | Status |
 |---|---|---|---|
-| **Paper 1 (main): DQN comparison** | How do DQN, Double DQN, Dueling Double DQN (D3QN) and Rainbow DQN compare when the environment, state, actions, reward, budget, seeds and evaluation are identical? And how much does a decaying scripted guide change the result? | `dqn_comparison/dqn_comparison/` | Code ready; runs pending |
+| **Paper 1 (main): DQN comparison** | How do DQN, Double DQN, Dueling Double DQN (D3QN) and Rainbow DQN compare when the environment, state, actions, reward, budget, seeds and evaluation are identical? And how much does a decaying scripted guide change the result? | `dqn_comparison/dqn_comparison/` | All 30 runs done (6 configurations × seeds 1–5); paper draft in preparation |
 | **Paper 2 (later): guided ablation** | A controlled ablation of the guide for Rainbow: guided (G) vs unguided (N) vs a matched random-action control (R) | `dqn_comparison/dqn_comparison/guided_ablation/` | Parked |
 
 The original exploratory code and results (DQN → DDQN → D3QN → Rainbow pilot) are on the [`pilot_runs`](../../tree/pilot_runs) branch.
@@ -24,6 +24,7 @@ ROS 2 package: `dqn_comparison/`. Its Python code is in `dqn_comparison/dqn_comp
 | `train.py` | One training loop for all arms (`dqn`, `ddqn`, `d3qn`, `d3qn_g`, `rainbow`, `rainbow_g`) |
 | `evaluate.py` | Greedy or heuristic evaluation from 5 fixed start poses, with Wilson intervals |
 | `analyze.py` | Summary tables and figures |
+| `paper_figures.py` | Publication figures, LaTeX tables and post hoc analyses (analysis only) |
 | `HYPERPARAMETERS.md` | All settings |
 | `guided_ablation/train.py` | Paper 2 (G / N / R arms), parked |
 
@@ -36,6 +37,21 @@ Other folders:
 | `turtlebot3_simulations/`, `turtlebot3_msgs/` | Gazebo worlds, launch files and messages |
 | `commands.md` | Every command, in order |
 | `docs/previous_project/` | Notes from the earlier project |
+
+## Paper 1 results and reproducibility
+
+| Path or tag | Contents |
+|---|---|
+| `results/<arm>_s<seed>/` | Per run: episode CSV, greedy-check CSV, final-evaluation CSV, `run_meta.json` (git commit, dirty flag, slot, hyperparameters), Gazebo logs, plots |
+| `results/H/`, `results/H_eta/` | Heuristic baselines (guide alone, and with 15% action noise) |
+| `results/q_trajectory/` | Post hoc probe: Q-values and rewards along one greedy episode from P0 per final epsilon-greedy checkpoint (`scripts/run_q_probe_slot.sh`) |
+| tag `comparison-prereg-v1` | Code, protocol and primary metric fixed before training (15 Nov 2026) |
+| tag `comparison-prereg-v1.1` | Seeds raised from three to five before any final result (16 Nov 2026) |
+| tag `comparison-analysis-v1.2` | Statistical test code frozen (17 Nov 2026) |
+
+Model checkpoints (`*.pth`) are not in git; the final ones are attached to the paper release.
+
+**Dirty-tree flag.** Eight runs record `git_dirty = true` in `run_meta.json`. The flag was caused by untracked output files in the working tree; the training code was identical across all commits used by the 30 runs.
 
 ## Build
 
