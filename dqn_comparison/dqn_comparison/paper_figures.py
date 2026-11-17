@@ -124,10 +124,12 @@ def draw_world(ax, boxes, paths, poses=True, legend=False):
         r = Rectangle((-L / 2, -W / 2), L, W, color="#333333", lw=0)
         r.set_transform(Affine2D().rotate(yaw).translate(x, y) + ax.transData)
         ax.add_patch(r)
+    # CHANGED (2026-11-17): the cylinders were STATIC in every run (Gazebo could not load
+    # libobstacle1/2.so; verified live and in ~/.gazebo/server-*/default.log), so draw them
+    # at their spawn positions only, not along the plugin key-frame paths.
     for i, path in enumerate(paths):
-        xs, ys = zip(*path)
-        ax.plot(xs, ys, ":", color="#E69F00", lw=1.0, label="cylinder paths" if i == 0 else None)
-        ax.add_patch(Circle(path[0], 0.16, fc="none", ec="#E69F00", lw=0.8))
+        ax.add_patch(Circle(path[0], 0.16, fc="#E69F00", ec="#E69F00", lw=0.8, alpha=0.8,
+                            label="static cylinders" if i == 0 else None))
     ax.plot(*GOAL, marker="*", ms=9, color="#D55E00", ls="none", label="goal")
     ax.add_patch(Circle(GOAL, 0.20, fc="none", ec="#D55E00", lw=0.6))
     if poses:
@@ -196,7 +198,7 @@ def main():
     draw_world(ax, boxes, paths)
     ax.set_xlabel("x (m)"); ax.set_ylabel("y (m)")
     ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.15), ncol=2, frameon=False, fontsize=6)
-    save(fig, out, "fig_world")
+    save(fig, out, "fig_world_schematic")   # fig_world.* = annotated Gazebo screenshot (reports/paper/make_world_figure.py)
 
     # ================================================================ Fig: learning curves
     fig, axes = plt.subplots(1, 2, figsize=(TXT_W, 2.2), sharey=True)
