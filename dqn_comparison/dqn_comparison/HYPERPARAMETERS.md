@@ -5,13 +5,13 @@ These settings are **shared, not tuned per method**. Every run also records its 
 ## Environment and protocol (all methods)
 | Setting | Value |
 |---|---|
-| Robot / world | TurtleBot3 Burger, Gazebo Classic, stage-4 DRL world (2 moving cylinders) |
+| Robot / world | TurtleBot3 Burger, Gazebo Classic 11.10.2, stage-4 DRL world (2 cylinders; static in every Paper 1 run because the animation plugins did not load) |
 | State | 52: 50 LiDAR sectors (min range per 7.2° sector, ÷3.5 m) + goal distance (÷6 m) + goal angle (÷π) |
 | Actions | 7 discrete (linear, angular): (0.15,0), (0.11,±0.4), (0.08,±0.8), (0.02,±1.0), each held for 0.5 s |
 | Reward | +100 goal (≤0.20 m); −25 collision (≤0.15 m); −0.1 per step; +5·Δdistance; −0.05·\|goal angle\|; proximity ramp below 0.30 m |
 | Episode end | goal / collision (terminal); no progress for 60 steps or 250 steps (truncation, bootstrapped) |
 | Training | 200 episodes, start (0,0,0), goal (2,−2), 2 gradient updates per environment step |
-| Seeds | 1, 2, 3; `set_seed` runs before the agent is built |
+| Seeds | 1–5 (amendment `comparison-prereg-v1.1` raised 3 to 5); `set_seed` runs before the agent is built |
 | In-training check | every 20 episodes: 5 greedy episodes from (0,0,0) |
 | Final evaluation | 50 greedy episodes, 5 poses × 10, 250-step cap |
 
@@ -22,7 +22,7 @@ These settings are **shared, not tuned per method**. Every run also records its 
 | Head | 256→128→7 | same | V: 256→128→1, A: 256→128→7 | Noisy V: 256→128→51, Noisy A: 256→128→7×51 |
 | Target | max Q_target | online argmax, target value | as DDQN | distributional C51 with a Double DQN target |
 | Returns | 1-step | 1-step | 1-step | 3-step |
-| Replay | uniform 50k | uniform 50k | uniform 50k | prioritized 50k (α 0.6; β starts at 0.4 and is annealed over 1M samples, so it only reaches ≈0.46 in a 200-episode run) |
+| Replay | uniform 50k | uniform 50k | uniform 50k | prioritized 50k (α 0.6; β starts at 0.4 and is annealed over 1M samples, so it reaches at most ≈0.43 unguided / ≈0.41 guided in a 200-episode run) |
 | Exploration | ε 1.0→0.05 linear over 10k env steps | same | same | NoisyNet (σ₀ 0.5) |
 | Loss | Huber | Huber | Huber | cross-entropy on C51 |
 | Optimiser | Adam 1e-4 | same | same | same |

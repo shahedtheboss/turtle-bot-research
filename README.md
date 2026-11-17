@@ -1,6 +1,6 @@
 # turtle-bot-research
 
-Value-based deep reinforcement learning for mapless LiDAR goal navigation of a TurtleBot3 Burger in ROS 2 Humble and Gazebo Classic. The stage-4 DRL world has static walls and two moving cylinders.
+Value-based deep reinforcement learning for mapless LiDAR goal navigation of a TurtleBot3 Burger in ROS 2 Humble and Gazebo Classic. The stage-4 DRL world has static walls and two cylinders. The world file animates the cylinders through Gazebo plugins, but those plugins were not on `GAZEBO_PLUGIN_PATH` in this setup, so in every Paper 1 run the cylinders stayed static at (2, 2) and (-2, -2).
 
 ## Studies in this repository
 

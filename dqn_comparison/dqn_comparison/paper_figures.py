@@ -115,6 +115,34 @@ def fmt(x, nd=2):
     return "--" if x is None or (isinstance(x, float) and np.isnan(x)) else f"{x:.{nd}f}"
 
 
+# ---------------- NEW CODE ADDED (2026-11-17, review item 5): cluster bootstrap
+# A greedy policy started from the same pose is nearly deterministic (117 of 150 seed x pose
+# cells give the same outcome in all 10 episodes), so the 250 episodes of a configuration are not
+# independent. Resample seeds, then poses within each resampled seed (two-stage cluster bootstrap).
+def pose_cells(final_rows):
+    by = {}
+    for e in final_rows:
+        by.setdefault(int(e["pose_index"]), []).append(e["outcome"] == "goal_reached")
+    return np.array([np.mean(by[p]) for p in sorted(by)])
+
+
+def cluster_boot_ci(C, reps=10_000, seed=0):
+    """C: seeds x poses matrix of per-cell success rates -> 95% percentile interval of the mean."""
+    rng = np.random.default_rng(seed)
+    n_s, n_p = C.shape
+    B = np.empty(reps)
+    for i in range(reps):
+        S = C[rng.integers(0, n_s, n_s)]
+        B[i] = np.mean([row[rng.integers(0, n_p, n_p)].mean() for row in S])
+    return float(np.percentile(B, 2.5)), float(np.percentile(B, 97.5))
+
+
+def pfmt(p):
+    """p-values: exact to 4 decimals, trailing zeros dropped (0.004, 0.0625, 0.1875, 1)."""
+    return f"{p:.4f}".rstrip("0").rstrip(".")
+# ---------------- END NEW CODE
+
+
 def by_arm(runs):
     return {a: sorted([r for r in runs if r["arm"] == a], key=lambda r: r["seed"]) for a in ARMS}
 
@@ -194,26 +222,31 @@ def cylinder_path(n, spawn):
     return [(spawn[0] + float(x), spawn[1] + float(y)) for x, y in pts]
 
 
+# CHANGED (2026-11-17, review): maps are drawn in the same orientation as the Gazebo screenshot
+# (Fig. 1): up = +x, right = -y. Horizontal axis = y (inverted), vertical axis = x.
+SWAP = Affine2D(np.array([[0.0, 1.0, 0.0], [1.0, 0.0, 0.0], [0.0, 0.0, 1.0]]))
+
+
 def draw_world(ax, boxes, paths, poses=True, legend=False):
     for _, x, y, yaw, L, W in boxes:
         r = Rectangle((-L / 2, -W / 2), L, W, color=INK2, lw=0)
-        r.set_transform(Affine2D().rotate(yaw).translate(x, y) + ax.transData)
+        r.set_transform(Affine2D().rotate(yaw).translate(x, y) + SWAP + ax.transData)
         ax.add_patch(r)
     # CHANGED (2026-11-17): the cylinders were STATIC in every run (Gazebo could not load
     # libobstacle1/2.so; verified live and in ~/.gazebo/server-*/default.log), so draw them
     # at their spawn positions only, not along the plugin key-frame paths.
     for i, path in enumerate(paths):
-        ax.add_patch(Circle(path[0], 0.16, fc=REF, ec=REF, lw=0.8,
+        ax.add_patch(Circle((path[0][1], path[0][0]), 0.16, fc=REF, ec=REF, lw=0.8,
                             label="static cylinders" if i == 0 else None))
-    ax.plot(*GOAL, marker="*", ms=9, color=INK, ls="none", label="goal")
-    ax.add_patch(Circle(GOAL, 0.20, fc="none", ec=INK, lw=0.6))
+    ax.plot(GOAL[1], GOAL[0], marker="*", ms=9, color=INK, ls="none", label="goal")
+    ax.add_patch(Circle((GOAL[1], GOAL[0]), 0.20, fc="none", ec=INK, lw=0.6))
     if poses:
         for i, (x, y, yaw) in enumerate(POSES):
-            ax.annotate("", xy=(x + 0.3 * np.cos(yaw), y + 0.3 * np.sin(yaw)), xytext=(x, y),
+            ax.annotate("", xy=(y + 0.3 * np.sin(yaw), x + 0.3 * np.cos(yaw)), xytext=(y, x),
                         arrowprops=dict(arrowstyle="->", color=INK2, lw=1.0))
-            ax.plot(x, y, "o", color=INK2, ms=3)
-            ax.text(x + 0.08, y + 0.1, f"P{i}", color=INK, fontsize=7)
-    ax.set_xlim(-2.6, 2.6); ax.set_ylim(-2.6, 2.6); ax.set_aspect("equal")
+            ax.plot(y, x, "o", color=INK2, ms=3)
+            ax.text(y - 0.08, x + 0.1, f"P{i}", color=INK, fontsize=7)
+    ax.set_xlim(2.6, -2.6); ax.set_ylim(-2.6, 2.6); ax.set_aspect("equal")
     ax.set_xticks([-2, 0, 2]); ax.set_yticks([-2, 0, 2])
 
 
@@ -294,7 +327,7 @@ def main():
     # ================================================================ Fig: world + poses (schematic, not in the paper)
     fig, ax = plt.subplots(figsize=(COL_W * 0.9, COL_W * 0.9))
     draw_world(ax, boxes, paths)
-    ax.set_xlabel("x (m)"); ax.set_ylabel("y (m)")
+    ax.set_xlabel("y (m), increasing to the left"); ax.set_ylabel("x (m)")
     ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.15), ncol=3, frameon=False, fontsize=6)
     save(fig, out, "fig_world_schematic")   # fig_world.* = annotated Gazebo screenshot (reports/paper/make_world_figure.py)
 
@@ -362,7 +395,7 @@ def main():
             va="top", fontsize=6, color=INK2, clip_on=False)
     for i, a in enumerate(ARMS):
         k = sum(int(r["succ"] * 50 + 0.5) for r in A[a]); n = 50 * len(A[a])
-        lo, hi = wilson(k, n)
+        lo, hi = cluster_boot_ci(np.array([pose_cells(r["final"]) for r in A[a]]))   # was wilson(k, n)
         ax.bar(i, k / n, width=0.5, color=COLOR[a], alpha=0.35 if a.endswith("_g") else 0.95, lw=0, zorder=2)
         ax.errorbar(i, k / n, yerr=[[k / n - lo], [hi - k / n]], color=INK, capsize=2, lw=0.8, zorder=4)
         ax.plot(i + np.linspace(-0.16, 0.16, len(A[a])), [r["succ"] for r in A[a]], "o", ms=2.6,
@@ -410,11 +443,11 @@ def main():
         n_tot = len(eps)
         for oc, (m, c) in OUTCOME_STYLE.items():
             sel = [e for e in eps if e["outcome"] == oc]
-            ax.plot([float(e["end_x"]) for e in sel], [float(e["end_y"]) for e in sel], m, color=c,
+            ax.plot([float(e["end_y"]) for e in sel], [float(e["end_x"]) for e in sel], m, color=c,
                     ms=3.2, mew=0.8, mfc=c if m == "x" else "none", alpha=0.85, zorder=4,
                     label=OUTCOME_SHORT[oc] if a == panels[0] else None)
         for i, (x, y, _) in enumerate(POSES):
-            ax.plot(x, y, "o", color=INK2, ms=2.4, mec=SURFACE, mew=0.4, zorder=3,
+            ax.plot(y, x, "o", color=INK2, ms=2.4, mec=SURFACE, mew=0.4, zorder=3,
                     label="start poses" if (a == panels[0] and i == 0) else None)
         nf = sum(e["outcome"] != "goal_reached" for e in eps)
         ax.set_title(f"{SHORT[a].replace(chr(10), ' ')}: {nf}/{n_tot} failed", fontsize=6.5, color=INK)
@@ -508,12 +541,12 @@ def main():
     save(fig, out, "fig_tradeoff")
 
     # ================================================================ Table: main results
-    hdr = ["Arm", "E* median (censored)", "AUC", "Success mean", "IQM", "Bootstrap95",
+    hdr = ["Arm", "E* median (censored)", "AUC", "Success mean", "IQM", "ClusterBoot95 (seeds, poses)",
            "Pooled k/n", "Wilson95", "Collision rate", "Steps to goal", "Train goals", "Wall h"]
     rows, tex = [], []
     for a in ARMS:
         R = A[a]; succ = [r["succ"] for r in R]; k = sum(int(s * 50 + 0.5) for s in succ); n = 50 * len(R)
-        lo, hi = bootstrap_ci(succ); wl, wh = wilson(k, n)
+        lo, hi = cluster_boot_ci(np.array([pose_cells(r["final"]) for r in R])); wl, wh = wilson(k, n)
         Es = [r["E"] for r in R]; nc = sum(r["cens"] for r in R)
         st = [int(e["steps"]) for r in R for e in r["final"] if e["outcome"] == "goal_reached"]
         coll = np.mean([r["coll"] for r in R]); auc = np.mean([r["auc"] for r in R])
@@ -576,10 +609,15 @@ def main():
     write_table(out, "tab_contrasts_all", hdr, allrows, [])
     names = {"C1": "Rainbow+guide vs Rainbow", "C2": "D3QN+guide vs D3QN", "C3": "DDQN vs DQN (paired)",
              "C4": "Rainbow+guide vs best unguided"}
+    # CHANGED (2026-11-17, review): one p format everywhere; Holm also for the step-based tests;
+    # for the paired C3 the effect is the within-pair probability of superiority (ties = 1/2).
+    dq = {r["seed"]: r["E"] for r in A["dqn"]}; dd = {r["seed"]: r["E"] for r in A["ddqn"]}
+    paired_ps = np.mean([1.0 if dd[s] < dq[s] else 0.5 if dd[s] == dq[s] else 0.0 for s in dq])
     for c in B2[budget]:
+        st = [x for x in B3["E_steps"] if x[0] == c[0]][0]
+        eff = f"{paired_ps:.2f}$^\\dagger$" if c[0] == "C3" else f"{c[4]:.2f}"
         tex.append([c[0], names[c[0]] + (f" ({LABEL[c[2]]})" if c[0] == "C4" else ""),
-                    f"{c[4]:.2f}", f"{c[5]:.3f}", f"{c[7]:.3f}",
-                    f"{[x for x in B3['E_steps'] if x[0] == c[0]][0][5]:.3f}"])
+                    eff, pfmt(c[5]), pfmt(c[7]), pfmt(st[5]), pfmt(st[7])])
     with open(os.path.join(out, "tables", "tab_contrasts.tex"), "w") as f:
         for r in tex:
             f.write(" & ".join(r) + r" \\" + "\n")
