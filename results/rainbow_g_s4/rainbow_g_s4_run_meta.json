@@ -1,0 +1,81 @@
+{
+  "study": "paper1",
+  "run_name": "rainbow_g_s4",
+  "arm": "rainbow_g",
+  "algo": "rainbow",
+  "guide": true,
+  "seed": 4,
+  "episodes": 200,
+  "eval_every": 20,
+  "eval_episodes": 5,
+  "max_steps": 250,
+  "updates_per_step": 2,
+  "start_pose": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "goal": [
+    2.0,
+    -2.0
+  ],
+  "guide_schedule": {
+    "start": 0.8,
+    "end": 0.1,
+    "episodes": 100,
+    "noise": 0.15
+  },
+  "git_commit": "1003633b6f84e55a96fb199a4e7f8e71a23663ba",
+  "git_dirty": false,
+  "torch_version": "2.14.1+cu130",
+  "slot": "2",
+  "ros_domain_id": "32",
+  "gazebo_master_uri": "http://localhost:11347",
+  "parallel_runs": "6",
+  "start_time": "2026-11-16T18:53:29",
+  "end_time": "2026-11-16T21:02:19",
+  "status": "completed",
+  "device": "cuda",
+  "hyperparameters": {
+    "learning_rate": 0.0001,
+    "gamma": 0.99,
+    "batch_size": 128,
+    "memory_size": 50000,
+    "n_step": 3,
+    "num_atoms": 51,
+    "v_min": -75.0,
+    "v_max": 125.0,
+    "target_update_every": 250,
+    "warmup_transitions": 1000,
+    "grad_clip": 10.0,
+    "per_alpha": 0.6,
+    "per_beta_start": 0.4,
+    "per_beta_frames": 1000000,
+    "noisy_sigma0": 0.5
+  },
+  "initial_greedy_action_hist": [
+    28,
+    0,
+    272,
+    0,
+    0,
+    0,
+    0
+  ],
+  "initial_explore_action_hist": [
+    85,
+    9,
+    155,
+    2,
+    0,
+    35,
+    14
+  ],
+  "initial_greedy_top_share": 0.907,
+  "learning_steps": 19906,
+  "episodes_completed": 200,
+  "env_steps_total": 10954,
+  "wall_time_h": 2.147,
+  "rtf_mean": 0.998,
+  "rtf_min": 0.989
+}

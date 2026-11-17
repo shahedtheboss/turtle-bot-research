@@ -1,0 +1,78 @@
+{
+  "study": "paper1",
+  "run_name": "d3qn_g_s5",
+  "arm": "d3qn_g",
+  "algo": "d3qn",
+  "guide": true,
+  "seed": 5,
+  "episodes": 200,
+  "eval_every": 20,
+  "eval_episodes": 5,
+  "max_steps": 250,
+  "updates_per_step": 2,
+  "start_pose": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "goal": [
+    2.0,
+    -2.0
+  ],
+  "guide_schedule": {
+    "start": 0.8,
+    "end": 0.1,
+    "episodes": 100,
+    "noise": 0.15
+  },
+  "git_commit": "1003633b6f84e55a96fb199a4e7f8e71a23663ba",
+  "git_dirty": false,
+  "torch_version": "2.14.1+cu130",
+  "slot": "4",
+  "ros_domain_id": "34",
+  "gazebo_master_uri": "http://localhost:11349",
+  "parallel_runs": "6",
+  "start_time": "2026-11-16T19:31:00",
+  "end_time": "2026-11-16T21:44:03",
+  "status": "completed",
+  "device": "cuda",
+  "hyperparameters": {
+    "learning_rate": 0.0001,
+    "gamma": 0.99,
+    "batch_size": 128,
+    "memory_size": 50000,
+    "target_update_every": 250,
+    "warmup_transitions": 1000,
+    "grad_clip": 10.0,
+    "epsilon_start": 1.0,
+    "epsilon_end": 0.05,
+    "epsilon_decay_steps": 10000,
+    "hidden": 256,
+    "head_hidden": 128
+  },
+  "initial_greedy_action_hist": [
+    116,
+    0,
+    0,
+    0,
+    0,
+    184,
+    0
+  ],
+  "initial_explore_action_hist": [
+    35,
+    45,
+    49,
+    45,
+    50,
+    45,
+    31
+  ],
+  "initial_greedy_top_share": 0.613,
+  "learning_steps": 20766,
+  "episodes_completed": 200,
+  "env_steps_total": 11382,
+  "wall_time_h": 2.218,
+  "rtf_mean": 0.999,
+  "rtf_min": 0.993
+}
