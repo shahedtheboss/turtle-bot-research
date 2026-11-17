@@ -1,0 +1,5 @@
+id,hypothesis,X,Y,test,n_X,n_Y,E_star_X,E_star_Y,A_X_sooner,statistic,stat_value,p_one_sided,p_two_sided_exploratory,p_holm
+C1,H2: guide speeds up Rainbow,rainbow_g,rainbow,unpaired,5,5,100 120 120 100 80,220 220 220 220 220,1.0,A (rank statistic),1.0,0.004,0.0079,0.016
+C2,H2: guide speeds up D3QN,d3qn_g,d3qn,unpaired,5,5,120 140 160 120 80,60 60 140 100 60,0.18,A (rank statistic),0.18,0.9683,0.127,1.0
+C3,H1: DDQN at least as fast as DQN,ddqn,dqn,paired,5,5,80 60 100 80 100,100 80 120 140 100,0.8,mean E* difference (Y - X),24.0,0.0625,0.125,0.1875
+C4,H3: guided Rainbow beats best unguided (d3qn),rainbow_g,d3qn,unpaired,5,5,100 120 120 100 80,60 60 140 100 60,0.28,A (rank statistic),0.28,0.9048,0.2381,1.0
