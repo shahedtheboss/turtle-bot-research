@@ -11,8 +11,13 @@ train.py itself is not modified, so v1 stays reproducible from this branch too. 
     given seed every method trains on the same goal sequence and goal draws do not use training randomness
   - greedy checks: one greedy episode per goal from the start pose (4 per check)
   - arms: dqn, ddqn, d3qn, rainbow, rainbow_g (d3qn_g dropped in v2); results in results_v2/
-Rewards, network, optimiser, epsilon schedule, guide and replay are still the v1 settings here;
-the approved v2 algorithm changes (reward scaling, PER beta) are a separate step.
+Approved v2 algorithm changes (2026-11-19), applied identically to every method:
+  - REWARD SCALING: every reward the agent LEARNS from is multiplied by REWARD_SCALE = 0.01 (environment
+    and logged rewards stay in v1 units). Positive scaling leaves the optimal policy unchanged; with
+    errors mostly < 1 the Huber loss acts like squared error, so the +1 goal target is fitted (v1 probe:
+    Q ~ 12 one step before a +100 goal). Rainbow's C51 support is scaled the same way: [-0.75, 1.25].
+  - PER BETA (Rainbow): 0.4 -> 1.0 linearly over the episode budget (v1: <= 0.43 reached).
+Network, optimiser, epsilon schedule, guide and replay sizes are unchanged from v1.
 
   DQN_SIM_TIME_STEP=1 python3 -m dqn_comparison.train_v2 --world 4 --arm d3qn --seed 1
 """
@@ -36,6 +41,7 @@ from dqn_comparison.environment import RobotEnvironment
 from dqn_comparison.episode_v2 import prepare_episode_v2
 from dqn_comparison.train import (AGENTS, EPISODE_FIELDS, probe_states, action_histogram,
                                   run_episode, save_plot)
+from dqn_comparison.agent_rainbow import build_rainbow
 from dqn_comparison import worlds_v2 as W
 
 EPISODES = 200            # placeholder; the v2 budget is set by the pilot and fixed before the main runs
@@ -44,9 +50,30 @@ GOAL_RNG_OFFSET = 10_000  # goal RNG seed = seed + offset (independent of the tr
 ARMS_V2 = {"dqn": ("dqn", False), "ddqn": ("ddqn", False), "d3qn": ("d3qn", False),
            "rainbow": ("rainbow", False), "rainbow_g": ("rainbow", True)}
 
-EPISODE_FIELDS_V2 = ["world", "goal_index", "goal_x", "goal_y", "t_start"] + EPISODE_FIELDS
+REWARD_SCALE = 0.01
+RAINBOW_SUPPORT = (-75.0 * REWARD_SCALE, 125.0 * REWARD_SCALE)   # v1 support, scaled like the rewards
+PER_BETA_START = 0.4
+AGENTS_V2 = {"dqn": AGENTS["dqn"], "ddqn": AGENTS["ddqn"], "d3qn": AGENTS["d3qn"],
+             "rainbow": lambda: build_rainbow(52, 7, v_min=RAINBOW_SUPPORT[0], v_max=RAINBOW_SUPPORT[1])}
+
+EPISODE_FIELDS_V2 = ["world", "goal_index", "goal_x", "goal_y", "t_start", "per_beta"] + EPISODE_FIELDS
 EVAL_FIELDS_V2 = ["episode", "env_steps_total", "wins", "n", "success_rate", "outcomes",
                   "steps", "q_start_mean", "disc_return_mean", "q_probe_mean"]
+
+
+def apply_reward_scale(agent, scale=REWARD_SCALE):
+    """Every transition the agent stores (and so learns from) carries reward * scale."""
+    store = agent.remember
+
+    def remember(state, action, reward, next_state, terminal, truncated=False):
+        return store(state, action, reward * scale, next_state, terminal, truncated)
+    agent.remember = remember
+    return agent
+
+
+def per_beta(episode, episodes, start=PER_BETA_START):
+    """PER importance-sampling exponent for this episode: start at episode 0, 1.0 at the last episode."""
+    return start + (1.0 - start) * min(1.0, episode / episodes)
 
 
 def world_arg(v):
@@ -128,6 +155,9 @@ def main(argv=None):
         "goal_counts": [goals.count(i) for i in range(4)],
         "sim_time_stepping": os.environ.get("DQN_SIM_TIME_STEP") == "1",
         "rtf_cap": os.environ.get("V2_RTF_CAP"),
+        "reward_scale": REWARD_SCALE, "rainbow_support": RAINBOW_SUPPORT,
+        "per_beta_schedule": f"{PER_BETA_START} + {1 - PER_BETA_START} * episode / episodes (Rainbow only)",
+        "q_logging": "q_start_mean and q_probe_mean are divided by reward_scale (environment reward units)",
         "guide_schedule": {"start": GUIDED_START, "end": GUIDED_END,
                            "episodes": GUIDED_EPISODES, "noise": GUIDED_NOISE},
         "git_commit": commit, "git_dirty": dirty, "git_untracked_code": untracked_code_files(),
@@ -152,7 +182,7 @@ def main(argv=None):
         env = RobotEnvironment()
         if not env.sim_time_stepping:
             raise RuntimeError("train_v2 needs DQN_SIM_TIME_STEP=1 (actions timed on simulated time)")
-        agent = AGENTS[args.algo]()
+        agent = apply_reward_scale(AGENTS_V2[args.algo]())
         meta["device"] = str(agent.device)
         meta["hyperparameters"] = (dict(agent.cfg) if hasattr(agent, "cfg") else
                                    {"learning_rate": agent.optimizer.param_groups[0]["lr"], "gamma": agent.gamma,
@@ -176,6 +206,9 @@ def main(argv=None):
             gi = goals[episode - 1]
             goal = lay["goals"][gi]
             t_start = prepare_episode_v2(env, args.world, lay["start"], goal)   # reset, warm-up W, teleport
+            beta = per_beta(episode, args.episodes) if hasattr(agent.memory, "beta_override") else float("nan")
+            if beta == beta:
+                agent.memory.beta_override = beta
 
             wall0 = time.monotonic()
             result = run_episode(env, agent, greedy=False, episode=episode, guide=args.guide,
@@ -187,7 +220,7 @@ def main(argv=None):
             agent.update_epsilon(env_steps_total)
 
             row = {"world": args.world, "goal_index": gi, "goal_x": goal[0], "goal_y": goal[1],
-                   "t_start": round(t_start, 4),
+                   "t_start": round(t_start, 4), "per_beta": round(beta, 4),
                    "episode": episode, "outcome": result["outcome"], "reward": round(result["reward"], 4),
                    "steps": result["steps"], "env_steps_total": env_steps_total, "loss": result["loss"],
                    "epsilon": round(float(agent.epsilon), 4), "random_steps": result["random_steps"],
@@ -206,13 +239,13 @@ def main(argv=None):
 
             if args.eval_every and episode % args.eval_every == 0:
                 outcomes, steps, qs, gs = [], [], [], []
-                q_probe = float(np.mean(np.max(agent.estimate_q(probes), axis=1)))
+                q_probe = float(np.mean(np.max(agent.estimate_q(probes), axis=1))) / REWARD_SCALE
                 for g in lay["goals"]:                     # one greedy episode per goal, from the start pose
                     prepare_episode_v2(env, args.world, lay["start"], g)
                     r = run_episode(env, agent, greedy=True)
                     outcomes.append(r["outcome"]); steps.append(r["steps"])
                     if r["true_terminal"]:
-                        qs.append(r["q_start"]); gs.append(r["disc_return"])
+                        qs.append(r["q_start"] / REWARD_SCALE); gs.append(r["disc_return"])
                 wins, n = outcomes.count("goal_reached"), len(outcomes)
                 ev = {"episode": episode, "env_steps_total": env_steps_total, "wins": wins, "n": n,
                       "success_rate": wins / n, "outcomes": ";".join(outcomes),

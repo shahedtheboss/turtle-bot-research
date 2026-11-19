@@ -138,6 +138,14 @@ class PrioritizedNStepReplay:
         # Used to gradually increase beta.
         self.samples = 0
 
+        # ---------------- NEW CODE ADDED (2026-11-19, v2): PER beta tied to training progress ----------------
+        # v1: beta rose over 1e6 sample calls, but runs had only 19k-52k, so beta stayed <= 0.43.
+        # If beta_override is set (study v2 sets it every episode: 0.4 -> 1.0 at the last episode), it is
+        # used instead of the sample-count schedule. None (default) keeps the v1 behaviour exactly.
+        self.beta_override = None
+        self.last_beta = beta_start
+        # ---------------- END NEW CODE
+
         # Small positive value to prevent zero priorities.
         self.eps = 1e-6
 
@@ -230,6 +238,9 @@ class PrioritizedNStepReplay:
         self.samples += 1
         # Gradually increase beta towards 1.0 over time to reduce bias.
         beta = min(1.0, self.beta_start + (1 - self.beta_start) * self.samples / self.beta_frames)
+        if self.beta_override is not None:          # NEW (v2): progress-based schedule
+            beta = float(self.beta_override)
+        self.last_beta = beta
         # Compute the weights for the sampled experiences based on their probabilities and the current value of beta.
         weights = (size * probs[idx]) ** (-beta)
         # Normalize the weights to prevent excessively large updates.

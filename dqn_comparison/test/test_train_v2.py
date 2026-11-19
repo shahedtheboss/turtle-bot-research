@@ -41,3 +41,51 @@ def test_goal_sequence_exactly_balanced_in_blocks():
 def test_untracked_code_files_returns_a_list():
     files = T.untracked_code_files()
     assert isinstance(files, list) and all(not f.startswith("results") for f in files)
+
+
+# ---- v2 algorithm changes: reward scaling and PER beta (2026-11-19) ----
+import numpy as np                                           # noqa: E402
+from dqn_comparison.agent_dqn import DQNAgent                # noqa: E402
+
+
+def test_reward_scale_applies_to_stored_transitions_dqn():
+    agent = T.apply_reward_scale(DQNAgent(52, 7))
+    s = np.zeros(52, dtype=np.float32)
+    agent.remember(s, 0, 100.0, s, True)
+    agent.remember(s, 1, -25.0, s, True, truncated=False)
+    assert [m[2] for m in agent.memory] == [pytest.approx(1.0), pytest.approx(-0.25)]
+
+
+def test_reward_scale_applies_to_rainbow_and_support_is_scaled():
+    agent = T.apply_reward_scale(T.AGENTS_V2['rainbow']())
+    assert (agent.v_min, agent.v_max) == (pytest.approx(-0.75), pytest.approx(1.25))
+    assert agent.delta_z == pytest.approx(0.04)
+    seen = []
+    agent.memory.add = lambda *a: seen.append(a[2])           # what reaches the replay buffer
+    agent.remember(np.zeros(52), 0, 100.0, np.zeros(52), True)
+    assert seen == [pytest.approx(1.0)]
+
+
+def test_v1_rainbow_defaults_unchanged():
+    from dqn_comparison.agent_rainbow import build_rainbow
+    a = build_rainbow()
+    assert (a.v_min, a.v_max) == (-75.0, 125.0) and a.memory.beta_override is None
+
+
+def test_per_beta_schedule():
+    assert T.per_beta(0, 200) == pytest.approx(0.4)
+    assert T.per_beta(100, 200) == pytest.approx(0.7)
+    assert T.per_beta(200, 200) == pytest.approx(1.0)
+    assert T.per_beta(250, 200) == pytest.approx(1.0)
+
+
+def test_replay_buffer_uses_beta_override_and_keeps_v1_schedule_without_it():
+    agent = T.AGENTS_V2['rainbow']()
+    s = np.zeros(52, dtype=np.float32)
+    for i in range(300):
+        agent.memory.add(s, i % 7, 0.01, s, i % 10 == 9)
+    agent.memory.sample()
+    assert agent.memory.last_beta == pytest.approx(0.4, abs=1e-5)  # v1 schedule: 1 sample of 1e6
+    agent.memory.beta_override = 0.9
+    agent.memory.sample()
+    assert agent.memory.last_beta == 0.9
