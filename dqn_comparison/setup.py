@@ -6,6 +6,8 @@ setup(
     name=package_name,
     version='0.0.0',
     packages=find_packages(exclude=['test']),
+    # v2: recorded obstacle paths used by worlds_v2.py (loaded next to the module)
+    package_data={package_name: ['data/v2_obstacle_paths.csv']},
     data_files=[
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),

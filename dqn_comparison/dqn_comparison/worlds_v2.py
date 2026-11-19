@@ -5,11 +5,18 @@ Everything here is DATA copied from the Gazebo model/world files and the obstacl
 start poses, goals and the warm-up time W (scripts/v2_world_layout.py) and, later, by training and
 evaluation. tests/test_worlds_v2.py checks the copied keyframes against the .cc plugin files.
 
-Coordinates: Gazebo world frame, metres. Obstacle animation keyframes are ABSOLUTE world positions
-(measured 2026-11-19: positions match the keyframes, the <include> pose is overridden).
-Animation time restarts at 0 after /reset_simulation.
+Coordinates: Gazebo world frame, metres. Animation time restarts at 0 after /reset_simulation.
+
+CORRECTED 2026-11-19 (B4b): each moving obstacle is a NESTED model. The outer model follows the keyframes
+(that is what /get_entity_state reports), the cylinder sits inside it at the <include> <pose> offset
+(OFFSETS below), and Gazebo interpolates between keyframes with smooth curves, not straight lines.
+The real cylinder positions were therefore RECORDED from /obstacle/odom (gazebo_ros_p3d, world frame) and
+are used from data/v2_obstacle_paths.csv; a LiDAR check confirmed /obstacle/odom is what the robot sees
+(scripts/v2_obstacle_truth_check.py). anim_position() below is the outer frame only, kept for reference.
 """
+import csv
 import math
+import os
 
 ARENA_HALF = 2.345            # inner face of the outer walls (centre 2.42, thickness 0.15)
 ROBOT_RADIUS = 0.105          # TurtleBot3 Burger footprint, approx. circumradius
@@ -56,27 +63,61 @@ WORLDS = {
 }
 
 
-# ---- v2 layouts (chosen 2026-11-19 by scripts/v2_world_layout.py; rules in its header) -----------------
+# ---- v2 layouts: produced by `python3 scripts/v2_world_layout.py --search` (rules rev 3 in its header) ---
+# Re-chosen 2026-11-19 on the RECORDED obstacle paths (the rev-1/2 layouts used wrong positions).
 # start and goals are the same in every world; test poses are per world; W = warm-up after reset
 # (animation time at which every episode starts); poses are (x, y, yaw_rad).
 START = (0.0, 0.0, 0.0)
-GOALS = [(1.75, -1.75), (0.5, -1.75), (-1.0, -1.75), (-1.75, -0.5)]
+GOALS = [(1.75, -1.0), (-1.75, 1.0), (0.5, 1.75), (-1.75, -0.5)]
+_OPEN_TESTS = [(1.75, 1.75, -2.3562), (-1.75, -1.75, 0.7854), (1.25, -1.75, 2.191), (-1.25, 1.75, -0.9505)]
 LAYOUTS = {
-    1: {'W': 0.0, 'start': START, 'goals': GOALS,
-        'tests': [(1.75, 1.75, -2.3562), (-1.75, 0.5, -0.2783), (1.0, -1.0, 2.3562), (-0.25, 1.75, -1.4289)]},
-    2: {'W': 0.0, 'start': START, 'goals': GOALS,
-        'tests': [(1.75, 1.75, -2.3562), (-1.75, 0.5, -0.2783), (1.75, -0.75, 2.7367), (-0.25, -1.25, 1.3734)]},
-    3: {'W': 5.0, 'start': START, 'goals': GOALS,
-        'tests': [(1.75, 1.75, -2.3562), (-1.75, 1.25, -0.6202), (1.25, 1.25, -2.3562), (-1.25, 1.75, -0.9505)]},
-    4: {'W': 15.0, 'start': START, 'goals': GOALS,
-        'tests': [(-1.75, 1.75, -0.7854), (1.75, -0.75, 2.7367), (-1.75, 0.75, -0.4049), (-1.5, 1.25, -0.6947)]},
-    6: {'W': 19.0, 'start': START, 'goals': GOALS,
-        'tests': [(-1.75, 1.75, -0.7854), (1.75, -0.75, 2.7367), (0.0, 1.25, -1.5708), (0.0, -1.0, 1.5708)]},
+    1: {'W': 0.0, 'start': START, 'goals': GOALS, 'tests': _OPEN_TESTS},
+    2: {'W': 0.0, 'start': START, 'goals': GOALS, 'tests': _OPEN_TESTS},
+    3: {'W': 5.0, 'start': START, 'goals': GOALS, 'tests': _OPEN_TESTS},
+    4: {'W': 5.0, 'start': START, 'goals': GOALS,
+        'tests': [(0.25, -1.75, 1.7127), (0.75, 0.75, -2.3562), (-1.0, -1.0, 0.7854), (1.0, 0.0, -3.1416)]},
+    6: {'W': 5.0, 'start': START, 'goals': GOALS,
+        'tests': [(-1.25, 1.75, -0.9505), (0.5, -1.75, 1.8491), (0.75, 0.75, -2.3562), (-1.0, -1.0, 0.7854)]},
 }
 
 
+# Nested <include> pose of each cylinder inside its animated model (world files, stages 4 and 6).
+OFFSETS = {4: {'obstacle1': (2.0, 2.0), 'obstacle2': (-2.0, -2.0)},
+           6: {'obstacle1': (2.0, 2.0), 'obstacle2': (-2.0, -2.0), 'obstacle3': (2.0, -2.0),
+               'obstacle4': (-2.0, 2.0), 'obstacle5': (-2.0, 0.0), 'obstacle6': (2.0, 0.0)}}
+
+_PATHS = None
+PATH_DT = 0.1      # table resolution [s]; table covers 0-400 s, longer than every loop period
+
+
+def _paths():
+    """Recorded cylinder positions {(stage, name): [(x, y), ...]} and stage-3 yaw {(3,'group_yaw'): [yaw, ...]}."""
+    global _PATHS
+    if _PATHS is None:
+        _PATHS = {}
+        path = os.path.join(os.path.dirname(__file__), 'data', 'v2_obstacle_paths.csv')
+        with open(path) as f:
+            for r in csv.DictReader(f):
+                key = (int(r['stage']), r['name'])
+                val = float(r['x_or_yaw']) if r['y'] == '' else (float(r['x_or_yaw']), float(r['y']))
+                _PATHS.setdefault(key, []).append(val)
+    return _PATHS
+
+
+def recorded_position(stage, name, t):
+    """Real (x, y) of an animated cylinder at animation time t, from the recording (loops are identical)."""
+    table = _paths()[(stage, name)]
+    i = round((t % ANIM[name][0]) / PATH_DT)
+    return table[min(i, len(table) - 1)]
+
+
+def recorded_group_yaw(t):
+    table = _paths()[(3, 'group_yaw')]
+    return table[min(round((t % GROUP_PERIOD) / PATH_DT), len(table) - 1)]
+
+
 def anim_position(name, t):
-    """(x, y) of an animated obstacle at animation time t (loops)."""
+    """(x, y) of the OUTER animated frame at time t, linear between keyframes (reference only, not the cylinder)."""
     period, keys = ANIM[name]
     t = t % period
     for (t0, x0, y0), (t1, x1, y1) in zip(keys, keys[1:]):
@@ -93,10 +134,10 @@ def obstacles_at(stage, t):
     if w['group'] == 'static':
         out += [(x, y, GROUP_RADIUS) for x, y in GROUP_CYLINDERS]
     elif w['group'] == 'rotating':
-        a = 2 * math.pi * (t % GROUP_PERIOD) / GROUP_PERIOD
+        a = recorded_group_yaw(t)              # recorded: eased, not constant speed
         out += [(x * math.cos(a) - y * math.sin(a), x * math.sin(a) + y * math.cos(a), GROUP_RADIUS)
                 for x, y in GROUP_CYLINDERS]
-    out += [(*anim_position(n, t), ANIM_RADIUS) for n in w['anim']]
+    out += [(*recorded_position(stage, n, t), ANIM_RADIUS) for n in w['anim']]
     return out
 
 

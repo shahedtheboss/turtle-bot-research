@@ -22,11 +22,22 @@ def test_obstacle1_interpolates_and_loops(t, expected):
     assert x == pytest.approx(expected[0]) and y == pytest.approx(expected[1])
 
 
-def test_stage3_group_rotates_quarter_turn_in_10_s():
-    before = W.obstacles_at(3, 0)
-    after = W.obstacles_at(3, 10)              # 40 s per turn -> 90 deg
-    for (x0, y0, _), (x1, y1, _) in zip(before, after):
-        assert (x1, y1) == pytest.approx((-y0, x0))
+def test_stage3_rotation_is_recorded_eased_and_periodic():
+    # recorded in Gazebo (B4b): eased, not constant speed; half a turn at 20 s; 40 s period
+    assert math.degrees(W.recorded_group_yaw(5.0)) == pytest.approx(32.3, abs=0.2)
+    assert abs(math.degrees(W.recorded_group_yaw(20.0))) == pytest.approx(180.0, abs=0.2)
+    assert W.recorded_group_yaw(45.0) == pytest.approx(W.recorded_group_yaw(5.0))
+
+
+def test_recorded_cylinders_start_at_their_offsets_and_match_lidar_check():
+    # t = 0: cylinders at the nested <include> offsets, not at (0, 0)
+    assert [o[:2] for o in W.obstacles_at(4, 0.0)] == [pytest.approx((2.0, 2.0), abs=0.01),
+                                                       pytest.approx((-2.0, -2.0), abs=0.01)]
+    # positions confirmed by the LiDAR truth check (scripts/v2_obstacle_truth_check.py)
+    assert [o[:2] for o in W.obstacles_at(4, 15.3)] == [pytest.approx((1.21, 0.97), abs=0.02),
+                                                        pytest.approx((-1.00, -1.36), abs=0.02)]
+    # stage 6 uses the same plugins for obstacles 1 and 2 -> identical paths
+    assert W.obstacles_at(6, 77.7)[:2] == W.obstacles_at(4, 77.7)
 
 
 def test_wall_distance():
