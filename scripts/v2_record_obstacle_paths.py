@@ -25,9 +25,13 @@ def yaw_of(q):
     return math.atan2(2 * (q.w * q.z + q.x * q.y), 1 - 2 * (q.y * q.y + q.z * q.z))
 
 
+def stage_arg(v):
+    return v if v == '4s' else int(v)
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--stage', type=int, required=True)
+    ap.add_argument('--stage', type=stage_arg, required=True)
     ap.add_argument('--seconds', type=float, default=400.0)
     ap.add_argument('--out', required=True)
     a = ap.parse_args()

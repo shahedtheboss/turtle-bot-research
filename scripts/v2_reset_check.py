@@ -37,15 +37,19 @@ def entity(env, client, name):
     return s.pose.position.x, s.pose.position.y, yaw, tilt
 
 
+def stage_arg(v):
+    return v if v == '4s' else int(v)
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--stage', type=int, required=True)
+    ap.add_argument('--stage', type=stage_arg, required=True)
     ap.add_argument('--repeats', type=int, default=3)
     ap.add_argument('--out', required=True)
     a = ap.parse_args()
     lay = W.LAYOUTS[a.stage]
-    world = open(f'{WORLD_DIR}/turtlebot3_drl_stage{a.stage}/burger.model').read()
-    movers = re.findall(r'<model name="([^"]+)">\s*<plugin', world)
+    world = open(f'{WORLD_DIR}/turtlebot3_drl_stage{str(a.stage).rstrip("s")}/burger.model').read()
+    movers = re.findall(r'<model name="([^"]+)">\s*<plugin', world) if W.has_moving(a.stage) else []
 
     rclpy.init()
     env = RobotEnvironment()

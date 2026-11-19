@@ -13,10 +13,10 @@ from matplotlib.transforms import Affine2D
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'dqn_comparison'))
 from dqn_comparison import worlds_v2 as W  # noqa: E402
 
-TITLES = {1: 'Stage 1: empty', 2: 'Stage 2: 4 static', 3: 'Stage 3: 4 rotating', 4: 'Stage 4: walls + 2 moving',
-          6: 'Stage 6: 6 moving'}
+TITLES = {2: 'Stage 2: 4 static', 3: 'Stage 3: 4 rotating', '4s': 'Stage 4s: walls + 2 static',
+          4: 'Stage 4: walls + 2 moving', 6: 'Stage 6: 6 moving'}
 fig, axes = plt.subplots(1, 5, figsize=(17, 3.9))
-for ax, st in zip(axes, [1, 2, 3, 4, 6]):
+for ax, st in zip(axes, W.STUDY_STAGES):
     lay = W.LAYOUTS[st]
     for cx, cy, yaw, L, T in W.WORLDS[st]['walls']:
         r = Rectangle((cx - L / 2, cy - T / 2), L, T, color='#5f5e5a')

@@ -58,6 +58,10 @@ WORLDS = {
     2: {'walls': OUTER_WALLS, 'group': 'static', 'anim': []},
     3: {'walls': OUTER_WALLS, 'group': 'rotating', 'anim': []},
     4: {'walls': OUTER_WALLS + INNER_WALLS_STAGE4, 'group': None, 'anim': ['obstacle1', 'obstacle2']},
+    # '4s': stage 4 with the animation plugins removed (launch stage:=4s) -> both cylinders stay at their
+    # <include> offsets, exactly the v1 setting (added 2026-11-19, replaces stage 1 in the study).
+    '4s': {'walls': OUTER_WALLS + INNER_WALLS_STAGE4, 'group': None, 'anim': [],
+           'static': [(2.0, 2.0, 0.16), (-2.0, -2.0, 0.16)]},
     6: {'walls': OUTER_WALLS, 'group': None,
         'anim': ['obstacle1', 'obstacle2', 'obstacle3', 'obstacle4', 'obstacle5', 'obstacle6']},
 }
@@ -70,12 +74,13 @@ WORLDS = {
 START = (0.0, 0.0, 0.0)
 GOALS = [(1.75, -1.0), (-1.75, 1.0), (0.5, 1.75), (-1.75, -0.5)]
 _OPEN_TESTS = [(1.75, 1.75, -2.3562), (-1.75, -1.75, 0.7854), (1.25, -1.75, 2.191), (-1.25, 1.75, -0.9505)]
+_STAGE4_TESTS = [(0.25, -1.75, 1.7127), (0.75, 0.75, -2.3562), (-1.0, -1.0, 0.7854), (1.0, 0.0, -3.1416)]
+# rev 4 (2026-11-19): study worlds 2, 3, 4s, 4, 6; the static/moving pairs (2, 3) and (4s, 4) share test poses.
 LAYOUTS = {
-    1: {'W': 0.0, 'start': START, 'goals': GOALS, 'tests': _OPEN_TESTS},
     2: {'W': 0.0, 'start': START, 'goals': GOALS, 'tests': _OPEN_TESTS},
     3: {'W': 5.0, 'start': START, 'goals': GOALS, 'tests': _OPEN_TESTS},
-    4: {'W': 5.0, 'start': START, 'goals': GOALS,
-        'tests': [(0.25, -1.75, 1.7127), (0.75, 0.75, -2.3562), (-1.0, -1.0, 0.7854), (1.0, 0.0, -3.1416)]},
+    '4s': {'W': 0.0, 'start': START, 'goals': GOALS, 'tests': _STAGE4_TESTS},
+    4: {'W': 5.0, 'start': START, 'goals': GOALS, 'tests': _STAGE4_TESTS},
     6: {'W': 5.0, 'start': START, 'goals': GOALS,
         'tests': [(-1.25, 1.75, -0.9505), (0.5, -1.75, 1.8491), (0.75, 0.75, -2.3562), (-1.0, -1.0, 0.7854)]},
 }
@@ -137,8 +142,16 @@ def obstacles_at(stage, t):
         a = recorded_group_yaw(t)              # recorded: eased, not constant speed
         out += [(x * math.cos(a) - y * math.sin(a), x * math.sin(a) + y * math.cos(a), GROUP_RADIUS)
                 for x, y in GROUP_CYLINDERS]
+    out += list(w.get('static', []))
     out += [(*recorded_position(stage, n, t), ANIM_RADIUS) for n in w['anim']]
     return out
+
+
+def has_moving(stage):
+    w = WORLDS[stage]
+    return bool(w['anim']) or w['group'] == 'rotating'
+
+STUDY_STAGES = [2, 3, '4s', 4, 6]     # v2 study worlds (stage 1 replaced by '4s' on 2026-11-19)
 
 
 def wall_distance(stage, x, y):

@@ -43,7 +43,7 @@ def make_env(monkeypatch, sim=True):
     return env
 
 
-@pytest.mark.parametrize('stage', [1, 4, 6])
+@pytest.mark.parametrize('stage', [2, '4s', 4, 6])
 def test_episode_starts_at_w_plus_settle(monkeypatch, stage):
     env = make_env(monkeypatch)
     calls = fake_gazebo(monkeypatch, env)

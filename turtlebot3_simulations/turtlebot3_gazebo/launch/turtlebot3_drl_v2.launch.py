@@ -25,7 +25,8 @@ from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 
-V2_STAGES = ('1', '2', '3', '4', '6')     # worlds used in study v2 (all 5 x 5 m arena)
+V2_STAGES = ('1', '2', '3', '4', '4s', '6')   # v2 worlds (5 x 5 m arena); '4s' = stage 4 with obstacles STATIC
+# (1 is kept launchable but replaced by 4s in the study, 2026-11-19)
 TMP_DIR = '/tmp/drlnav_v2'
 
 
@@ -41,8 +42,15 @@ def _prepare(context):
 
     pkg = get_package_share_directory('turtlebot3_gazebo')
     model = os.environ.get('TURTLEBOT3_MODEL', 'burger')
-    src = os.path.join(pkg, 'worlds', f'turtlebot3_drl_stage{stage}', f'{model}.model')
+    base = stage.rstrip('s')                     # '4s' uses the stage-4 world file
+    src = os.path.join(pkg, 'worlds', f'turtlebot3_drl_stage{base}', f'{model}.model')
     text = open(src).read()
+    if stage == '4s':
+        # Static stage 4 (= the v1 setting): remove the obstacle animation plugins from the copy, so the
+        # cylinders stay at their <include> poses (2, 2) and (-2, -2) whatever GAZEBO_PLUGIN_PATH says.
+        text, n = re.subn(r'\s*<plugin name="obstacle\d" filename="libobstacle\d\.so"/>', '', text)
+        if n != 2:
+            raise RuntimeError(f'{src}: expected 2 obstacle plugins to remove, found {n}')
 
     rate = 1000.0 * rtf_cap      # steps per wall-clock second; 0 = unlimited
     text, n = re.subn(r'<real_time_update_rate>[^<]*</real_time_update_rate>',
@@ -87,7 +95,7 @@ def generate_launch_description():
     plugin_dir = os.path.join(pkg, 'models', 'turtlebot3_drl_world', 'obstacle_plugin', 'lib')
     gazebo_ros = get_package_share_directory('gazebo_ros')
     return LaunchDescription([
-        DeclareLaunchArgument('stage', default_value='4', description='DRL stage world: 1, 2, 3, 4 or 6'),
+        DeclareLaunchArgument('stage', default_value='4', description="DRL stage world: 1, 2, 3, 4, 4s (static) or 6"),
         DeclareLaunchArgument('rtf_cap', default_value='3', description='Max real-time factor (0 = unlimited)'),
         DeclareLaunchArgument('clock_rate', default_value='1000', description='/clock publish rate [Hz]'),
         DeclareLaunchArgument('gui', default_value='false', description='Start gzclient'),

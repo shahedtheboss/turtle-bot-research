@@ -41,12 +41,12 @@ def test_recorded_cylinders_start_at_their_offsets_and_match_lidar_check():
 
 
 def test_wall_distance():
-    assert W.wall_distance(1, 0.0, 0.0) == pytest.approx(W.ARENA_HALF)
-    assert W.wall_distance(1, 2.0, 0.0) == pytest.approx(W.ARENA_HALF - 2.0)
+    assert W.wall_distance(2, 0.0, 0.0) == pytest.approx(W.ARENA_HALF)
+    assert W.wall_distance(2, 2.0, 0.0) == pytest.approx(W.ARENA_HALF - 2.0)
     assert W.wall_distance(4, 1.0, -1.0) == 0.0          # inside an inner wall
 
 
-@pytest.mark.parametrize('stage', [1, 2, 3, 4, 6])
+@pytest.mark.parametrize('stage', [2, 3, '4s', 4, 6])
 def test_layouts_satisfy_rules(stage):
     lay = W.LAYOUTS[stage]
     poses = [lay['start']] + lay['tests']
@@ -54,3 +54,12 @@ def test_layouts_satisfy_rules(stage):
     assert all(L.goal_ok(stage, gx, gy, lay['start']) for gx, gy in lay['goals'])
     assert L.smallest_w(stage, poses) == lay['W']        # W is the smallest valid warm-up
     assert len(lay['tests']) == 4 and len(lay['goals']) == 4
+
+
+def test_static_stage4_has_v1_cylinders_and_shares_tests_with_stage4():
+    assert W.obstacles_at('4s', 0.0) == W.obstacles_at('4s', 123.4) == [(2.0, 2.0, 0.16), (-2.0, -2.0, 0.16)]
+    assert not W.has_moving('4s') and W.has_moving(4)
+    assert W.WORLDS['4s']['walls'] == W.WORLDS[4]['walls']
+    assert W.LAYOUTS['4s']['tests'] == W.LAYOUTS[4]['tests']     # pair differs only in obstacle motion
+    assert W.LAYOUTS[2]['tests'] == W.LAYOUTS[3]['tests']
+    assert W.STUDY_STAGES == [2, 3, '4s', 4, 6]
