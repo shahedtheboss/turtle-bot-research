@@ -25,6 +25,7 @@ import argparse
 import csv
 import os
 import random
+import socket
 import subprocess
 import sys
 import time
@@ -163,6 +164,7 @@ def main(argv=None):
         "q_logging": "q_start_mean and q_probe_mean are divided by reward_scale (environment reward units)",
         "guide_schedule": {"start": GUIDED_START, "end": GUIDED_END,
                            "episodes": GUIDED_EPISODES, "noise": GUIDED_NOISE},
+        "hostname": socket.gethostname(),
         "git_commit": commit, "git_dirty": dirty, "git_untracked_code": untracked_code_files(),
         "torch_version": torch.__version__,
         "slot": os.environ.get("RAINBOW_SLOT"), "ros_domain_id": os.environ.get("ROS_DOMAIN_ID", "0"),
