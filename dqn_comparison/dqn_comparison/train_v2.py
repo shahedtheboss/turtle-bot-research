@@ -56,7 +56,10 @@ PER_BETA_START = 0.4
 AGENTS_V2 = {"dqn": AGENTS["dqn"], "ddqn": AGENTS["ddqn"], "d3qn": AGENTS["d3qn"],
              "rainbow": lambda: build_rainbow(52, 7, v_min=RAINBOW_SUPPORT[0], v_max=RAINBOW_SUPPORT[1])}
 
-EPISODE_FIELDS_V2 = ["world", "goal_index", "goal_x", "goal_y", "t_start", "per_beta"] + EPISODE_FIELDS
+# B8: t_end (animation time at episode end) + robot end pose; obstacle positions at any time are
+# reconstructed exactly from worlds_v2.obstacles_at(world, t) (recorded, deterministic paths).
+EPISODE_FIELDS_V2 = ["world", "goal_index", "goal_x", "goal_y", "t_start", "t_end", "end_x", "end_y",
+                     "per_beta"] + EPISODE_FIELDS
 EVAL_FIELDS_V2 = ["episode", "env_steps_total", "wins", "n", "success_rate", "outcomes",
                   "steps", "q_start_mean", "disc_return_mean", "q_probe_mean"]
 
@@ -213,14 +216,17 @@ def main(argv=None):
             wall0 = time.monotonic()
             result = run_episode(env, agent, greedy=False, episode=episode, guide=args.guide,
                                  env_steps_before=env_steps_total)
-            sim_dt, wall_dt = env.sim_now - t_start, time.monotonic() - wall0
+            t_end = env.sim_now
+            end_x, end_y, _ = env.get_world_pose()
+            sim_dt, wall_dt = t_end - t_start, time.monotonic() - wall0
             rtf = sim_dt / wall_dt if wall_dt > 0 else float("nan")
             rtf_values.append(rtf)
             env_steps_total += result["steps"]
             agent.update_epsilon(env_steps_total)
 
             row = {"world": args.world, "goal_index": gi, "goal_x": goal[0], "goal_y": goal[1],
-                   "t_start": round(t_start, 4), "per_beta": round(beta, 4),
+                   "t_start": round(t_start, 4), "t_end": round(t_end, 4),
+                   "end_x": round(end_x, 4), "end_y": round(end_y, 4), "per_beta": round(beta, 4),
                    "episode": episode, "outcome": result["outcome"], "reward": round(result["reward"], 4),
                    "steps": result["steps"], "env_steps_total": env_steps_total, "loss": result["loss"],
                    "epsilon": round(float(agent.epsilon), 4), "random_steps": result["random_steps"],

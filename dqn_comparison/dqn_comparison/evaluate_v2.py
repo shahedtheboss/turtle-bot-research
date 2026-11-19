@@ -1,0 +1,99 @@
+"""Study v2 final evaluation: every (pose, goal) combination of a world, greedy, fixed obstacle phase.
+
+Poses = the world's start + 4 test poses (worlds_v2.LAYOUTS), goals = its 4 goals -> 20 combinations,
+each repeated --repeats times (default 2 -> 40 episodes). Every episode starts with prepare_episode_v2
+(reset, warm-up W, teleport), so the obstacle phase is identical. Greedy: no epsilon, no noise, no guide.
+--policy heuristic evaluates the scripted guide alone (baseline H), as in v1.
+Needs DQN_SIM_TIME_STEP=1 and Gazebo from turtlebot3_drl_v2.launch.py stage:=<world>.
+
+  DQN_SIM_TIME_STEP=1 python3 -m dqn_comparison.evaluate_v2 --world 4 \
+      --model results_v2/w4_d3qn_s1/w4_d3qn_s1_model_final.pth --out-csv results_v2/w4_d3qn_s1/w4_d3qn_s1_final_eval.csv
+"""
+import argparse
+import csv
+import os
+import sys
+
+import rclpy
+from rclpy.utilities import remove_ros_args
+
+from dqn_comparison.common import heuristic_action
+from dqn_comparison.environment import RobotEnvironment
+from dqn_comparison.episode_v2 import prepare_episode_v2
+from dqn_comparison.evaluate import load_greedy_agent, wait_for_sensors, run_episode
+from dqn_comparison.train_v2 import world_arg
+from dqn_comparison import worlds_v2 as W
+
+FIELDS = ["world", "label", "pose_index", "pose_x", "pose_y", "pose_yaw", "goal_index", "goal_x", "goal_y",
+          "repeat", "outcome", "steps", "reward", "t_start", "t_end", "end_x", "end_y"]
+
+
+def combinations(world, repeats):
+    """(pose_index, pose, goal_index, goal, repeat) in a fixed order: pose-major, then goal, then repeat."""
+    lay = W.LAYOUTS[world]
+    poses = [lay["start"]] + lay["tests"]
+    return [(pi, p, gi, g, r) for pi, p in enumerate(poses) for gi, g in enumerate(lay["goals"])
+            for r in range(repeats)]
+
+
+def parse_args(argv):
+    ap = argparse.ArgumentParser(description="Study v2 final evaluation")
+    ap.add_argument("--world", type=world_arg, required=True)
+    ap.add_argument("--policy", choices=["greedy", "heuristic"], default="greedy")
+    ap.add_argument("--model", help="checkpoint (required for --policy greedy)")
+    ap.add_argument("--repeats", type=int, default=2)
+    ap.add_argument("--label", default="")
+    ap.add_argument("--out-csv", required=True)
+    a = ap.parse_args(remove_ros_args(argv)[1:])
+    if a.policy == "greedy" and not a.model:
+        ap.error("--model is required for --policy greedy")
+    return a
+
+
+def main(argv=None):
+    a = parse_args(sys.argv if argv is None else argv)
+    rclpy.init(args=argv if argv is not None else sys.argv)
+    env, rows = None, []
+    try:
+        env = RobotEnvironment()
+        if not env.sim_time_stepping:
+            raise RuntimeError("evaluate_v2 needs DQN_SIM_TIME_STEP=1")
+        wait_for_sensors(env)
+        if a.policy == "greedy":
+            agent = load_greedy_agent(a.model)
+
+            def choose(state, rng, noise):
+                return agent.select_greedy_action(state)
+        else:
+            def choose(state, rng, noise):
+                return heuristic_action(state, env.MAX_LIDAR)
+
+        for pi, pose, gi, goal, rep in combinations(a.world, a.repeats):
+            t_start = prepare_episode_v2(env, a.world, pose, goal)
+            outcome, reward, steps = run_episode(env, choose, None, 0.0)
+            x, y, _ = env.get_world_pose()
+            rows.append({"world": a.world, "label": a.label, "pose_index": pi, "pose_x": pose[0],
+                         "pose_y": pose[1], "pose_yaw": pose[2], "goal_index": gi, "goal_x": goal[0],
+                         "goal_y": goal[1], "repeat": rep, "outcome": outcome, "steps": steps,
+                         "reward": round(reward, 4), "t_start": round(t_start, 4), "t_end": round(env.sim_now, 4),
+                         "end_x": round(x, 4), "end_y": round(y, 4)})
+            env.get_logger().info(f"[{a.label}] pose {pi} goal G{gi + 1} rep {rep}: {outcome} ({steps} steps)")
+        wins = sum(r["outcome"] == "goal_reached" for r in rows)
+        print(f"===== {a.label or a.policy} world {a.world}: {wins}/{len(rows)} goals reached =====")
+    finally:
+        if rows:
+            os.makedirs(os.path.dirname(os.path.abspath(a.out_csv)), exist_ok=True)
+            with open(a.out_csv, "w", newline="") as f:
+                w = csv.DictWriter(f, fieldnames=FIELDS)
+                w.writeheader()
+                w.writerows(rows)
+            print("CSV written:", a.out_csv)
+        if env is not None:
+            env.publish_stop()
+            env.destroy_node()
+        if rclpy.ok():
+            rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()
