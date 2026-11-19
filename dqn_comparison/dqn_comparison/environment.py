@@ -1,8 +1,15 @@
 import math
+import os
 import time
 import rclpy
 import random
 from rclpy.node import Node
+# ---------------- NEW CODE ADDED (2026-11-19, v2): simulated-time stepping ----------------
+# Reason: hold each action for 0.5 s of SIMULATED time (from /clock), so Gazebo can run
+# faster than real time without changing the task. Off by default (wall clock, as in v1).
+from rclpy.qos import QoSProfile, ReliabilityPolicy
+from rosgraph_msgs.msg import Clock
+# ---------------- END NEW CODE
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
@@ -86,10 +93,38 @@ class RobotEnvironment(Node):
             10
         )
 
+        # ---------------- NEW CODE ADDED (2026-11-19, v2): simulated-time stepping ----------------
+        # DQN_SIM_TIME_STEP=1 -> actions last action_duration seconds of SIMULATED time.
+        # Unset/0 -> unchanged wall-clock behaviour (all v1 runs). Needs /clock at high rate
+        # (gazebo_ros publish_rate, e.g. 1000 Hz); the default 10 Hz gives 100 ms resolution.
+        self.sim_time_stepping = os.environ.get('DQN_SIM_TIME_STEP', '0') == '1'
+        self.sim_now = None                      # latest /clock time [s], sim mode only
+        self.last_action_sim_duration = float('nan')   # measured length of the last action [sim s]
+        self.sim_wait_timeout = 10.0             # wall-clock seconds before giving up on /clock
+        if self.sim_time_stepping:
+            self.clock_sub = self.create_subscription(
+                Clock, '/clock', self.clock_callback,
+                QoSProfile(depth=10, reliability=ReliabilityPolicy.BEST_EFFORT))
+            self.get_logger().info('Simulated-time stepping ON (actions timed on /clock)')
+        # ---------------- END NEW CODE
+
         self.get_logger().info(
             f'Environment started. Fixed goal: '
             f'({self.goal_x:.2f}, {self.goal_y:.2f})'
         )
+
+    # ---------------- NEW CODE ADDED (2026-11-19, v2) ----------------
+    def clock_callback(self, msg):
+        self.sim_now = msg.clock.sec + msg.clock.nanosec * 1e-9
+
+    def _wait_for_clock(self):
+        """Spin until the first /clock message arrives (sim mode only)."""
+        deadline = time.monotonic() + self.sim_wait_timeout
+        while self.sim_now is None:
+            if time.monotonic() >= deadline or not rclpy.ok():
+                raise RuntimeError('No /clock message: is Gazebo running with gazebo_ros_init?')
+            rclpy.spin_once(self, timeout_sec=0.01)
+    # ---------------- END NEW CODE
 
     def scan_callback(self, msg):
         self.latest_scan = self.process_scan(msg)
@@ -259,6 +294,26 @@ class RobotEnvironment(Node):
         command = Twist()
         command.linear.x = float(action['linear_x'])
         command.angular.z = float(action['angular_z'])
+
+        # ---------------- NEW CODE ADDED (2026-11-19, v2): simulated-time branch ----------------
+        # Same structure as the wall-clock branch below, but the action ends when the
+        # SIMULATED clock has advanced by `duration`. Overshoot is about one /clock tick
+        # plus the poll interval (~1-3 ms sim at 1000 Hz); measured, not assumed.
+        if self.sim_time_stepping:
+            self._wait_for_clock()
+            t_start = self.sim_now
+            self.cmd_vel_pub.publish(command)
+            wall_deadline = time.monotonic() + self.sim_wait_timeout
+            try:
+                while rclpy.ok() and self.sim_now - t_start < duration:
+                    if time.monotonic() >= wall_deadline:
+                        raise RuntimeError('/clock stopped advancing during an action')
+                    rclpy.spin_once(self, timeout_sec=0.001)
+            finally:
+                self.publish_stop()
+                self.last_action_sim_duration = self.sim_now - t_start
+            return
+        # ---------------- END NEW CODE
 
         self.cmd_vel_pub.publish(command)
 
