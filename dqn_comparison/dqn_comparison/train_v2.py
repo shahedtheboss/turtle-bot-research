@@ -125,6 +125,10 @@ def parse_args(argv):
     p.add_argument("--run-name", help="default: w<world>_<arm>_s<seed>, e.g. w4_d3qn_s1")
     p.add_argument("--results-dir", default="results_v2")
     p.add_argument("--overwrite", action="store_true")
+    # ---- DIAGNOSIS ONLY (2026-11-20, pilot did not learn): change one v2 element at a time ----
+    p.add_argument("--diag-goal", help="X,Y: train and check on this ONE goal instead of the 4 (diagnosis only)")
+    p.add_argument("--reward-scale", type=float, default=REWARD_SCALE,
+                   help="reward multiplier for learning (default 0.01; 1.0 = v1 rewards; diagnosis only)")
     args = p.parse_args(remove_ros_args(argv)[1:])
     args.algo, args.guide = ARMS_V2[args.arm]
     return args
@@ -145,6 +149,11 @@ def main(argv=None):
     model_path, best_path = out("model_final.pth"), out("model_best.pth")
     meta_path, plot_path = out("run_meta.json"), out("training.png")
     goals = goal_sequence(args.seed, args.episodes)
+    scale = args.reward_scale
+    diag_goal = tuple(float(v) for v in args.diag_goal.split(",")) if args.diag_goal else None
+    train_goals = [diag_goal] if diag_goal else lay["goals"]
+    if diag_goal:
+        goals = [0] * args.episodes
 
     rclpy.init(args=argv if argv is not None else sys.argv)
     env = agent = None
@@ -159,7 +168,8 @@ def main(argv=None):
         "goal_counts": [goals.count(i) for i in range(4)],
         "sim_time_stepping": os.environ.get("DQN_SIM_TIME_STEP") == "1",
         "rtf_cap": os.environ.get("V2_RTF_CAP"),
-        "reward_scale": REWARD_SCALE, "rainbow_support": RAINBOW_SUPPORT,
+        "reward_scale": scale, "rainbow_support": (-75.0 * scale, 125.0 * scale),
+        "diag_goal": diag_goal, "diagnostic": bool(diag_goal) or scale != REWARD_SCALE,
         "per_beta_schedule": f"{PER_BETA_START} + {1 - PER_BETA_START} * episode / episodes (Rainbow only)",
         "q_logging": "q_start_mean and q_probe_mean are divided by reward_scale (environment reward units)",
         "guide_schedule": {"start": GUIDED_START, "end": GUIDED_END,
@@ -187,7 +197,9 @@ def main(argv=None):
         env = RobotEnvironment()
         if not env.sim_time_stepping:
             raise RuntimeError("train_v2 needs DQN_SIM_TIME_STEP=1 (actions timed on simulated time)")
-        agent = apply_reward_scale(AGENTS_V2[args.algo]())
+        agent = (build_rainbow(52, 7, v_min=-75.0 * scale, v_max=125.0 * scale) if args.algo == "rainbow"
+                 else AGENTS_V2[args.algo]())
+        agent = apply_reward_scale(agent, scale)
         meta["device"] = str(agent.device)
         meta["hyperparameters"] = (dict(agent.cfg) if hasattr(agent, "cfg") else
                                    {"learning_rate": agent.optimizer.param_groups[0]["lr"], "gamma": agent.gamma,
@@ -209,7 +221,7 @@ def main(argv=None):
 
         for episode in range(1, args.episodes + 1):
             gi = goals[episode - 1]
-            goal = lay["goals"][gi]
+            goal = train_goals[gi]
             t_start = prepare_episode_v2(env, args.world, lay["start"], goal)   # reset, warm-up W, teleport
             beta = per_beta(episode, args.episodes) if hasattr(agent.memory, "beta_override") else float("nan")
             if beta == beta:
@@ -247,13 +259,13 @@ def main(argv=None):
 
             if args.eval_every and episode % args.eval_every == 0:
                 outcomes, steps, qs, gs = [], [], [], []
-                q_probe = float(np.mean(np.max(agent.estimate_q(probes), axis=1))) / REWARD_SCALE
-                for g in lay["goals"]:                     # one greedy episode per goal, from the start pose
+                q_probe = float(np.mean(np.max(agent.estimate_q(probes), axis=1))) / scale
+                for g in (train_goals * 4 if diag_goal else lay["goals"]):   # one greedy episode per goal (diag: 4 x the goal)
                     prepare_episode_v2(env, args.world, lay["start"], g)
                     r = run_episode(env, agent, greedy=True)
                     outcomes.append(r["outcome"]); steps.append(r["steps"])
                     if r["true_terminal"]:
-                        qs.append(r["q_start"] / REWARD_SCALE); gs.append(r["disc_return"])
+                        qs.append(r["q_start"] / scale); gs.append(r["disc_return"])
                 wins, n = outcomes.count("goal_reached"), len(outcomes)
                 ev = {"episode": episode, "env_steps_total": env_steps_total, "wins": wins, "n": n,
                       "success_rate": wins / n, "outcomes": ";".join(outcomes),

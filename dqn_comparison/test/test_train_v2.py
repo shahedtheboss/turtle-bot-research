@@ -89,3 +89,10 @@ def test_replay_buffer_uses_beta_override_and_keeps_v1_schedule_without_it():
     agent.memory.beta_override = 0.9
     agent.memory.sample()
     assert agent.memory.last_beta == 0.9
+
+
+def test_diagnostic_flags_default_off():
+    a = T.parse_args(['p', '--world', '4', '--arm', 'd3qn'])
+    assert a.diag_goal is None and a.reward_scale == T.REWARD_SCALE
+    b = T.parse_args(['p', '--world', '4s', '--arm', 'd3qn', '--diag-goal', '2,-2', '--reward-scale', '1'])
+    assert b.diag_goal == '2,-2' and b.reward_scale == 1.0
