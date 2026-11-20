@@ -1,73 +1,70 @@
 # turtle-bot-research
 
-Value-based deep reinforcement learning for mapless LiDAR goal navigation of a TurtleBot3 Burger in ROS 2 Humble and Gazebo Classic. The stage-4 DRL world has static walls and two cylinders. The world file animates the cylinders through Gazebo plugins, but those plugins were not on `GAZEBO_PLUGIN_PATH` in this setup, so in every Paper 1 run the cylinders stayed static at (2, 2) and (-2, -2).
+Value-based deep reinforcement learning for mapless goal navigation of a TurtleBot3 Burger in ROS 2 Humble
+and Gazebo Classic 11. This branch (`main`) holds **study v2**: DQN, Double DQN, Dueling Double DQN (D3QN),
+Rainbow DQN and Rainbow with a decaying scripted guide, each tuned with an equal budget, compared in five
+Gazebo worlds (static and moving obstacles) with four goals drawn at random per episode.
 
-## Studies in this repository
+**Study v1** (one world, one fixed goal; paper release `paper1-v1.0`, Zenodo DOI 10.5281/zenodo.24313470) lives on
+the [`version-1`](../../tree/version-1) branch with its code, results and paper. v2 reuses the v1 learning code
+unchanged (now in `learning.py`).
 
-| Study | Question | Code | Status |
-|---|---|---|---|
-| **Paper 1 (main): DQN comparison** | How do DQN, Double DQN, Dueling Double DQN (D3QN) and Rainbow DQN compare when the environment, state, actions, reward, budget, seeds and evaluation are identical? And how much does a decaying scripted guide change the result? | `dqn_comparison/dqn_comparison/` | All 30 runs done (6 configurations × seeds 1–5); paper draft in preparation |
-| **Paper 2 (later): guided ablation** | A controlled ablation of the guide for Rainbow: guided (G) vs unguided (N) vs a matched random-action control (R) | `dqn_comparison/dqn_comparison/guided_ablation/` | Parked |
+## Design (summary)
 
-The original exploratory code and results (DQN → DDQN → D3QN → Rainbow pilot) are on the [`pilot_runs`](../../tree/pilot_runs) branch.
+| Item | Setting |
+|---|---|
+| Worlds | DRL stages 2, 3, 4s (stage 4, obstacles static), 4 (moving), 6; launch `turtlebot3_drl_v2.launch.py stage:=<world>` |
+| Episode start | `/reset_simulation`, warm-up W s of simulated time (same obstacle phase every episode), teleport to start |
+| Goals | 4 per world; shuffled blocks, one RNG per seed, so all methods see the same goal sequence |
+| State / actions | 52 values (50 LiDAR sectors, goal distance, goal angle) / 7 discrete actions, each 0.5 s of simulated time |
+| Speed | simulated-time stepping, real-time factor capped at 3, /clock 200 Hz, 5 ms poll (checked equal to v1 real-time motion) |
+| Budget | 500 episodes; greedy check (4 goals) every 20 episodes |
+| Primary metric | E* = first check with >= 3/4 goals, confirmed by the next check; censored at 520 |
+| Final evaluation | 5 poses × 4 goals × 2 repeats, greedy, final checkpoint |
+| Tuning | learning rate per algorithm, equal budget, separate seeds (`docs/v2_tuning_protocol.md`) |
+| Main runs | 5 arms × 5 worlds × seeds 1-5 = 125 runs (`scripts/main_runs_v2.csv`) |
 
 ## Layout
 
-ROS 2 package: `dqn_comparison/`. Its Python code is in `dqn_comparison/dqn_comparison/`.
+ROS 2 package `dqn_comparison/`, Python code in `dqn_comparison/dqn_comparison/`:
 
 | File | Contents |
 |---|---|
-| `environment.py` | Gazebo environment: 52-value state (50 LiDAR sectors + goal distance and angle), 7 actions, reward |
-| `common.py` | Shared helpers: Gazebo reset, start pose, the scripted guide and its schedule, seeding, git info |
-| `agent_dqn.py`, `agent_ddqn.py`, `agent_d3qn.py`, `agent_rainbow.py` | One file per method; DDQN and D3QN override only their target or network |
-| `rainbow_core.py` | Rainbow DQN (NoisyNet, dueling C51, prioritized 3-step replay, Double DQN target) |
-| `train.py` | One training loop for all arms (`dqn`, `ddqn`, `d3qn`, `d3qn_g`, `rainbow`, `rainbow_g`) |
-| `evaluate.py` | Greedy or heuristic evaluation from 5 fixed start poses, with Wilson intervals |
-| `analyze.py` | Summary tables and figures |
-| `paper_figures.py` | Publication figures, LaTeX tables and post hoc analyses (analysis only) |
-| `HYPERPARAMETERS.md` | All settings |
-| `guided_ablation/train.py` | Paper 2 (G / N / R arms), parked |
+| `environment.py` | Gazebo environment: state, actions, reward, simulated-time action timing |
+| `agent_dqn.py`, `agent_ddqn.py`, `agent_d3qn.py`, `agent_rainbow.py`, `rainbow_core.py` | The four algorithms |
+| `learning.py` | Method registry, one training/greedy episode, probe states, plot, checkpoint loading (from v1) |
+| `common.py` | Constants, seeding, guide heuristic, sensor wait, git info |
+| `worlds_v2.py` | Per-world layouts (start, goals, test poses, warm-up W) and recorded obstacle paths |
+| `episode_v2.py` | Episode start (reset, warm-up, teleport) |
+| `train_v2.py` | Training run (one world, arm, seed); tuned learning rates in `TUNED_LR` |
+| `evaluate_v2.py` | Final evaluation over all pose × goal combinations |
+| `metrics_v2.py`, `stats.py` | E*; Wilson, IQM, bootstrap, Vargha-Delaney A, exact permutation tests, Holm |
+| `data/v2_obstacle_paths.csv` | Recorded moving-obstacle paths |
 
-Other folders:
+Scripts (`scripts/`):
 
-| Path | Contents |
+| Script | Purpose |
 |---|---|
-| `dqn_comparison/test/test_agents.py` | Unit tests |
-| `scripts/run_slot.sh` | One training run in an isolated headless Gazebo "slot" (2–3 can run in parallel) |
-| `turtlebot3_simulations/`, `turtlebot3_msgs/` | Gazebo worlds, launch files and messages |
-| `commands.md` | Every command, in order |
-| `docs/previous_project/` | Notes from the earlier project |
+| `run_slot_v2.sh` | One run (train + final evaluation) in an isolated headless Gazebo slot |
+| `run_main_v2.sh` | The 125 main runs from `main_runs_v2.csv`, N slots in parallel, per machine, with take-over |
+| `run_tuning_v2.sh` | The tuning runs |
+| `run_sim_time_equivalence.sh`, `sim_time_equivalence.py` | Check: simulated-time stepping moves the robot like v1 real time |
+| `v2_*.py` | World layout, obstacle-path recording and checks, reset check |
 
-## Paper 1 results and reproducibility
-
-| Path or tag | Contents |
-|---|---|
-| `results/<arm>_s<seed>/` | Per run: episode CSV, greedy-check CSV, final-evaluation CSV, `run_meta.json` (git commit, dirty flag, slot, hyperparameters), Gazebo logs, plots |
-| `results/H/`, `results/H_eta/` | Heuristic baselines (guide alone, and with 15% action noise) |
-| `results/q_trajectory/` | Post hoc probe: Q-values and rewards along one greedy episode from P0 per final epsilon-greedy checkpoint (`scripts/run_q_probe_slot.sh`) |
-| tag `comparison-prereg-v1` | Code, protocol and primary metric fixed before training (15 Nov 2026) |
-| tag `comparison-prereg-v1.1` | Seeds raised from three to five before any final result (16 Nov 2026) |
-| tag `comparison-analysis-v1.2` | Statistical test code frozen (17 Nov 2026) |
-
-Model checkpoints (`*.pth`) are not in git; the final ones are attached to the paper release.
-
-**Dirty-tree flag.** Eight runs record `git_dirty = true` in `run_meta.json`. The flag was caused by untracked output files in the working tree; the training code was identical across all commits used by the 30 runs.
+Docs: `docs/v2_tuning_protocol.md` (tuning protocol and result), `docs/setup_second_machine.md` (lab PC).
 
 ## Build
 
-The repo root is the colcon workspace. Clone it **outside** any other ROS workspace, then:
+The repo root is the colcon workspace. Clone it outside any other ROS workspace:
 
     cd ~/turtle-bot-research && source /opt/ros/humble/setup.bash && colcon build --symlink-install
-
-Source `install/setup.bash` from this repo only. Don't also source another workspace that has `turtlebot3_*` packages.
 
 ## Quick start
 
     source /opt/ros/humble/setup.bash && source install/setup.bash && source ~/pytorch-env/bin/activate
-    PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest dqn_comparison/test/test_agents.py -q
-    scripts/run_slot.sh 1 d3qn 1
-
-See `commands.md` for the smoke test, the batch schedule, evaluation and analysis.
+    PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest dqn_comparison/test/ -q --ignore=dqn_comparison/test/test_flake8.py --ignore=dqn_comparison/test/test_pep257.py
+    EVAL_REPEATS=1 scripts/run_slot_v2.sh 1 4 d3qn 9 --episodes 3 --eval-every 3 --results-dir results_smoke/try --overwrite
+    scripts/run_main_v2.sh laptop          # main runs planned for this machine (see the script header)
 
 ## License
 

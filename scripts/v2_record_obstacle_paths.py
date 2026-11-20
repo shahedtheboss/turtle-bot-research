@@ -18,7 +18,7 @@ from nav_msgs.msg import Odometry
 
 from dqn_comparison.environment import RobotEnvironment
 from dqn_comparison.episode_v2 import reset_to_phase
-from dqn_comparison.evaluate import wait_for_sensors
+from dqn_comparison.common import wait_for_sensors
 
 
 def yaw_of(q):

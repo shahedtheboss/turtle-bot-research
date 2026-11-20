@@ -36,20 +36,31 @@ Note: `results_v2/`, the recorded obstacle paths and all code come from git; not
 ```bash
 cd ~/turtle-bot-research && source /opt/ros/humble/setup.bash && source install/setup.bash && source ~/pytorch-env/bin/activate
 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest dqn_comparison/test/ -q --ignore=dqn_comparison/test/test_flake8.py --ignore=dqn_comparison/test/test_pep257.py
-MODES="rt_wall x3_sim" REPEATS=10 TAG=_r10 scripts/run_sim_time_equivalence.sh
-EVAL_REPEATS=1 scripts/run_slot_v2.sh 1 4 d3qn 9 --episodes 3 --eval-every 3 --results-dir results_smoke/second_machine --overwrite
+MODES="rt_wall x3_sim" REPEATS=10 TAG=_r10 V2_CLOCK_HZ=200 DQN_SIM_POLL_S=0.005 scripts/run_sim_time_equivalence.sh
+V2_CLOCK_HZ=200 DQN_SIM_POLL_S=0.005 EVAL_REPEATS=1 scripts/run_slot_v2.sh 1 4 d3qn 9 --episodes 3 --eval-every 3 --results-dir results_smoke/second_machine --overwrite
 ```
 Send back `results_smoke/b3/*_r10.csv` and the smoke folder: the end poses must match the reference machine's
 (same mean within ~1 cm) before this machine runs study data.
 
-## 4. Running assigned runs
-Only runs listed for this machine in the pre-registered run list (decided BEFORE the main runs, so the machine
-is not chosen after seeing results). Example, 4 parallel slots:
+## 4. Measure how many runs fit (about 30 min)
+Run 4 slots, then 6, then 8, each with a short run, and keep the highest count where the per-run speed
+(steps per minute, from each run's episodes CSV and run_meta.json times) stays close to the 4-slot value
+and the CPU stays below ~95 C (`sensors`). Rough guide: about 2.3 CPU threads per run.
+
+## 5. Running the main runs
+The run list `scripts/main_runs_v2.csv` assigns whole seeds to machines (pre-registered): lab PC seeds 1-3
+(75 runs), laptop seeds 4-5 (50 runs).
 ```bash
-RAINBOW_PARALLEL=4 scripts/run_slot_v2.sh 1 6 dqn 1 --episodes <BUDGET> --eval-every 20
+PARALLEL=6 scripts/run_main_v2.sh labpc                 # this machine's runs
+DRY_RUN=1 scripts/run_main_v2.sh labpc                  # what is left, without running
 ```
+The launcher can be stopped and restarted at any time: finished runs are skipped, interrupted ones start again.
 Each run records the machine (hostname), git commit and untracked-code list in `run_meta.json`.
-Copy finished run folders back (USB or `rsync -a results_v2/<run>/ <laptop>:~/turtle-bot-research/results_v2/<run>/`).
+Copy finished run folders back (USB or `rsync -a results_v2/ <laptop>:~/turtle-bot-research/results_v2/`).
+
+**If the lab PC is not available long enough (fallback):** copy its finished run folders into the laptop's
+`results_v2/`, then on the laptop run `scripts/run_main_v2.sh laptop --take-over`: it does its own runs first,
+then every remaining run of the list. The same works the other way round (`labpc --take-over`).
 
 ## Caveats
 - Different CPUs give different simulation speeds; with simulated-time stepping this changes waiting time,

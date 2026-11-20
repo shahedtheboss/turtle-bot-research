@@ -19,7 +19,7 @@ from nav_msgs.msg import Odometry
 
 from dqn_comparison.environment import RobotEnvironment
 from dqn_comparison.episode_v2 import prepare_episode_v2, _spin_until
-from dqn_comparison.evaluate import wait_for_sensors
+from dqn_comparison.common import wait_for_sensors
 from dqn_comparison import worlds_v2 as W
 
 WORLD_DIR = '/home/shahed/turtle-bot-research/install/turtlebot3_gazebo/share/turtlebot3_gazebo/worlds'

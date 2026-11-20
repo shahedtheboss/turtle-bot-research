@@ -17,15 +17,31 @@ import sys
 import rclpy
 from rclpy.utilities import remove_ros_args
 
-from dqn_comparison.common import heuristic_action
+from dqn_comparison.common import heuristic_action, wait_for_sensors, MAX_STEPS
 from dqn_comparison.environment import RobotEnvironment
 from dqn_comparison.episode_v2 import prepare_episode_v2
-from dqn_comparison.evaluate import load_greedy_agent, wait_for_sensors, run_episode
+from dqn_comparison.learning import load_greedy_agent
 from dqn_comparison.train_v2 import world_arg
 from dqn_comparison import worlds_v2 as W
 
 FIELDS = ["world", "label", "pose_index", "pose_x", "pose_y", "pose_yaw", "goal_index", "goal_x", "goal_y",
           "repeat", "outcome", "steps", "reward", "t_start", "t_end", "end_x", "end_y"]
+
+
+def greedy_rollout(env, choose, rng, guide_noise):
+    """Run one episode. choose(state) -> action. Returns (outcome, reward, steps)."""
+    state = env.normalize(env.get_state())
+    total_reward, steps, outcome = 0.0, 0, "timeout"
+    for step in range(MAX_STEPS):
+        steps = step + 1
+        action = choose(state, rng, guide_noise)
+        next_state, reward, terminated, reason = env.step(action)
+        total_reward += float(reward)
+        state = next_state
+        if terminated:
+            outcome = str(reason)
+            break
+    return outcome, total_reward, steps
 
 
 def combinations(world, repeats):
@@ -70,7 +86,7 @@ def main(argv=None):
 
         for pi, pose, gi, goal, rep in combinations(a.world, a.repeats):
             t_start = prepare_episode_v2(env, a.world, pose, goal)
-            outcome, reward, steps = run_episode(env, choose, None, 0.0)
+            outcome, reward, steps = greedy_rollout(env, choose, None, 0.0)
             x, y, _ = env.get_world_pose()
             rows.append({"world": a.world, "label": a.label, "pose_index": pi, "pose_x": pose[0],
                          "pose_y": pose[1], "pose_yaw": pose[2], "goal_index": gi, "goal_x": goal[0],

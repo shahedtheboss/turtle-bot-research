@@ -16,7 +16,7 @@ from rclpy.qos import qos_profile_sensor_data
 
 from dqn_comparison.environment import RobotEnvironment
 from dqn_comparison.episode_v2 import reset_to_phase, teleport, _spin_until
-from dqn_comparison.evaluate import wait_for_sensors
+from dqn_comparison.common import wait_for_sensors
 
 R_OBS = 0.16
 

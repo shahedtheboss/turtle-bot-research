@@ -4,7 +4,7 @@ import os
 import pytest
 
 from dqn_comparison import evaluate_v2 as E
-from dqn_comparison.evaluate import load_greedy_agent
+from dqn_comparison.learning import load_greedy_agent
 
 REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 

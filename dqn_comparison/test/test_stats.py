@@ -6,7 +6,7 @@ Every expected value below can be worked out by hand (comments show how).
 
 import pytest
 
-from dqn_comparison.analyze import (exact_perm_test_paired, exact_perm_test_unpaired, holm,
+from dqn_comparison.stats import (exact_perm_test_paired, exact_perm_test_unpaired, holm,
                                     vargha_delaney_a)
 
 

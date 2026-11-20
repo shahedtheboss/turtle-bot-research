@@ -1,7 +1,7 @@
 """Study v2 training loop: five worlds, moving obstacles, a random goal (of 4) per episode.
 
-Reuses the v1 learning code UNCHANGED (train.run_episode, agents, guide schedule, probe states, plot);
-train.py itself is not modified, so v1 stays reproducible from this branch too. Differences from v1:
+Reuses the v1 learning code UNCHANGED (learning.py: run_episode, agents, guide schedule, probe states,
+plot; moved there from v1 train.py on 2026-11-21, v1 itself is on the version-1 branch). Differences from v1:
   - --world 2 | 3 | 4s | 4 | 6 (worlds_v2.STUDY_STAGES); Gazebo must be started with
     turtlebot3_drl_v2.launch.py stage:=<world>; needs DQN_SIM_TIME_STEP=1 (actions timed on /clock)
   - every episode (also the first) starts with episode_v2.prepare_episode_v2: /reset_simulation,
@@ -41,13 +41,13 @@ from dqn_comparison.common import (set_seed, git_info, write_json, MAX_STEPS, UP
                                    GUIDED_START, GUIDED_END, GUIDED_EPISODES, GUIDED_NOISE)
 from dqn_comparison.environment import RobotEnvironment
 from dqn_comparison.episode_v2 import prepare_episode_v2
-from dqn_comparison.train import (AGENTS, EPISODE_FIELDS, probe_states, action_histogram,
-                                  run_episode, save_plot)
+from dqn_comparison.learning import (AGENTS, EPISODE_FIELDS, probe_states, action_histogram,
+                                     run_episode, save_plot)
 from dqn_comparison.agent_rainbow import build_rainbow
 from dqn_comparison import worlds_v2 as W
 from dqn_comparison.metrics_v2 import e_star
 
-EPISODES = 200            # placeholder; the v2 budget is set by the pilot and fixed before the main runs
+EPISODES = 500            # v2 budget (2026-11-20, after the diagnosis follow-up; docs/v2_tuning_protocol.md)
 EVAL_EVERY = 20
 GOAL_RNG_OFFSET = 10_000  # goal RNG seed = seed + offset (independent of the training RNG)
 ARMS_V2 = {"dqn": ("dqn", False), "ddqn": ("ddqn", False), "d3qn": ("d3qn", False),
@@ -58,6 +58,9 @@ ARMS_V2 = {"dqn": ("dqn", False), "ddqn": ("ddqn", False), "d3qn": ("d3qn", Fals
 REWARD_SCALE = 1.0
 RAINBOW_SUPPORT = (-75.0 * REWARD_SCALE, 125.0 * REWARD_SCALE)   # v1 support, scaled like the rewards
 PER_BETA_START = 0.4
+# Tuned learning rates (docs/v2_tuning_protocol.md, result 2026-11-20): lowest median E* over 2 tuning seeds
+# in world 4. Used by every main run unless --lr is given; rainbow_g uses Rainbow's value.
+TUNED_LR = {"dqn": 2.5e-4, "ddqn": 2.5e-4, "d3qn": 1e-4, "rainbow": 1e-4}
 AGENTS_V2 = {"dqn": AGENTS["dqn"], "ddqn": AGENTS["ddqn"], "d3qn": AGENTS["d3qn"],
              "rainbow": lambda: build_rainbow(52, 7, v_min=RAINBOW_SUPPORT[0], v_max=RAINBOW_SUPPORT[1])}
 
@@ -136,7 +139,7 @@ def parse_args(argv):
     p.add_argument("--reward-scale", type=float, default=REWARD_SCALE,
                    help="reward multiplier for learning (default 0.01; 1.0 = v1 rewards; diagnosis only)")
     p.add_argument("--lr", type=float, default=None,
-                   help="learning rate override (tuning, docs/v2_tuning_protocol.md); default: shared value 1e-4")
+                   help="learning rate override (tuning only); default: the tuned value TUNED_LR[algorithm]")
     args = p.parse_args(remove_ros_args(argv)[1:])
     args.algo, args.guide = ARMS_V2[args.arm]
     return args
@@ -209,11 +212,12 @@ def main(argv=None):
         agent = (build_rainbow(52, 7, v_min=-75.0 * scale, v_max=125.0 * scale) if args.algo == "rainbow"
                  else AGENTS_V2[args.algo]())
         agent = apply_reward_scale(agent, scale)
-        if args.lr is not None:                  # tuning: same Adam optimizer, only its step size changes
-            for group in agent.optimizer.param_groups:
-                group["lr"] = args.lr
-            if hasattr(agent, "cfg"):
-                agent.cfg["learning_rate"] = args.lr
+        lr = TUNED_LR[args.algo] if args.lr is None else args.lr   # same Adam optimizer, only its step size
+        for group in agent.optimizer.param_groups:
+            group["lr"] = lr
+        if hasattr(agent, "cfg"):
+            agent.cfg["learning_rate"] = lr
+        meta["learning_rate_source"] = "tuned (TUNED_LR)" if args.lr is None else "--lr"
         meta["device"] = str(agent.device)
         meta["hyperparameters"] = (dict(agent.cfg) if hasattr(agent, "cfg") else
                                    {"learning_rate": agent.optimizer.param_groups[0]["lr"], "gamma": agent.gamma,

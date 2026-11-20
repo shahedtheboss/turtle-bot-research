@@ -123,8 +123,8 @@ def test_rainbow_wrapper_interface(tmp_path):
 
 @pytest.mark.parametrize("name", ["dqn", "ddqn", "d3qn", "rainbow"])
 def test_evaluate_loader_rebuilds_same_policy(tmp_path, name):
-    from dqn_comparison.evaluate import load_greedy_agent
-    from dqn_comparison.train import AGENTS, probe_states
+    from dqn_comparison.learning import load_greedy_agent
+    from dqn_comparison.learning import AGENTS, probe_states
     a = AGENTS[name]()
     p = tmp_path / f"{name}.pth"
     a.save(str(p))
@@ -134,7 +134,7 @@ def test_evaluate_loader_rebuilds_same_policy(tmp_path, name):
 
 
 def test_evaluate_loader_rejects_unknown_algo(tmp_path):
-    from dqn_comparison.evaluate import load_greedy_agent
+    from dqn_comparison.learning import load_greedy_agent
     p = tmp_path / "x.pth"
     torch.save({"algo": "ppo"}, str(p))
     with pytest.raises(ValueError):
@@ -142,17 +142,11 @@ def test_evaluate_loader_rejects_unknown_algo(tmp_path):
 
 
 def test_guided_probability_schedule():
-    from dqn_comparison.train import guided_probability
+    from dqn_comparison.learning import guided_probability
     assert guided_probability(1, False) == 0.0 and guided_probability(150, False) == 0.0
     assert guided_probability(1, True) == pytest.approx(0.8)
     assert guided_probability(100, True) == pytest.approx(0.1)
     assert guided_probability(200, True) == pytest.approx(0.1)
 
 
-def test_parse_args_arms():
-    from dqn_comparison.train import parse_args
-    a = parse_args(["x", "--arm", "d3qn_g"])
-    assert (a.algo, a.guide, a.arm) == ("d3qn", "on", "d3qn_g")
-    b = parse_args(["x", "--algo", "rainbow"])
-    assert (b.algo, b.guide, b.arm) == ("rainbow", "off", "rainbow")
 # ---------------- END NEW CODE ----------------
