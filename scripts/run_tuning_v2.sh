@@ -31,7 +31,10 @@ for seed in 101 102; do
     done
 done
 
-slot_busy() {   # is a Gazebo for this slot (port 11345 + slot) still running?
+slot_busy() {   # is this slot still used by an earlier launcher's run (its script, or its Gazebo)?
+    # the script check matters: run_slot_v2's cleanup stops its Gazebo twice, 5 s apart, so "no Gazebo" alone
+    # let a new run start in between and get killed (2026-11-20, two lost starts)
+    pgrep -f "run_slot_v2.sh $1 " > /dev/null && return 0
     for p in $(pgrep gzserver || true); do
         tr '\0' '\n' < /proc/$p/environ 2>/dev/null | grep -qx "GAZEBO_MASTER_URI=http://localhost:$((11345 + $1))" && return 0
     done
