@@ -48,7 +48,7 @@ def _spin_until(env, condition, what):
     while not condition():
         if time.monotonic() >= deadline or not rclpy.ok():
             raise RuntimeError(f'timed out waiting for {what}')
-        rclpy.spin_once(env, timeout_sec=0.001)
+        rclpy.spin_once(env, timeout_sec=env.sim_poll)
 
 
 def reset_to_phase(env, w):

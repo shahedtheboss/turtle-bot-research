@@ -101,6 +101,8 @@ class RobotEnvironment(Node):
         self.sim_now = None                      # latest /clock time [s], sim mode only
         self.last_action_sim_duration = float('nan')   # measured length of the last action [sim s]
         self.sim_wait_timeout = 10.0             # wall-clock seconds before giving up on /clock
+        # NEW (2026-11-20): poll interval while waiting on /clock (CPU tweak; default = original 1 ms)
+        self.sim_poll = float(os.environ.get('DQN_SIM_POLL_S', '0.001'))
         if self.sim_time_stepping:
             self.clock_sub = self.create_subscription(
                 Clock, '/clock', self.clock_callback,
@@ -308,7 +310,7 @@ class RobotEnvironment(Node):
                 while rclpy.ok() and self.sim_now - t_start < duration:
                     if time.monotonic() >= wall_deadline:
                         raise RuntimeError('/clock stopped advancing during an action')
-                    rclpy.spin_once(self, timeout_sec=0.001)
+                    rclpy.spin_once(self, timeout_sec=self.sim_poll)
             finally:
                 self.publish_stop()
                 self.last_action_sim_duration = self.sim_now - t_start

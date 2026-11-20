@@ -168,6 +168,7 @@ def main(argv=None):
         "goal_counts": [goals.count(i) for i in range(4)],
         "sim_time_stepping": os.environ.get("DQN_SIM_TIME_STEP") == "1",
         "rtf_cap": os.environ.get("V2_RTF_CAP"),
+        "clock_hz": os.environ.get("V2_CLOCK_HZ"), "sim_poll_s": os.environ.get("DQN_SIM_POLL_S", "0.001"),
         "reward_scale": scale, "rainbow_support": (-75.0 * scale, 125.0 * scale),
         "diag_goal": diag_goal, "diagnostic": bool(diag_goal) or scale != REWARD_SCALE,
         "per_beta_schedule": f"{PER_BETA_START} + {1 - PER_BETA_START} * episode / episodes (Rainbow only)",

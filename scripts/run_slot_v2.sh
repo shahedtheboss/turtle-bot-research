@@ -22,6 +22,8 @@ export ROS_DOMAIN_ID=$((30 + SLOT)) ROS_LOCALHOST_ONLY=1
 export GAZEBO_MASTER_URI="http://localhost:$((11345 + SLOT))"
 export RAINBOW_SLOT="$SLOT" RAINBOW_PARALLEL="${RAINBOW_PARALLEL:-unknown}" TURTLEBOT3_MODEL=burger
 export DQN_SIM_TIME_STEP=1 V2_RTF_CAP="${V2_RTF_CAP:-3}"
+# CPU tweak options (2026-11-20): /clock rate and wait-poll interval; defaults = original values
+export V2_CLOCK_HZ="${V2_CLOCK_HZ:-1000}" DQN_SIM_POLL_S="${DQN_SIM_POLL_S:-0.001}"
 source /opt/ros/humble/setup.bash
 source "$REPO/install/setup.bash"
 source "$HOME/pytorch-env/bin/activate"
@@ -51,7 +53,8 @@ cleanup() {
 trap cleanup EXIT
 
 echo "[slot $SLOT] $RUN_NAME world=$WORLD domain=$ROS_DOMAIN_ID gazebo=$GAZEBO_MASTER_URI rtf_cap=$V2_RTF_CAP"
-setsid ros2 launch turtlebot3_gazebo turtlebot3_drl_v2.launch.py stage:="$WORLD" rtf_cap:="$V2_RTF_CAP" gui:=false \
+setsid ros2 launch turtlebot3_gazebo turtlebot3_drl_v2.launch.py stage:="$WORLD" rtf_cap:="$V2_RTF_CAP" \
+    clock_rate:="$V2_CLOCK_HZ" gui:=false \
     > "$GZ_LOG" 2>&1 &
 deadline=$(( $(date +%s) + 120 ))
 until timeout 10 ros2 topic echo /scan --once --no-daemon > /dev/null 2>&1; do

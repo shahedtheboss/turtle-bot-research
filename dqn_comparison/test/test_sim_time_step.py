@@ -55,3 +55,16 @@ def test_frozen_clock_raises_and_stops_robot(monkeypatch):
         env.execute_action_for_duration(0)
     assert sent[-1] == (0.0, 0.0)                # robot is still stopped
     env.destroy_node()
+
+
+def test_poll_interval_default_and_override(monkeypatch):
+    env, _ = make_env(monkeypatch, sim=True)
+    assert env.sim_poll == 0.001                       # original behaviour
+    env.destroy_node()
+    monkeypatch.setenv('DQN_SIM_POLL_S', '0.005')
+    env, sent = make_env(monkeypatch, sim=True)
+    assert env.sim_poll == 0.005
+    fake_clock(monkeypatch, env, tick=0.005)           # 200 Hz clock
+    env.execute_action_for_duration(0)
+    assert 0.5 <= env.last_action_sim_duration < 0.506 and sent[-1] == (0.0, 0.0)
+    env.destroy_node()
