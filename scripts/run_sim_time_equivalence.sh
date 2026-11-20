@@ -16,7 +16,7 @@ mkdir -p results_smoke/b3 log/slots
 
 run_mode() {   # mode rtf_cap sim_flag
     local mode=$1 cap=$2 sim=$3
-    setsid ros2 launch turtlebot3_gazebo turtlebot3_drl_v2.launch.py stage:=1 rtf_cap:=$cap \
+    setsid ros2 launch turtlebot3_gazebo turtlebot3_drl_v2.launch.py stage:=1 rtf_cap:=$cap clock_rate:="${V2_CLOCK_HZ:-1000}" \
         > "log/slots/b3_${mode}_gazebo.log" 2>&1 &
     local gz=$!
     deadline=$(( $(date +%s) + 120 ))

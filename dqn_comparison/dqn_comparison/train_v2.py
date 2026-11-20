@@ -135,6 +135,8 @@ def parse_args(argv):
                    help="end training once E* is met (>= 3/4 confirmed); diagnosis/pilot only, never main runs")
     p.add_argument("--reward-scale", type=float, default=REWARD_SCALE,
                    help="reward multiplier for learning (default 0.01; 1.0 = v1 rewards; diagnosis only)")
+    p.add_argument("--lr", type=float, default=None,
+                   help="learning rate override (tuning, docs/v2_tuning_protocol.md); default: shared value 1e-4")
     args = p.parse_args(remove_ros_args(argv)[1:])
     args.algo, args.guide = ARMS_V2[args.arm]
     return args
@@ -207,6 +209,11 @@ def main(argv=None):
         agent = (build_rainbow(52, 7, v_min=-75.0 * scale, v_max=125.0 * scale) if args.algo == "rainbow"
                  else AGENTS_V2[args.algo]())
         agent = apply_reward_scale(agent, scale)
+        if args.lr is not None:                  # tuning: same Adam optimizer, only its step size changes
+            for group in agent.optimizer.param_groups:
+                group["lr"] = args.lr
+            if hasattr(agent, "cfg"):
+                agent.cfg["learning_rate"] = args.lr
         meta["device"] = str(agent.device)
         meta["hyperparameters"] = (dict(agent.cfg) if hasattr(agent, "cfg") else
                                    {"learning_rate": agent.optimizer.param_groups[0]["lr"], "gamma": agent.gamma,
