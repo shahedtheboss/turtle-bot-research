@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 # Study v2 tuning (docs/v2_tuning_protocol.md, option a): 4 algorithms x 3 learning rates x 2 tuning seeds
-# = 24 runs in world 4 (moving), each stopped once E* is met (--stop-when-learned), PARALLEL slots at once.
+# = 24 runs (20 after dropping lr 5e-5 on seed 102) in world 4 (moving), each stopped once E* is met (--stop-when-learned), PARALLEL slots at once.
 #
 #   scripts/run_tuning_v2.sh            # all 24 runs, 4 slots
 #   PARALLEL=3 scripts/run_tuning_v2.sh
 #
-# Runs already finished (status completed in run_meta.json) are skipped, so the script can be restarted.
+# Runs already finished (status completed in run_meta.json) or still running are skipped, so the script can be
+# restarted; a worker waits until its slot's Gazebo from an earlier launcher has stopped.
 # Output: results_tune_v2/tune_w4_<arm>_lr<lr>_s<seed>/
 set -o pipefail
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -21,11 +22,21 @@ export V2_CLOCK_HZ=200 DQN_SIM_POLL_S=0.005
 jobs=()
 for seed in 101 102; do
     for lr in 1e-4 5e-5 2.5e-4; do
+        # dropped 2026-11-20 by the author for time (protocol deviation, see docs/v2_tuning_protocol.md):
+        # learning rate 5e-5 on seed 102 (only seed 101 is run at 5e-5)
+        [ "$lr" = 5e-5 ] && [ "$seed" = 102 ] && continue
         for arm in dqn ddqn d3qn rainbow; do
             jobs+=("$arm $lr $seed")
         done
     done
 done
+
+slot_busy() {   # is a Gazebo for this slot (port 11345 + slot) still running?
+    for p in $(pgrep gzserver || true); do
+        tr '\0' '\n' < /proc/$p/environ 2>/dev/null | grep -qx "GAZEBO_MASTER_URI=http://localhost:$((11345 + $1))" && return 0
+    done
+    return 1
+}
 
 worker() {   # slot: takes every PARALLEL-th job, starting at job (slot - 1)
     local slot=$1
@@ -37,6 +48,10 @@ worker() {   # slot: takes every PARALLEL-th job, starting at job (slot - 1)
                 && [ -f "results_tune_v2/$name/${name}_final_eval.csv" ]; then
             echo "[slot $slot] skip $name (done)"; continue
         fi
+        if pgrep -f -- "--run-name $name " > /dev/null; then
+            echo "[slot $slot] skip $name (already running from an earlier launcher)"; continue
+        fi
+        while slot_busy "$slot"; do sleep 30; done      # an earlier launcher's run still uses this slot
         echo "[slot $slot] $(date +%T) start $name"
         RAINBOW_PARALLEL=$PARALLEL scripts/run_slot_v2.sh "$slot" "$WORLD" "$arm" "$seed" \
             --episodes "$EPISODES" --eval-every 20 --lr "$lr" --stop-when-learned \

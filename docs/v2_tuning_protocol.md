@@ -27,6 +27,11 @@ later reported.
 | (b) learning rate (3) x one second setting (2) per algorithm, 2 seeds: Rainbow sigma0 in {0.5, 0.25}; DQN/DDQN/D3QN epsilon decay length in {10k, 20k} steps | 6 x 2 | 48 |
 Everything not tuned keeps the shared v2 settings (Table II of the paper, plus the PER beta schedule; rewards unscaled, x1.0).
 
+**Deviation (2026-11-20, decided by the author for time, after 5 of 24 tuning runs had finished):** learning rate
+5e-5 is run on seed 101 only (20 runs instead of 24). At that point the seed-101 runs at 5e-5 were learning slowly
+(Rainbow E* 400; DQN/DDQN/D3QN not learned by ~460 episodes), so the decision was made after seeing tuning data;
+it is reported as such. For 5e-5, the selection rule uses the single seed.
+
 ## Selection rule
 For each algorithm, choose the setting with the **lowest median E\*** over its tuning seeds (censored runs count as
 budget + check interval). Ties: higher mean final success (final evaluation of the model at the stopping point, 2 x 20 episodes). Remaining ties: the
