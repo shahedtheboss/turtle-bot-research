@@ -12,7 +12,8 @@ train.py itself is not modified, so v1 stays reproducible from this branch too. 
   - greedy checks: one greedy episode per goal from the start pose (4 per check)
   - arms: dqn, ddqn, d3qn, rainbow, rainbow_g (d3qn_g dropped in v2); results in results_v2/
 Approved v2 algorithm changes (2026-11-19), applied identically to every method:
-  - REWARD SCALING: every reward the agent LEARNS from is multiplied by REWARD_SCALE = 0.01 (environment
+  - REWARD SCALING (REVERTED 2026-11-20 to 1.0: the diagnosis showed x0.01 stops learning; kept as an option):
+    every reward the agent LEARNS from is multiplied by REWARD_SCALE (environment
     and logged rewards stay in v1 units). Positive scaling leaves the optimal policy unchanged; with
     errors mostly < 1 the Huber loss acts like squared error, so the +1 goal target is fitted (v1 probe:
     Q ~ 12 one step before a +100 goal). Rainbow's C51 support is scaled the same way: [-0.75, 1.25].
@@ -44,6 +45,7 @@ from dqn_comparison.train import (AGENTS, EPISODE_FIELDS, probe_states, action_h
                                   run_episode, save_plot)
 from dqn_comparison.agent_rainbow import build_rainbow
 from dqn_comparison import worlds_v2 as W
+from dqn_comparison.metrics_v2 import e_star
 
 EPISODES = 200            # placeholder; the v2 budget is set by the pilot and fixed before the main runs
 EVAL_EVERY = 20
@@ -51,7 +53,9 @@ GOAL_RNG_OFFSET = 10_000  # goal RNG seed = seed + offset (independent of the tr
 ARMS_V2 = {"dqn": ("dqn", False), "ddqn": ("ddqn", False), "d3qn": ("d3qn", False),
            "rainbow": ("rainbow", False), "rainbow_g": ("rainbow", True)}
 
-REWARD_SCALE = 0.01
+# CHANGED 2026-11-20: 0.01 -> 1.0 (v1 rewards). The diagnosis showed scaling by 0.01 stops learning
+# (static stage 4s, one goal, D3QN: scale 1.0 learned at E* 60/140, scale 0.01 did not learn in 200 episodes).
+REWARD_SCALE = 1.0
 RAINBOW_SUPPORT = (-75.0 * REWARD_SCALE, 125.0 * REWARD_SCALE)   # v1 support, scaled like the rewards
 PER_BETA_START = 0.4
 AGENTS_V2 = {"dqn": AGENTS["dqn"], "ddqn": AGENTS["ddqn"], "d3qn": AGENTS["d3qn"],
@@ -127,6 +131,8 @@ def parse_args(argv):
     p.add_argument("--overwrite", action="store_true")
     # ---- DIAGNOSIS ONLY (2026-11-20, pilot did not learn): change one v2 element at a time ----
     p.add_argument("--diag-goal", help="X,Y: train and check on this ONE goal instead of the 4 (diagnosis only)")
+    p.add_argument("--stop-when-learned", action="store_true",
+                   help="end training once E* is met (>= 3/4 confirmed); diagnosis/pilot only, never main runs")
     p.add_argument("--reward-scale", type=float, default=REWARD_SCALE,
                    help="reward multiplier for learning (default 0.01; 1.0 = v1 rewards; diagnosis only)")
     args = p.parse_args(remove_ros_args(argv)[1:])
@@ -279,6 +285,14 @@ def main(argv=None):
                 if wins / n > best_success:
                     best_success = wins / n
                     agent.save(best_path)
+                if args.stop_when_learned:
+                    e, censored = e_star([(r["episode"], r["wins"]) for r in eval_rows], args.episodes,
+                                         args.eval_every)
+                    if not censored:
+                        meta["stopped_early_at_e_star"] = e
+                        meta["status"] = "completed"
+                        env.get_logger().info(f"[{run_name}] learned (E*={e}); stopping early")
+                        break
         else:
             meta["status"] = "completed"
 

@@ -49,7 +49,7 @@ from dqn_comparison.agent_dqn import DQNAgent                # noqa: E402
 
 
 def test_reward_scale_applies_to_stored_transitions_dqn():
-    agent = T.apply_reward_scale(DQNAgent(52, 7))
+    agent = T.apply_reward_scale(DQNAgent(52, 7), 0.01)          # the option still works
     s = np.zeros(52, dtype=np.float32)
     agent.remember(s, 0, 100.0, s, True)
     agent.remember(s, 1, -25.0, s, True, truncated=False)
@@ -57,7 +57,8 @@ def test_reward_scale_applies_to_stored_transitions_dqn():
 
 
 def test_reward_scale_applies_to_rainbow_and_support_is_scaled():
-    agent = T.apply_reward_scale(T.AGENTS_V2['rainbow']())
+    from dqn_comparison.agent_rainbow import build_rainbow
+    agent = T.apply_reward_scale(build_rainbow(52, 7, v_min=-0.75, v_max=1.25), 0.01)
     assert (agent.v_min, agent.v_max) == (pytest.approx(-0.75), pytest.approx(1.25))
     assert agent.delta_z == pytest.approx(0.04)
     seen = []
@@ -96,3 +97,10 @@ def test_diagnostic_flags_default_off():
     assert a.diag_goal is None and a.reward_scale == T.REWARD_SCALE
     b = T.parse_args(['p', '--world', '4s', '--arm', 'd3qn', '--diag-goal', '2,-2', '--reward-scale', '1'])
     assert b.diag_goal == '2,-2' and b.reward_scale == 1.0
+
+
+def test_default_is_v1_rewards_after_diagnosis():
+    assert T.REWARD_SCALE == 1.0
+    a = T.AGENTS_V2['rainbow']()
+    assert (a.v_min, a.v_max) == (-75.0, 125.0)                   # v1 support again
+    assert T.parse_args(['p', '--world', '4', '--arm', 'd3qn']).stop_when_learned is False
