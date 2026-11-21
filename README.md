@@ -1,71 +1,83 @@
 # turtle-bot-research
 
-Value-based deep reinforcement learning for mapless goal navigation of a TurtleBot3 Burger in ROS 2 Humble
-and Gazebo Classic 11. This branch (`main`) holds **study v2**: DQN, Double DQN, Dueling Double DQN (D3QN),
-Rainbow DQN and Rainbow with a decaying scripted guide, each tuned with an equal budget, compared in five
-Gazebo worlds (static and moving obstacles) with four goals drawn at random per episode.
+Deep reinforcement learning for **mapless goal navigation** of a TurtleBot3 Burger, built on
+**ROS 2 Humble**, **Gazebo Classic 11** and **PyTorch**.
 
-**Study v1** (one world, one fixed goal; paper release `paper1-v1.0`, Zenodo DOI 10.5281/zenodo.24313470) lives on
-the [`version-1`](../../tree/version-1) branch with its code, results and paper. v2 reuses the v1 learning code
-unchanged (now in `learning.py`).
+The robot sees only a 2D LiDAR scan and the distance and angle to its goal. It has no map and no planner,
+and it learns to reach goals while avoiding static and moving obstacles.
 
-## Design (summary)
+> This is an active research project. The code is public; the study design, results and paper will be
+> released when the work is published.
 
-| Item | Setting |
+## Highlights
+
+- **Value-based DRL agents:** DQN-family agents, implemented from scratch in PyTorch, sharing one
+  environment and one training loop.
+- **Several Gazebo worlds,** from simple walls to moving obstacles. Every episode starts in the same
+  state, so runs can be reproduced.
+- **Faster than real time without changing behaviour.** Simulated-time stepping lets several isolated
+  headless Gazebo instances train in parallel. A check confirms the robot moves the same way as in
+  real-time control.
+- **Reproducible runs.** Seeds, git commit, machine and device are recorded in every run's metadata.
+- **Evaluation and statistics tools:** greedy evaluation, Wilson intervals, IQM, bootstrap confidence
+  intervals, effect sizes and exact permutation tests.
+
+## How it works
+
+| Part | Description |
 |---|---|
-| Worlds | DRL stages 2, 3, 4s (stage 4, obstacles static), 4 (moving), 6; launch `turtlebot3_drl_v2.launch.py stage:=<world>` |
-| Episode start | `/reset_simulation`, warm-up W s of simulated time (same obstacle phase every episode), teleport to start |
-| Goals | 4 per world; shuffled blocks, one RNG per seed, so all methods see the same goal sequence |
-| State / actions | 52 values (50 LiDAR sectors, goal distance, goal angle) / 7 discrete actions, each 0.5 s of simulated time |
-| Speed | simulated-time stepping, real-time factor capped at 3, /clock 200 Hz, 5 ms poll (checked equal to v1 real-time motion) |
-| Budget | 500 episodes; greedy check (4 goals) every 20 episodes |
-| Primary metric | E* = first check with >= 3/4 goals, confirmed by the next check; censored at 520 |
-| Final evaluation | 5 poses × 4 goals × 2 repeats, greedy, final checkpoint |
-| Tuning | learning rate per algorithm, equal budget, separate seeds (`docs/v2_tuning_protocol.md`) |
-| Main runs | 5 arms × 5 worlds × seeds 1-5 = 125 runs (`scripts/main_runs_v2.csv`) |
+| Observation | 52 values: 50 LiDAR sectors, goal distance, goal angle |
+| Actions | 7 discrete velocity commands, each held for 0.5 s of simulated time |
+| Reward | Progress toward the goal, plus a bonus for reaching it and a penalty for collisions |
+| Episode start | Simulation reset, a fixed warm-up, then the robot is placed at the start |
 
-## Layout
+## Repository layout
 
-ROS 2 package `dqn_comparison/`, Python code in `dqn_comparison/dqn_comparison/`:
+ROS 2 package `dqn_comparison/`; the Python code is in `dqn_comparison/dqn_comparison/`.
 
 | File | Contents |
 |---|---|
-| `environment.py` | Gazebo environment: state, actions, reward, simulated-time action timing |
-| `agent_dqn.py`, `agent_ddqn.py`, `agent_d3qn.py`, `agent_rainbow.py`, `rainbow_core.py` | The four algorithms |
-| `learning.py` | Method registry, one training/greedy episode, probe states, plot, checkpoint loading (from v1) |
-| `common.py` | Constants, seeding, guide heuristic, sensor wait, git info |
-| `worlds_v2.py` | Per-world layouts (start, goals, test poses, warm-up W) and recorded obstacle paths |
-| `episode_v2.py` | Episode start (reset, warm-up, teleport) |
-| `train_v2.py` | Training run (one world, arm, seed); tuned learning rates in `TUNED_LR` |
-| `evaluate_v2.py` | Final evaluation over all pose × goal combinations |
-| `metrics_v2.py`, `stats.py` | E*; Wilson, IQM, bootstrap, Vargha-Delaney A, exact permutation tests, Holm |
-| `data/v2_obstacle_paths.csv` | Recorded moving-obstacle paths |
+| `environment.py` | Gazebo environment: observations, actions, reward, simulated-time stepping |
+| `agent_*.py`, `rainbow_core.py` | Learning agents |
+| `learning.py` | Agent registry, episode loop, checkpoint loading |
+| `train_v2.py`, `evaluate_v2.py` | Training and evaluation entry points |
+| `worlds_v2.py`, `episode_v2.py` | World layouts and episode start |
+| `metrics_v2.py`, `stats.py` | Metrics and statistics |
+| `scripts/` | Launchers for isolated parallel Gazebo runs, plus checks |
+| `dqn_comparison/test/` | Unit tests |
 
-Scripts (`scripts/`):
+## Getting started
 
-| Script | Purpose |
-|---|---|
-| `run_slot_v2.sh` | One run (train + final evaluation) in an isolated headless Gazebo slot |
-| `run_main_v2.sh` | The 125 main runs from `main_runs_v2.csv`, N slots in parallel, per machine, with take-over |
-| `run_tuning_v2.sh` | The tuning runs |
-| `run_sim_time_equivalence.sh`, `sim_time_equivalence.py` | Check: simulated-time stepping moves the robot like v1 real time |
-| `v2_*.py` | World layout, obstacle-path recording and checks, reset check |
+Requirements: Ubuntu 22.04, ROS 2 Humble, Gazebo Classic 11, the TurtleBot3 packages, and Python with
+PyTorch (a CUDA GPU is recommended).
 
-Docs: `docs/v2_tuning_protocol.md` (tuning protocol and result), `docs/setup_second_machine.md` (lab PC).
+```bash
+git clone <this repo> ~/turtle-bot-research && cd ~/turtle-bot-research
+source /opt/ros/humble/setup.bash
+colcon build --symlink-install
+source install/setup.bash
+```
 
-## Build
+Run the tests:
 
-The repo root is the colcon workspace. Clone it outside any other ROS workspace:
+```bash
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest dqn_comparison/test/ -q \
+  --ignore=dqn_comparison/test/test_flake8.py --ignore=dqn_comparison/test/test_pep257.py
+```
 
-    cd ~/turtle-bot-research && source /opt/ros/humble/setup.bash && colcon build --symlink-install
+Run a short training run in a headless Gazebo slot (slot 1, world 4, agent D3QN, seed 9, 3 episodes):
 
-## Quick start
+```bash
+EVAL_REPEATS=1 scripts/run_slot_v2.sh 1 4 d3qn 9 --episodes 3 --eval-every 3 \
+  --results-dir results_smoke/try --overwrite
+```
 
-    source /opt/ros/humble/setup.bash && source install/setup.bash && source ~/pytorch-env/bin/activate
-    PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest dqn_comparison/test/ -q --ignore=dqn_comparison/test/test_flake8.py --ignore=dqn_comparison/test/test_pep257.py
-    EVAL_REPEATS=1 scripts/run_slot_v2.sh 1 4 d3qn 9 --episodes 3 --eval-every 3 --results-dir results_smoke/try --overwrite
-    scripts/run_main_v2.sh laptop          # main runs planned for this machine (see the script header)
+## Earlier work
+
+The first study (one world, one fixed goal) is on the [`version-1`](../../tree/version-1) branch, with its
+code, results and paper. Its archived release is on Zenodo:
+[10.5281/zenodo.24313470](https://doi.org/10.5281/zenodo.24313470).
 
 ## License
 
-MIT, see `LICENSE`.
+MIT. See `LICENSE`.
