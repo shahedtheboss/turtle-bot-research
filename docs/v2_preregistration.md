@@ -43,3 +43,18 @@ step for every algorithm.
 **Consequences:** the 4 main runs are discarded (results_invalid_v2_stale_clock/, not analysed); the tuning is
 rerun with the same protocol on the fixed code; the main runs restart from scratch after a new tag
 (v2-prereg-1.1). No main-study result had been looked at beyond these 4 invalid runs.
+(The tuning rerun planned here was replaced by deviation 2.)
+
+## Deviation 2 (2026-11-21): learning rates kept from the first tuning; learning device fixed to CUDA
+**Cause found:** at 12:37:49 the NVIDIA driver was changed (595 -> 580-open, `apt install`), which broke CUDA until
+a reboot. The code chose CUDA "if available, else CPU" without warning, so the first tuning ran on the GPU and the
+4 discarded main runs (except DQN, started 13 s before the change) and the tuning rerun on the CPU. CPU learning with
+4 parallel runs was slow, which is why the timing bug (deviation 1) stopped the robot in the main runs but only
+shortened actions slightly in the first tuning (GPU learning is fast; the shortening cannot be measured afterwards).
+**Decision (author):** the tuning rerun was stopped after ~1 h (partial, CPU; results_tune_v2_rerun_partial_cpu/,
+not used) and the learning rates selected by the FIRST tuning (results_tune_v2_stale_clock/) are kept:
+DQN 2.5e-4, DDQN 2.5e-4, D3QN 1e-4, Rainbow 1e-4. Limitation, to be reported: that tuning ran on the pre-fix code,
+where actions were shortened by the (short, GPU) learning time, so the rates were chosen on a slightly different
+task; in it, 1e-4 and 2.5e-4 were within seed-to-seed noise for every algorithm.
+**Device:** all main runs use CUDA, required (`DQN_DEVICE=cuda` in run_slot_v2.sh: a run fails instead of falling
+back to the CPU); the device is recorded in run_meta.json. Laptop and lab PC both run CUDA.

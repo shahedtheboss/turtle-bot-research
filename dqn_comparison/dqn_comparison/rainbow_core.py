@@ -5,6 +5,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
+from dqn_comparison.common import select_device
 
 
 class NoisyLinear(nn.Module):
@@ -278,7 +279,7 @@ class RainbowDQNAgent:
         self.target_update_every, self.warmup_transitions = target_update_every, warmup_transitions
 
         self.learning_steps = 0
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = select_device()                # DQN_DEVICE (common.select_device), 2026-11-21
         self.support = torch.linspace(v_min, v_max, num_atoms, device = self.device) 
         self.delta_z =(v_max - v_min) / (num_atoms - 1)
 

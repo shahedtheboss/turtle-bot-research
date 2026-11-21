@@ -150,3 +150,19 @@ def test_guided_probability_schedule():
 
 
 # ---------------- END NEW CODE ----------------
+
+
+def test_select_device(monkeypatch):
+    import torch
+    from dqn_comparison.common import select_device
+    monkeypatch.setenv("DQN_DEVICE", "cpu")
+    assert select_device().type == "cpu"
+    monkeypatch.setenv("DQN_DEVICE", "cuda")
+    if torch.cuda.is_available():
+        assert select_device().type == "cuda"
+    else:
+        with pytest.raises(RuntimeError):       # never a silent CPU fallback
+            select_device()
+    monkeypatch.setenv("DQN_DEVICE", "gpu")
+    with pytest.raises(ValueError):
+        select_device()

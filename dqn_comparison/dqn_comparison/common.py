@@ -22,6 +22,22 @@ GUIDED_EPISODES = 100
 GUIDED_NOISE = 0.15           # chance the guided action is replaced by a forward-biased random one
 
 
+def select_device():
+    """Torch device from DQN_DEVICE: 'cuda' (required: error if CUDA does not work), 'cpu', or 'auto' (default:
+    CUDA if available, else CPU). Added 2026-11-21: 'auto' silently fell back to the CPU when the NVIDIA driver
+    broke mid-session, so runs of one experiment used different devices; the run scripts now set 'cuda'."""
+    choice = os.environ.get("DQN_DEVICE", "auto")
+    if choice == "cuda":
+        if not torch.cuda.is_available():
+            raise RuntimeError("DQN_DEVICE=cuda but CUDA is not available (NVIDIA driver? reboot after a driver update)")
+        return torch.device("cuda")
+    if choice == "cpu":
+        return torch.device("cpu")
+    if choice != "auto":
+        raise ValueError(f"DQN_DEVICE must be cuda, cpu or auto, not {choice!r}")
+    return torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+
 def set_seed(seed):
     random.seed(seed)
     np.random.seed(seed)

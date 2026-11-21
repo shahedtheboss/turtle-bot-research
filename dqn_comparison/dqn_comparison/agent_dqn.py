@@ -18,6 +18,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from dqn_comparison.common import select_device
 
 
 # ---------------- NEW CODE ADDED: one place for the hyperparameters shared by DQN/DDQN/D3QN ----------------
@@ -76,7 +77,7 @@ class DQNAgent:
         self.gamma = cfg["gamma"]
         self.batch_size = cfg["batch_size"]
         self.learning_steps = 0                      # was agent_DDDQN.py:78 (learn_steps)
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = select_device()                # DQN_DEVICE (common.select_device), 2026-11-21
 
         self.policy_net = self._build_network().to(self.device)
         self.target_net = self._build_network().to(self.device)

@@ -24,6 +24,8 @@ export RAINBOW_SLOT="$SLOT" RAINBOW_PARALLEL="${RAINBOW_PARALLEL:-unknown}" TURT
 export DQN_SIM_TIME_STEP=1 V2_RTF_CAP="${V2_RTF_CAP:-3}"
 # CPU tweak options (2026-11-20): /clock rate and wait-poll interval; defaults = original values
 export V2_CLOCK_HZ="${V2_CLOCK_HZ:-1000}" DQN_SIM_POLL_S="${DQN_SIM_POLL_S:-0.001}"
+# learning device (2026-11-21): cuda by default and REQUIRED, so no run silently falls back to the CPU
+export DQN_DEVICE="${DQN_DEVICE:-cuda}"
 source /opt/ros/humble/setup.bash
 source "$REPO/install/setup.bash"
 source "$HOME/pytorch-env/bin/activate"

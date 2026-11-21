@@ -135,7 +135,7 @@ def parse_args(argv):
     # ---- DIAGNOSIS ONLY (2026-11-20, pilot did not learn): change one v2 element at a time ----
     p.add_argument("--diag-goal", help="X,Y: train and check on this ONE goal instead of the 4 (diagnosis only)")
     p.add_argument("--stop-when-learned", action="store_true",
-                   help="end training once E* is met (>= 3/4 confirmed); diagnosis/pilot only, never main runs")
+                   help="end training once E* is met (>= 3/4 confirmed); diagnosis and tuning only, never main runs")
     p.add_argument("--reward-scale", type=float, default=REWARD_SCALE,
                    help="reward multiplier for learning (default 0.01; 1.0 = v1 rewards; diagnosis only)")
     p.add_argument("--lr", type=float, default=None,
