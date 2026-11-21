@@ -45,13 +45,13 @@ class RainbowAgent(_BaseRainbow):
     # ---------------- END NEW CODE ----------------
 
 
-def build_rainbow(state_size=52, action_size=7, v_min=-75.0, v_max=125.0):
+def build_rainbow(state_size=52, action_size=7, v_min=-75.0, v_max=125.0, n_step=3, sigma0=0.5):
     """Rainbow with exactly the hyperparameters of the pilot / ablation train.py.
     v_min/v_max: C51 support; defaults are v1. Study v2 scales rewards by 0.01 and passes -0.75 / 1.25
     (CHANGED 2026-11-19: support became parameters; defaults unchanged)."""
     return RainbowAgent(
         state_size=state_size, action_size=action_size,
         learning_rate=1e-4, gamma=0.99, batch_size=128, memory_size=50000,
-        n_step=3, num_atoms=51, v_min=v_min, v_max=v_max,
-        target_update_every=250, warmup_transitions=1000,
+        n_step=n_step, num_atoms=51, v_min=v_min, v_max=v_max,
+        target_update_every=250, warmup_transitions=1000, sigma0=sigma0,   # n_step, sigma0: tuning 2026-11-21
     )

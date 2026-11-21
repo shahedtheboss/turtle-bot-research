@@ -61,6 +61,14 @@ PER_BETA_START = 0.4
 # Tuned learning rates (docs/v2_tuning_protocol.md, result 2026-11-20): lowest median E* over 2 tuning seeds
 # in world 4. Used by every main run unless --lr is given; rainbow_g uses Rainbow's value.
 TUNED_LR = {"dqn": 2.5e-4, "ddqn": 2.5e-4, "d3qn": 1e-4, "rainbow": 1e-4}
+# Second tuning stage (2026-11-21, docs/v2_tuning_protocol.md): two more settings per algorithm, equal budget.
+# Until that tuning is done these are the shared v1 values; the main runs use the selected values.
+TUNED_EXTRA = {
+    "dqn": {"epsilon_decay_steps": 10_000, "target_update_every": 250},
+    "ddqn": {"epsilon_decay_steps": 10_000, "target_update_every": 250},
+    "d3qn": {"epsilon_decay_steps": 10_000, "target_update_every": 250},
+    "rainbow": {"sigma0": 0.5, "n_step": 3},
+}
 AGENTS_V2 = {"dqn": AGENTS["dqn"], "ddqn": AGENTS["ddqn"], "d3qn": AGENTS["d3qn"],
              "rainbow": lambda: build_rainbow(52, 7, v_min=RAINBOW_SUPPORT[0], v_max=RAINBOW_SUPPORT[1])}
 
@@ -140,8 +148,25 @@ def parse_args(argv):
                    help="reward multiplier for learning (default 0.01; 1.0 = v1 rewards; diagnosis only)")
     p.add_argument("--lr", type=float, default=None,
                    help="learning rate override (tuning only); default: the tuned value TUNED_LR[algorithm]")
+    # second tuning stage (2026-11-21): None = the value in TUNED_EXTRA
+    p.add_argument("--eps-decay", type=int, default=None, help="DQN/DDQN/D3QN: epsilon decay length [env steps]")
+    p.add_argument("--target-update", type=int, default=None, help="DQN/DDQN/D3QN: target update period [learning steps]")
+    p.add_argument("--sigma0", type=float, default=None, help="Rainbow: NoisyNet initial noise scale")
+    p.add_argument("--n-step", type=int, default=None, help="Rainbow: n-step return length")
     args = p.parse_args(remove_ros_args(argv)[1:])
     args.algo, args.guide = ARMS_V2[args.arm]
+    rainbow_only = (args.sigma0, args.n_step)
+    dqn_only = (args.eps_decay, args.target_update)
+    if args.algo == "rainbow" and any(v is not None for v in dqn_only):
+        p.error("--eps-decay / --target-update are for DQN, DDQN and D3QN, not Rainbow")
+    if args.algo != "rainbow" and any(v is not None for v in rainbow_only):
+        p.error("--sigma0 / --n-step are for Rainbow only")
+    extra = dict(TUNED_EXTRA[args.algo])
+    for key, value in (("epsilon_decay_steps", args.eps_decay), ("target_update_every", args.target_update),
+                       ("sigma0", args.sigma0), ("n_step", args.n_step)):
+        if value is not None:
+            extra[key] = value
+    args.extra = extra
     return args
 
 
@@ -209,8 +234,12 @@ def main(argv=None):
         env = RobotEnvironment()
         if not env.sim_time_stepping:
             raise RuntimeError("train_v2 needs DQN_SIM_TIME_STEP=1 (actions timed on simulated time)")
-        agent = (build_rainbow(52, 7, v_min=-75.0 * scale, v_max=125.0 * scale) if args.algo == "rainbow"
-                 else AGENTS_V2[args.algo]())
+        if args.algo == "rainbow":
+            agent = build_rainbow(52, 7, v_min=-75.0 * scale, v_max=125.0 * scale,
+                                  n_step=args.extra["n_step"], sigma0=args.extra["sigma0"])
+        else:
+            agent = AGENTS_V2[args.algo]()
+            agent.cfg.update(args.extra)         # read at use time (update_epsilon, target sync)
         agent = apply_reward_scale(agent, scale)
         lr = TUNED_LR[args.algo] if args.lr is None else args.lr   # same Adam optimizer, only its step size
         for group in agent.optimizer.param_groups:
@@ -222,8 +251,9 @@ def main(argv=None):
         meta["hyperparameters"] = (dict(agent.cfg) if hasattr(agent, "cfg") else
                                    {"learning_rate": agent.optimizer.param_groups[0]["lr"], "gamma": agent.gamma,
                                     "batch_size": agent.batch_size, "n_step": agent.memory.n_step,
-                                    "v_min": agent.v_min, "v_max": agent.v_max,
+                                    "v_min": agent.v_min, "v_max": agent.v_max, "sigma0": agent.sigma0,
                                     "per_beta_frames": agent.memory.beta_frames})
+        meta["extra_settings"] = args.extra
         probes = probe_states()
         rng_state = (random.getstate(), np.random.get_state(), torch.get_rng_state())
         greedy_hist = action_histogram(agent.select_greedy_action(s) for s in probes)

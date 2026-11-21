@@ -70,3 +70,22 @@ during start-up, no training happened) and were rerun with the same settings.
 ## Rerun (2026-11-21, after the timing fix)
 Same protocol: option (a), world 4, seeds 101-102, lr 5e-5 on seed 101 only (20 runs), stop when learned.
 Results: results_tune_v2/; selection rule as above.
+
+## Second tuning stage (2026-11-21, decided before any run of this stage)
+**Why:** the learning rate alone leaves Rainbow's own components at v1 values (reviewer concern: "Rainbow only partly
+tuned"). To keep the budget equal, every algorithm gets two more settings with two values each.
+
+| Algorithm | Setting 1 | Setting 2 | Learning rate (fixed, from the first stage) |
+|---|---|---|---|
+| DQN, DDQN, D3QN | epsilon decay length {10k, 20k} env steps | target update period {250, 1000} learning steps | DQN 2.5e-4, DDQN 2.5e-4, D3QN 1e-4 |
+| Rainbow | NoisyNet sigma0 {0.25, 0.5} | n-step return {1, 3} | 1e-4 |
+
+4 settings x 2 tuning seeds (101, 102) x 4 algorithms = **32 runs**, world 4 (moving), 500 episodes, stop when learned,
+fixed code (deviation 1), CUDA, 4 in parallel (`scripts/run_tuning2_v2.sh`, results in `results_tune2_v2/`).
+The v1 values (10k / 250; sigma0 0.5 / n-step 3) are one of the 4 settings, rerun on the fixed code.
+Rainbow + guide uses Rainbow's selection.
+
+**Selection rule:** as in the first stage (lowest median E* over the 2 seeds; ties: higher mean final success; then
+the v1 value). The selected values go into `TUNED_EXTRA` in train_v2.py before the main runs (new tag v2-prereg-1.2).
+
+**Reporting:** both stages are reported, including that the first stage ran before the timing fix (deviation 2).

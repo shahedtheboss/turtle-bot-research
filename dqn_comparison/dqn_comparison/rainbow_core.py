@@ -62,7 +62,7 @@ class RainbowNetwork(nn.Module):
     Rainbow DQN network architecture with NoisyNet and C51 distributional output.
     """
 
-    def __init__(self, state_size, action_size, num_atoms=51, hidden=256):
+    def __init__(self, state_size, action_size, num_atoms=51, hidden=256, sigma0=0.5):
         super().__init__()
         self.action_size = action_size
         self.num_atoms = num_atoms
@@ -74,12 +74,12 @@ class RainbowNetwork(nn.Module):
         )
 
         #Value Stream
-        self.value_hidden = NoisyLinear(hidden, 128)
-        self.value_out = NoisyLinear(128, num_atoms)
+        self.value_hidden = NoisyLinear(hidden, 128, sigma0)
+        self.value_out = NoisyLinear(128, num_atoms, sigma0)
 
         #Advantage Stream
-        self.adv_hidden = NoisyLinear(hidden, 128)
-        self.adv_out = NoisyLinear(128, action_size* num_atoms)
+        self.adv_hidden = NoisyLinear(hidden, 128, sigma0)
+        self.adv_out = NoisyLinear(128, action_size* num_atoms, sigma0)
 
     def forward(self, x):
         x = self.features(x)
@@ -271,7 +271,7 @@ class RainbowDQNAgent:
     def __init__(self, state_size=52, action_size=7, learning_rate=1e-4,
                  gamma=0.99, batch_size=128, memory_size=50000, n_step=3,
                  num_atoms=51, v_min=-75.0, v_max=125.0,
-                 target_update_every=250, warmup_transitions=1000):
+                 target_update_every=250, warmup_transitions=1000, sigma0=0.5):   # sigma0: 2026-11-21 (tuning)
 
         self.state_size, self.action_size = state_size,action_size
         self.gamma, self.batch_size = gamma, batch_size
@@ -283,11 +283,12 @@ class RainbowDQNAgent:
         self.support = torch.linspace(v_min, v_max, num_atoms, device = self.device) 
         self.delta_z =(v_max - v_min) / (num_atoms - 1)
 
+        self.sigma0 = sigma0
         self.policy_net  = RainbowNetwork(
-            state_size, action_size, num_atoms
+            state_size, action_size, num_atoms, sigma0=sigma0
         ).to(self.device)
         self.target_net = RainbowNetwork(
-            state_size, action_size, num_atoms
+            state_size, action_size, num_atoms, sigma0=sigma0
         ).to(self.device)
         self.target_net.load_state_dict(self.policy_net.state_dict())
         self.target_net.train()    # NoisyNet noise is active during Bellman-target calculation.

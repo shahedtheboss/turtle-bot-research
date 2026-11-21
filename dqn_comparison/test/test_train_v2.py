@@ -104,3 +104,39 @@ def test_default_is_v1_rewards_after_diagnosis():
     a = T.AGENTS_V2['rainbow']()
     assert (a.v_min, a.v_max) == (-75.0, 125.0)                   # v1 support again
     assert T.parse_args(['p', '--world', '4', '--arm', 'd3qn']).stop_when_learned is False
+
+
+# ---- second tuning stage (2026-11-21) ----
+def test_extra_settings_default_to_v1_values_and_override():
+    a = T.parse_args(['prog', '--world', '4', '--arm', 'ddqn'])
+    assert a.extra == {"epsilon_decay_steps": 10_000, "target_update_every": 250}
+    b = T.parse_args(['prog', '--world', '4', '--arm', 'dqn', '--eps-decay', '20000', '--target-update', '1000'])
+    assert b.extra == {"epsilon_decay_steps": 20_000, "target_update_every": 1000}
+    c = T.parse_args(['prog', '--world', '4', '--arm', 'rainbow_g', '--sigma0', '0.25', '--n-step', '1'])
+    assert c.extra == {"sigma0": 0.25, "n_step": 1}
+
+
+def test_extra_settings_rejected_for_the_wrong_algorithm():
+    with pytest.raises(SystemExit):
+        T.parse_args(['prog', '--world', '4', '--arm', 'rainbow', '--eps-decay', '20000'])
+    with pytest.raises(SystemExit):
+        T.parse_args(['prog', '--world', '4', '--arm', 'd3qn', '--sigma0', '0.25'])
+
+
+def test_dqn_extra_settings_take_effect():
+    agent = T.AGENTS_V2['dqn']()
+    agent.cfg.update({"epsilon_decay_steps": 20_000, "target_update_every": 1000})
+    agent.update_epsilon(10_000)                     # half way through a 20k decay
+    assert agent.epsilon == pytest.approx(1.0 + (0.05 - 1.0) * 0.5)
+
+
+def test_rainbow_sigma0_and_n_step_take_effect():
+    import math
+    from dqn_comparison.agent_rainbow import build_rainbow
+    default = build_rainbow(52, 7)
+    a = build_rainbow(52, 7, n_step=1, sigma0=0.25)
+    assert default.sigma0 == 0.5 and default.memory.n_step == 3          # v1 defaults unchanged
+    assert a.memory.n_step == 1
+    layer = a.policy_net.value_hidden                                     # NoisyLinear(256, 128)
+    assert float(layer.weight_sigma[0, 0]) == pytest.approx(0.25 / math.sqrt(256))
+    assert float(a.target_net.value_hidden.weight_sigma[0, 0]) == pytest.approx(0.25 / math.sqrt(256))
