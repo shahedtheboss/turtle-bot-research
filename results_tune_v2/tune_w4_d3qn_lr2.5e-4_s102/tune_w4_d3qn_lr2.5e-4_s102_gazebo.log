@@ -1,0 +1,779 @@
+[INFO] [launch]: All log files can be found below /home/shahed/.ros/log/2026-11-20-22-08-30-013724-shahed-Aspire-A715-79G-252898
+[INFO] [launch]: Default logging verbosity is set to INFO
+urdf_file_name : turtlebot3_burger.urdf
+urdf_file_name : turtlebot3_burger.urdf
+[INFO] [gzserver-1]: process started with pid [252915]
+[INFO] [robot_state_publisher-2]: process started with pid [252917]
+[robot_state_publisher-2] [WARN] [1795190910.418261163] [robot_state_publisher]: No robot_description parameter, but command-line argument available.  Assuming argument is name of URDF file.  This backwards compatibility fallback will be removed in the future.
+[robot_state_publisher-2] [INFO] [1795190910.421141466] [robot_state_publisher]: got segment ${namespace}base_footprint
+[robot_state_publisher-2] [INFO] [1795190910.421168958] [robot_state_publisher]: got segment ${namespace}base_link
+[robot_state_publisher-2] [INFO] [1795190910.421171871] [robot_state_publisher]: got segment ${namespace}base_scan
+[robot_state_publisher-2] [INFO] [1795190910.421173882] [robot_state_publisher]: got segment ${namespace}caster_back_link
+[robot_state_publisher-2] [INFO] [1795190910.421176035] [robot_state_publisher]: got segment ${namespace}imu_link
+[robot_state_publisher-2] [INFO] [1795190910.421178167] [robot_state_publisher]: got segment ${namespace}wheel_left_link
+[robot_state_publisher-2] [INFO] [1795190910.421180261] [robot_state_publisher]: got segment ${namespace}wheel_right_link
+[gzserver-1] [INFO] [1795190911.372055931] [turtlebot3_imu]: <initial_orientation_as_reference> is unset, using default value of false to comply with REP 145 (world as orientation reference)
+[gzserver-1] [INFO] [1795190911.389966266] [gazebo_ros_state]: Publishing states of gazebo models at [/model_states]
+[gzserver-1] [INFO] [1795190911.390351178] [gazebo_ros_state]: Publishing states of gazebo links at [/link_states]
+[gzserver-1] [INFO] [1795190911.421624859] [turtlebot3_diff_drive]: Wheel pair 1 separation set to [0.160000m]
+[gzserver-1] [INFO] [1795190911.421668854] [turtlebot3_diff_drive]: Wheel pair 1 diameter set to [0.066000m]
+[gzserver-1] [INFO] [1795190911.422366441] [turtlebot3_diff_drive]: Subscribed to [/cmd_vel]
+[gzserver-1] [INFO] [1795190911.422622934] [turtlebot3_diff_drive]: Advertise odometry on [/odom]
+[gzserver-1] [INFO] [1795190911.424373455] [turtlebot3_diff_drive]: Publishing odom transforms between [odom] and [base_footprint]
+[gzserver-1] [INFO] [1795190911.430362112] [turtlebot3_joint_state]: Going to publish joint [wheel_left_joint]
+[gzserver-1] [INFO] [1795190911.430406936] [turtlebot3_joint_state]: Going to publish joint [wheel_right_joint]
+[gzserver-1] [INFO] [1795190919.088932003] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795190919.095640649] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795190926.169478731] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795190926.176015869] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795190936.310553232] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795190936.317241522] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795190948.514923876] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795190948.521554102] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795190960.714825003] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795190960.721427291] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795190967.790847808] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795190967.797521349] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795190979.993849909] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795190980.000445579] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795190986.737124076] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795190986.743573419] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795190993.472844153] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795190993.479559968] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191000.043628025] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191000.050289911] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191011.749022558] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191011.755548179] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191019.519911898] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191019.526841683] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191032.748149450] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191032.755078118] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191039.658125501] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191039.664667594] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191047.276481558] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191047.283148629] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191059.139155601] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191059.145799162] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191065.710550559] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191065.717168792] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191077.912467306] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191077.918883564] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191090.115601740] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191090.122188790] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191109.879661713] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191109.886354601] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191116.966552927] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191116.973298705] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191131.882461281] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191131.888974905] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191143.563490206] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191143.570089549] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191153.362304113] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191153.368884467] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191162.977879599] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191162.984542214] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191172.815071223] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191172.821948900] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191182.341128838] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191182.347727944] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191194.573830430] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191194.580461117] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191220.629526586] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191220.636175453] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191231.990679020] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191231.997174963] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191245.402701316] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191245.409182362] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191252.200479014] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191252.207189761] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191270.046908397] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191270.053519206] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191281.567781765] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191281.574552513] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191288.674223127] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191288.680825090] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191296.491192091] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191296.497817919] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191307.171260149] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191307.177934453] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191322.614818436] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191322.621214773] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191334.870270488] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191334.877105457] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191343.498489778] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191343.505357837] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191350.594675292] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191350.601428916] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191365.416562704] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191365.423104307] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191374.719572344] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191374.726205164] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191401.962880719] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191401.969533263] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191411.789480560] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191411.796184822] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191421.742447039] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191421.748894816] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191432.238459948] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191432.244963362] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191439.483456157] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191439.489925164] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191446.062054889] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191446.068858768] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191451.970012031] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191451.976558410] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191458.896272130] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191458.902919093] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191469.572259290] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191469.578865258] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191476.661614586] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191476.668185808] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191488.874125740] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191488.880790889] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191516.438829753] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191516.445389116] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191524.052224795] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191524.058914292] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191532.000259862] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191532.006936208] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191539.787808430] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191539.794193050] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191559.858852303] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191559.865627182] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191567.405457484] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191567.411985263] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191575.381231914] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191575.388056990] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191589.697333745] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191589.704040016] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191596.456325611] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191596.463028680] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191606.999131565] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191607.005790958] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191613.793575902] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191613.800193161] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191627.212020324] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191627.218579023] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191638.609889634] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191638.616604941] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191647.106502102] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191647.112936135] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191655.222588251] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191655.229391253] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191662.293862194] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191662.300625073] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191673.292246993] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191673.298895435] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191681.034805638] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191681.041193509] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191688.803311207] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191688.810013294] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191695.759882063] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191695.766487765] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191703.537453750] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191703.544189642] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191711.490113429] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191711.496528787] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191718.107766093] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191718.114188428] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191730.158727338] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191730.165407066] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191740.328177136] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191740.335001144] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191748.488122824] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191748.494922773] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191757.802454193] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191757.809240124] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191776.155723499] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191776.162535753] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191789.589676498] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191789.596377497] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191805.543979127] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191805.550588076] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191815.725359034] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191815.731888569] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191827.258535506] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191827.265281357] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191837.455487498] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191837.462164480] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191847.441291236] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191847.448074487] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191861.234300743] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191861.240923969] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191883.153899090] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191883.160535798] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191890.118045658] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191890.124877627] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191897.039540886] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191897.046128694] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191908.396276372] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191908.403065413] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191917.165127006] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191917.171813513] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191931.238865969] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191931.245491886] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191942.912872751] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191942.919410923] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191951.685476829] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191951.691905902] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191958.813165201] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191958.819781078] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191965.906748366] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191965.913330159] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191973.345735962] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191973.352469300] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191980.614250430] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191980.620817509] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191988.903411956] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191988.909884247] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795191996.841809054] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795191996.848187575] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192008.709477425] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192008.716041764] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192023.967816459] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192023.974191793] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192034.025230664] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192034.031937044] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192042.867791411] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192042.874153840] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192051.214466982] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192051.220890777] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192057.198111318] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192057.204575201] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192065.881123302] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192065.887565199] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192072.574471307] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192072.581123547] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192080.750125272] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192080.756579684] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192088.912530331] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192088.919129123] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192095.286525378] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192095.293227626] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192103.125798944] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192103.132170994] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192118.737574870] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192118.744171325] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192125.560455677] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192125.566847299] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192133.717500242] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192133.723922079] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192145.410806668] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192145.417169669] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192154.571830985] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192154.578494986] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192161.385725275] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192161.392160861] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192177.012513156] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192177.019148977] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192184.166794666] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192184.173544928] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192196.773516968] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192196.780108863] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192207.175808201] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192207.182175634] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192214.887132060] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192214.893508194] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192221.373805818] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192221.380170127] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192227.532476872] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192227.538916925] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192238.911415171] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192238.917874274] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192256.699617187] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192256.706427308] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192264.024804898] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192264.031157506] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192272.886140890] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192272.892856258] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192280.260452104] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192280.266869645] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192292.854807800] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192292.861204018] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192304.212200097] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192304.219019448] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192310.532123499] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192310.538529027] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192323.083108761] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192323.089529346] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192341.705116114] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192341.711669769] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192363.842306083] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192363.849039811] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192371.533162700] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192371.539525891] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192386.089542689] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192386.096090590] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192400.126104730] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192400.132536209] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192414.515115436] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192414.521530354] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192423.006966764] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192423.013507553] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192438.574895590] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192438.581662217] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192453.020801420] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192453.027221021] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192470.148460670] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192470.154857775] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192485.609259709] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192485.615872709] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192491.937697866] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192491.944188303] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192502.520152164] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192502.526820389] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192512.202461297] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192512.208834036] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192525.932795767] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192525.939154645] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192533.275454855] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192533.282223323] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192540.102679510] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192540.109345282] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192554.892821229] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192554.899392512] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192565.419838765] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192565.426504834] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192571.727121783] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192571.733551970] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192580.912523424] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192580.919198595] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192593.472125223] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192593.478670782] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192602.314345732] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192602.320891513] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192612.508389831] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192612.514882368] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192620.045789691] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192620.052196136] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192637.964124932] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192637.970516356] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192648.146807685] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192648.153174636] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192655.313542316] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192655.320025661] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192662.120111830] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192662.126519534] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192676.169798928] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192676.176296007] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192682.134802313] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192682.141279000] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192694.158808971] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192694.165243601] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192706.193264728] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192706.199863737] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192712.515539842] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192712.522166449] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192722.223113435] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192722.229846572] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192748.087805128] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192748.094188145] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192762.157813344] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192762.164419294] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192774.202121528] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192774.208522816] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192787.603125778] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192787.609507786] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192796.130814351] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192796.137578099] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192803.837146661] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192803.843737247] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192818.267619697] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192818.274159743] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192824.747177196] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192824.753795378] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192834.774148884] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192834.780594935] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192846.858654977] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192846.865341957] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192858.931459856] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192858.937870312] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192868.124865000] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192868.131726068] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192875.792134027] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192875.798687788] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192882.315116704] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192882.321760158] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192889.148457901] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192889.154872133] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192897.666467794] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192897.673040430] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192913.420924566] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192913.427669649] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192922.913447830] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192922.920028717] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192931.557114599] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192931.563733649] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192940.215457976] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192940.221849630] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192956.291457984] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192956.297876809] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192964.306493677] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192964.313193267] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192973.740120287] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192973.746517140] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795192981.950810970] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795192981.957325294] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193001.393396832] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193001.400022567] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193021.827114980] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193021.833601084] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193033.866183227] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193033.872741893] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193041.692454993] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193041.698927505] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193053.577436753] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193053.584103952] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193065.624128369] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193065.630493338] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193081.024020251] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193081.030513640] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193090.413465748] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193090.420133930] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193098.939112765] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193098.945523529] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193118.221459520] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193118.227920555] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193128.240839751] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193128.247505458] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193143.130077803] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193143.136598429] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193150.635390614] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193150.641874300] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193157.495452046] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193157.501896279] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193173.755879885] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193173.762552049] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193183.644797291] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193183.651497599] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193195.691805585] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193195.698178821] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193210.902799393] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193210.909189705] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193219.384471245] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193219.390858030] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193227.371799893] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193227.378171091] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193238.046452589] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193238.052860052] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193246.423818150] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193246.430375995] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193254.921826536] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193254.928396202] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193271.847111819] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193271.853553178] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193283.936460434] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193283.942849535] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193300.176802806] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193300.183262635] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193312.223133171] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193312.229808823] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193322.761571772] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193322.768066435] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193350.654118484] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193350.660885059] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193360.518504051] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193360.525167804] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193372.572108289] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193372.578545411] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193380.436108253] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193380.442538741] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193389.788097998] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193389.794563129] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193401.845266025] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193401.851886459] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193414.054144525] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193414.060836804] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193424.702828957] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193424.709379557] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193441.542811475] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193441.549361156] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193452.154143702] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193452.160678806] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193459.102798458] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193459.109176717] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193474.935522965] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193474.941884770] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193486.901530681] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193486.907896162] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193492.489792432] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193492.496170878] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193507.605795011] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193507.612141580] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193519.375802329] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193519.382142515] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193531.317815378] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193531.324189056] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193539.963805610] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193539.970176076] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193546.399586484] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193546.406147028] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193555.043825500] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193555.050179643] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193567.002127825] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193567.008722766] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193583.459311802] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193583.465926999] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193600.966347015] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193600.972866905] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193612.090791660] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193612.097168661] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193628.718805146] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193628.725141411] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193635.657799529] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193635.664177528] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193654.289805969] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193654.296185584] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193664.735121193] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193664.741529875] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193680.375293636] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193680.381885074] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193693.165458965] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193693.171885225] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193715.311134838] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193715.317553676] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193727.258817477] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193727.265187003] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193741.924805271] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193741.931139243] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193758.932454943] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193758.938890208] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193768.915792698] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193768.922150188] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193778.691112855] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193778.697467308] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193790.648795186] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193790.655139968] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193809.774854299] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193809.781436588] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193821.715456490] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193821.721864316] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193836.495105495] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193836.501513924] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193848.435453560] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193848.441822946] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193863.064169739] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193863.070663122] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193872.845112757] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193872.851503050] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193884.297788407] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193884.304229612] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193896.250790609] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193896.257146228] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193908.200943799] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193908.207521489] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193922.326491202] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193922.333052485] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193929.599509199] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193929.606012427] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193941.589454896] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193941.595835814] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193959.384451754] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193959.390834671] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193971.375111392] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193971.381511541] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193982.363792603] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193982.370165069] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795193994.365803027] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795193994.372224826] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194010.537237185] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194010.543920084] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194022.495178097] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194022.501793279] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194034.484845099] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194034.491234427] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194041.634796146] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194041.641155633] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194053.631162736] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194053.637542484] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194064.922111829] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194064.928532651] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194078.710455058] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194078.716898501] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194101.045796703] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194101.052175498] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194115.662447133] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194115.668809581] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194127.603794210] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194127.610152346] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194135.362786409] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194135.369164123] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194160.821801580] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194160.828160122] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194175.326126828] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194175.332541081] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194187.282813492] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194187.289171755] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194199.390078040] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194199.396518416] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194206.865894884] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194206.872647306] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194213.871195188] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194213.877779644] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194238.319061948] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194238.325889205] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194250.540449186] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194250.547263967] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194262.669080365] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194262.675570427] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194270.702801751] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194270.709646608] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194279.954740135] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194279.961492094] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194287.358047742] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194287.364841083] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194305.519759481] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194305.526196902] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194325.748849313] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194325.755492439] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194341.024894366] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194341.031522809] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194348.112462774] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194348.119165900] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194370.258267242] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194370.264823323] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194382.652404641] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194382.659004948] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194390.597121123] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194390.604062147] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194398.189664533] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194398.196349715] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194413.132314315] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194413.139042633] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194425.475614052] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194425.482463945] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194434.082081617] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194434.088821099] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194441.311955306] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194441.318540623] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194459.959813407] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194459.966189326] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194485.984162209] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194485.990641567] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194497.180021239] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194497.186580458] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194507.014895807] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194507.021541511] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194515.291817854] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194515.298374222] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194524.254349713] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194524.260883864] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194535.103111454] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194535.109882039] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194552.107747982] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194552.114461186] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194560.271233329] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194560.277844587] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194567.880601740] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194567.887299035] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194578.565133515] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194578.571529529] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194599.367233218] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194599.373803029] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194608.542911032] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194608.549438748] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194625.572872928] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194625.579570517] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194633.874283248] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194633.880883984] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194642.024147392] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194642.030898930] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194650.983894436] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194650.990618832] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194672.943365378] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194672.950211570] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194683.611625669] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194683.618262923] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194705.218117103] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194705.224774349] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194712.865885858] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194712.872403295] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194720.792111160] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194720.798638033] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194730.090266808] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194730.096957923] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194738.361826767] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194738.368339182] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194757.958944833] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194757.965590586] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194767.259811244] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194767.266237607] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194775.175332330] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194775.182220847] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194784.284669612] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194784.291389259] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194793.581276219] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194793.587975708] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194800.984241098] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194800.990859738] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194808.727237809] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194808.734098425] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194825.509583867] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194825.516183459] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194844.345115003] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194844.351725901] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194859.260377692] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194859.267042715] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194872.825632057] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194872.832411528] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194894.202186820] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194894.209029090] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194915.776509839] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194915.783165153] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194932.907654318] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194932.914397325] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194949.890823214] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194949.897185377] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194970.784740942] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194970.791450581] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795194992.541221082] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795194992.547874344] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795195002.174768045] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795195002.181173365] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795195011.813137450] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795195011.819572364] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795195023.664821736] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795195023.671502822] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795195038.586291862] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795195038.592967870] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795195043.615458660] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795195043.622153370] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795195048.636651295] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795195048.643180129] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795195062.192127304] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795195062.198528513] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795195076.086641962] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795195076.093225361] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795195093.905982478] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795195093.912797819] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795195113.244538683] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795195113.251075760] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795195127.974693704] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795195127.981357946] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795195142.884970316] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795195142.891506811] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795195156.430993851] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795195156.437535767] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795195162.664050226] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795195162.671053141] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795195181.494008409] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795195181.500534949] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795195200.345751502] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795195200.352402283] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795195208.773459871] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795195208.779924364] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795195217.220115809] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795195217.226565688] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795195234.227205612] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795195234.233899586] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795195251.718641272] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795195251.725476781] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795195259.478158128] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795195259.484758148] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795195269.111162959] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795195269.117964031] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gzserver-1] [INFO] [1795195288.128249540] [turtlebot3_joint_state]: Negative sim time difference detected.
+[robot_state_publisher-2] [WARN] [1795195288.134826398] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-2] [INFO] [1795195308.584663294] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[INFO] [robot_state_publisher-2]: process has finished cleanly [pid 252917]
+[INFO] [gzserver-1]: process has finished cleanly [pid 252915]
