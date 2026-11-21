@@ -80,6 +80,7 @@ def settle(node, seconds):
 
 def prepare_episode(env, pose):
     """Reset Gazebo, teleport to the start pose, and re-anchor the pose tracking there."""
+    env.set_physics_paused(False)        # 2026-11-21: env.step pauses physics after each action
     if not reset_simulation(env):
         raise RuntimeError("Gazebo reset failed")
     x, y, yaw = pose
@@ -97,6 +98,8 @@ def main():
     ap.add_argument('--repeats', type=int, default=3)
     ap.add_argument('--actions', type=int, default=30)
     ap.add_argument('--seed', type=int, default=7)
+    ap.add_argument('--learn-delay', type=float, default=0.0,
+                    help='wall seconds of no spinning between actions, like a slow learning update (2026-11-21 check)')
     args = ap.parse_args()
 
     actions = random.Random(args.seed).choices(range(7), k=args.actions)   # same sequence every run
@@ -116,6 +119,8 @@ def main():
             wall0, sim0 = time.monotonic(), clock['t']
             for i, a in enumerate(actions):
                 env.step(a)
+                if args.learn_delay:
+                    time.sleep(args.learn_delay)
                 x, y, yaw = env.get_world_pose()
                 rows.append({'mode': args.mode, 'repeat': rep, 'step': i, 'action': a,
                              'x': round(x, 5), 'y': round(y, 5), 'yaw': round(yaw, 5),

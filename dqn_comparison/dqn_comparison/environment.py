@@ -14,6 +14,7 @@ from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
 from gazebo_msgs.srv import SetEntityState
+from std_srvs.srv import Empty
 
 class RobotEnvironment(Node):
 
@@ -103,6 +104,18 @@ class RobotEnvironment(Node):
         self.sim_wait_timeout = 10.0             # wall-clock seconds before giving up on /clock
         # NEW (2026-11-20): poll interval while waiting on /clock (CPU tweak; default = original 1 ms)
         self.sim_poll = float(os.environ.get('DQN_SIM_POLL_S', '0.001'))
+        # NEW (2026-11-21, bug fix): pause Gazebo between actions (DQN_SIM_PAUSE=1, default in sim mode).
+        # Bug: sim_now is only refreshed while spinning; during learning nothing spins, so the next action
+        # started from a STALE time and ended early (by the learning time x speed). With learning slower than
+        # ~0.17 s wall (0.5 s sim at 3x) actions shrank to a few ms and the robot stopped moving. Pausing makes
+        # simulated time advance ONLY during actions, so learning speed (algorithm, CPU load, machine) cannot
+        # change the task, and moving obstacles do not move while the agent learns.
+        self.clock_count = 0
+        self.pause_between_steps = self.sim_time_stepping and os.environ.get('DQN_SIM_PAUSE', '1') == '1'
+        self.physics_paused = None               # unknown until the first pause/unpause call
+        if self.pause_between_steps:
+            self.pause_client = self.create_client(Empty, '/pause_physics')
+            self.unpause_client = self.create_client(Empty, '/unpause_physics')
         if self.sim_time_stepping:
             self.clock_sub = self.create_subscription(
                 Clock, '/clock', self.clock_callback,
@@ -118,6 +131,32 @@ class RobotEnvironment(Node):
     # ---------------- NEW CODE ADDED (2026-11-19, v2) ----------------
     def clock_callback(self, msg):
         self.sim_now = msg.clock.sec + msg.clock.nanosec * 1e-9
+        self.clock_count += 1
+
+    def _fresh_clock(self):
+        """Spin until a NEW /clock message arrives, so sim_now is current (not from before learning)."""
+        n = self.clock_count
+        deadline = time.monotonic() + self.sim_wait_timeout
+        while self.clock_count == n:
+            if time.monotonic() >= deadline or not rclpy.ok():
+                raise RuntimeError('/clock did not advance (is Gazebo paused or stopped?)')
+            rclpy.spin_once(self, timeout_sec=self.sim_poll)
+
+    def set_physics_paused(self, paused):
+        """Pause/unpause Gazebo physics (no-op unless DQN_SIM_PAUSE is on). Raises if Gazebo does not answer."""
+        if not self.pause_between_steps or self.physics_paused == paused:
+            return
+        client = self.pause_client if paused else self.unpause_client
+        what = '/pause_physics' if paused else '/unpause_physics'
+        if not client.wait_for_service(timeout_sec=5.0):
+            raise RuntimeError(f'{what}: service unavailable')
+        future = client.call_async(Empty.Request())
+        deadline = time.monotonic() + 5.0
+        while rclpy.ok() and not future.done() and time.monotonic() < deadline:
+            rclpy.spin_once(self, timeout_sec=0.001)
+        if not future.done() or future.result() is None:
+            raise RuntimeError(f'{what}: no reply')
+        self.physics_paused = paused
 
     def _wait_for_clock(self):
         """Spin until the first /clock message arrives (sim mode only)."""
@@ -302,7 +341,9 @@ class RobotEnvironment(Node):
         # SIMULATED clock has advanced by `duration`. Overshoot is about one /clock tick
         # plus the poll interval (~1-3 ms sim at 1000 Hz); measured, not assumed.
         if self.sim_time_stepping:
+            self.set_physics_paused(False)
             self._wait_for_clock()
+            self._fresh_clock()                  # bug fix 2026-11-21: start from the CURRENT simulated time
             t_start = self.sim_now
             self.cmd_vel_pub.publish(command)
             wall_deadline = time.monotonic() + self.sim_wait_timeout
@@ -360,6 +401,7 @@ class RobotEnvironment(Node):
                 break
 
         next_state = self.get_state()
+        self.set_physics_paused(True)            # bug fix 2026-11-21: no simulated time passes while learning
 
         if next_state is None:
             raise RuntimeError("State is not available after action execution. Waiting for sensor data.")

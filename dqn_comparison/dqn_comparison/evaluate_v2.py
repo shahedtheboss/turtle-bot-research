@@ -74,6 +74,7 @@ def main(argv=None):
         env = RobotEnvironment()
         if not env.sim_time_stepping:
             raise RuntimeError("evaluate_v2 needs DQN_SIM_TIME_STEP=1")
+        env.set_physics_paused(False)        # 2026-11-21: training may have left Gazebo paused
         wait_for_sensors(env)
         if a.policy == "greedy":
             agent = load_greedy_agent(a.model)

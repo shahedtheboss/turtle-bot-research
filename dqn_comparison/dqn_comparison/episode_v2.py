@@ -58,6 +58,7 @@ def reset_to_phase(env, w):
     if not hasattr(env, '_v2_reset_client'):
         env._v2_reset_client = env.create_client(Empty, '/reset_simulation')
         env._v2_state_client = env.create_client(SetEntityState, '/set_entity_state')
+    env.set_physics_paused(False)                         # 2026-11-21: physics is paused between episodes
     env._wait_for_clock()
     t_before = env.sim_now
     env.publish_stop()
@@ -92,4 +93,5 @@ def prepare_episode_v2(env, stage, pose, goal):
                 'sensor data after the teleport')
     env.goal_x, env.goal_y = float(goal[0]), float(goal[1])
     env.begin_episode(start=pose, settle_sec=0.0)
+    env.set_physics_paused(True)                          # 2026-11-21: the first action unpauses
     return env.sim_now

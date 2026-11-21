@@ -26,3 +26,20 @@ Everything below is fixed before the first main run. Changes after the tag are r
 - Planned split: lab PC seeds 1-3 (75 runs), laptop seeds 4-5 (50 runs). Whole seeds per machine, so each arm and world is equally affected by machine differences.
 - Fallback: if a machine is not available long enough, the other runs the remaining runs (`scripts/run_main_v2.sh <machine> --take-over`). The machine of every run is recorded (hostname in `run_meta.json`) and reported; a machine effect is checked descriptively.
 - A run that fails for a technical reason (crash, Gazebo not starting) is rerun with the same settings and reported.
+
+## Deviation 1 (2026-11-21): simulated-time stepping bug fixed; tuning redone; main runs restarted
+**Found** in the first 4 main runs (laptop, world 2, seed 4) about 1.5 h after the tag: the environment read the
+simulated clock only while processing messages, so after each learning update the next action started from a
+stale time and ended early by (learning wall time x speed). When learning took longer than ~0.17 s wall time the
+actions shrank to a few milliseconds and the robot stopped moving (DDQN, D3QN, Rainbow, Rainbow+guide ended
+episodes within 3-10 cm of the start; 1.7-4.8 s of simulated time per step instead of 0.5). In the earlier tuning
+and diagnosis runs the same bug shortened actions by a load- and algorithm-dependent amount (not measurable
+afterwards).
+**Fix:** Gazebo physics is paused between actions (simulated time advances only while an action runs) and the
+clock is refreshed before each action. Checks: a unit test that fails on the old code and passes on the new;
+in Gazebo, 30 fixed actions end at (1.062, -0.200) with 0.5 s of artificial learning delay per step vs
+(1.066, -0.195) for the v1 real-time reference; training at 4 parallel runs gives 0.51 s of simulated time per
+step for every algorithm.
+**Consequences:** the 4 main runs are discarded (results_invalid_v2_stale_clock/, not analysed); the tuning is
+rerun with the same protocol on the fixed code; the main runs restart from scratch after a new tag
+(v2-prereg-1.1). No main-study result had been looked at beyond these 4 invalid runs.

@@ -231,6 +231,7 @@ def main(argv=None):
         random.setstate(rng_state[0]); np.random.set_state(rng_state[1]); torch.set_rng_state(rng_state[2])
         write_json(meta_path, meta)
 
+        env.set_physics_paused(False)            # 2026-11-21: an earlier process may have left Gazebo paused
         deadline = time.monotonic() + 10.0
         while rclpy.ok() and env.get_state() is None:
             if time.monotonic() >= deadline:

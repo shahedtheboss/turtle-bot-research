@@ -25,7 +25,7 @@ run_mode() {   # mode rtf_cap sim_flag
         sleep 2
     done
     sleep 3
-    DQN_SIM_TIME_STEP=$sim python3 scripts/sim_time_equivalence.py --mode "$mode" --repeats "${REPEATS:-3}" --out "results_smoke/b3/${mode}${TAG:-}.csv" || true
+    DQN_SIM_TIME_STEP=$sim python3 scripts/sim_time_equivalence.py --mode "$mode" --repeats "${REPEATS:-3}" --learn-delay "${LEARN_DELAY:-0}" --out "results_smoke/b3/${mode}${TAG:-}.csv" || true
     kill -INT -- -$gz 2>/dev/null || true; sleep 5; kill -KILL -- -$gz 2>/dev/null || true
 }
 

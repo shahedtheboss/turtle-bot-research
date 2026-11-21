@@ -33,6 +33,7 @@ def fake_gazebo(monkeypatch, env, reset_works=True):
     monkeypatch.setattr(ep.rclpy, 'spin_once', spin_once)
     monkeypatch.setattr(ep, '_call', call)
     monkeypatch.setattr(env, 'begin_episode', lambda start, settle_sec: calls.append(('begin', start)))
+    monkeypatch.setattr(env, 'set_physics_paused', lambda p: calls.append(('pause' if p else 'unpause', env.sim_now)))
     return calls
 
 
@@ -50,8 +51,8 @@ def test_episode_starts_at_w_plus_settle(monkeypatch, stage):
     t = ep.prepare_episode_v2(env, stage, (0.0, 0.0, 0.0), (1.75, -1.75))
     w = ep.LAYOUTS[stage]['W']
     assert t == pytest.approx(w + ep.SETTLE_SIM, abs=0.005)
-    assert [c[0] for c in calls] == ['/reset_simulation', '/set_entity_state', 'begin']
-    assert calls[1][1] == pytest.approx(w, abs=0.002)  # teleport happens at time W, after the warm-up
+    assert [c[0] for c in calls] == ['unpause', '/reset_simulation', '/set_entity_state', 'begin', 'pause']
+    assert calls[2][1] == pytest.approx(w, abs=0.002)  # teleport happens at time W, after the warm-up
     assert (env.goal_x, env.goal_y) == (1.75, -1.75)
     env.destroy_node()
 

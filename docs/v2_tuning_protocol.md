@@ -49,7 +49,10 @@ supplement." (Wording to be adjusted to the option actually used.)
 - [x] Tuning world: moving stage 4; budget 500 episodes (diagnosis follow-up: one of two world-4 seeds not learned by 400)
 - [ ] Committed before the first tuning run (the pre-registration tag follows tuning)
 
-## Result (2026-11-20, 20 tuning runs finished 23:55; results_tune_v2/)
+## Result of the FIRST tuning (2026-11-20; INVALID, see deviation 1 in docs/v2_preregistration.md: actions were
+shortened by learning time; kept for the record in results_tune_v2_stale_clock/)
+
+### First tuning, 20 tuning runs finished 23:55; results_tune_v2/)
 Median E* over the tuning seeds (censored = 520), selected by the rule above:
 
 | Algorithm | 5e-5 (seed 101 only) | 1e-4 | 2.5e-4 | Selected |
@@ -63,3 +66,7 @@ Two seeds per setting: the differences between 1e-4 and 2.5e-4 are small relativ
 DDQN 2.5e-4: 160 and 60), so the selection is a documented, fixed-rule choice, not evidence that one rate is
 better. Two runs (DQN 2.5e-4 s101, Rainbow 1e-4 s102) lost their first start to a launcher bug (Gazebo stopped
 during start-up, no training happened) and were rerun with the same settings.
+
+## Rerun (2026-11-21, after the timing fix)
+Same protocol: option (a), world 4, seeds 101-102, lr 5e-5 on seed 101 only (20 runs), stop when learned.
+Results: results_tune_v2/; selection rule as above.
