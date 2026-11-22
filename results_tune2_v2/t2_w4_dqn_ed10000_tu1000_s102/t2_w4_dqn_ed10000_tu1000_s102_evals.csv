@@ -1,0 +1,10 @@
+episode,env_steps_total,wins,n,success_rate,outcomes,steps,q_start_mean,disc_return_mean,q_probe_mean
+20,824,0,4,0.0,no_progress;no_progress;no_progress;no_progress,70;85;61;80,nan,nan,0.09
+40,1770,0,4,0.0,collision_warning;collision_warning;collision_warning;collision_warning,25;42;33;28,0.043,-22.092,0.001
+60,2823,1,4,0.25,goal_reached;collision_warning;collision_warning;collision_warning,32;26;41;23,-0.059,5.395,-0.026
+80,3778,1,4,0.25,collision_warning;collision_warning;goal_reached;collision_warning,28;27;34;40,0.004,3.096,0.02
+100,4547,2,4,0.5,collision_warning;collision_warning;goal_reached;goal_reached,24;25;35;40,0.176,24.136,0.201
+120,5252,2,4,0.5,collision_warning;goal_reached;goal_reached;collision_warning,27;39;35;47,0.56,24.028,0.574
+140,6032,1,4,0.25,collision_warning;collision_warning;goal_reached;collision_warning,21;29;41;50,0.915,1.273,0.892
+160,6890,3,4,0.75,collision_warning;goal_reached;goal_reached;goal_reached,23;34;32;39,1.012,49.761,0.982
+180,7726,4,4,1.0,goal_reached;goal_reached;goal_reached;goal_reached,35;35;32;38,1.368,72.295,1.328

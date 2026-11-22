@@ -58,3 +58,9 @@ where actions were shortened by the (short, GPU) learning time, so the rates wer
 task; in it, 1e-4 and 2.5e-4 were within seed-to-seed noise for every algorithm.
 **Device:** all main runs use CUDA, required (`DQN_DEVICE=cuda` in run_slot_v2.sh: a run fails instead of falling
 back to the CPU); the device is recorded in run_meta.json. Laptop and lab PC both run CUDA.
+
+## Deviation 3 (2026-11-22): second tuning stage added before the main runs
+Added after deviation 2 and before any main run (decided before any run of the stage; `docs/v2_tuning_protocol.md`):
+epsilon decay length and target update period (DQN, DDQN, D3QN) and NoisyNet sigma0 and n-step (Rainbow), 2 values
+each, equal budget, same selection rule. Selected (`TUNED_EXTRA` in train_v2.py): DQN 10k / 1000, DDQN 10k / 250,
+D3QN 20k / 1000, Rainbow and `rainbow_g` sigma0 0.5 / n-step 3. Frozen by tag `v2-prereg-1.2`.

@@ -64,9 +64,10 @@ TUNED_LR = {"dqn": 2.5e-4, "ddqn": 2.5e-4, "d3qn": 1e-4, "rainbow": 1e-4}
 # Second tuning stage (2026-11-21, docs/v2_tuning_protocol.md): two more settings per algorithm, equal budget.
 # Until that tuning is done these are the shared v1 values; the main runs use the selected values.
 TUNED_EXTRA = {
-    "dqn": {"epsilon_decay_steps": 10_000, "target_update_every": 250},
+    # selected by the second tuning stage (2026-11-22, docs/v2_tuning_protocol.md)
+    "dqn": {"epsilon_decay_steps": 10_000, "target_update_every": 1000},
     "ddqn": {"epsilon_decay_steps": 10_000, "target_update_every": 250},
-    "d3qn": {"epsilon_decay_steps": 10_000, "target_update_every": 250},
+    "d3qn": {"epsilon_decay_steps": 20_000, "target_update_every": 1000},
     "rainbow": {"sigma0": 0.5, "n_step": 3},
 }
 AGENTS_V2 = {"dqn": AGENTS["dqn"], "ddqn": AGENTS["ddqn"], "d3qn": AGENTS["d3qn"],

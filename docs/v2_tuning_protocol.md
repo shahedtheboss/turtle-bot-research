@@ -89,3 +89,21 @@ Rainbow + guide uses Rainbow's selection.
 the v1 value). The selected values go into `TUNED_EXTRA` in train_v2.py before the main runs (new tag v2-prereg-1.2).
 
 **Reporting:** both stages are reported, including that the first stage ran before the timing fix (deviation 2).
+
+### Second-stage result (2026-11-22)
+Median E* over seeds 101/102 (censored = 520, marked c); mean final success in brackets.
+
+| Algorithm | 10k / 250 (v1) | 10k / 1000 | 20k / 250 | 20k / 1000 | Selected |
+|---|---|---|---|---|---|
+| DQN | 200, 300 -> 250 (0.56) | 160, 160 -> **160** (0.57) | 280, 120 -> 200 (0.55) | 100, 440 -> 270 (0.60) | 10k / 1000 |
+| DDQN | 60, 160 -> **110** (0.34) | 200, 400 -> 300 (0.54) | 280, 300 -> 290 (0.56) | 200, 160 -> 180 (0.50) | 10k / 250 |
+| D3QN | 520c, 520c -> 520 (0.44) | 180, 240 -> 210 (0.66) | 220, 200 -> 210 (0.50) | 140, 240 -> **190** (0.51) | 20k / 1000 |
+
+| Algorithm | 0.5 / 3 (v1) | 0.5 / 1 | 0.25 / 3 | 0.25 / 1 | Selected |
+|---|---|---|---|---|---|
+| Rainbow (sigma0 / n-step) | 280, 200 -> **240** (0.61) | 420, 520c -> 470 (0.30) | 360, 520c -> 440 (0.30) | 520c, 520c -> 520 (0.21) | 0.5 / 3 |
+
+Notes: seed-to-seed differences are large (e.g. DQN 20k/1000: 100 vs 440), so the selection is a fixed-rule choice,
+not evidence that a setting is better. The DDQN selection learns fastest but has the lowest final success of its
+settings (0.34; seed 101: 0.12); the rule uses E* only, as fixed in advance. D3QN with the v1 values never learned.
+Wall time: 2026-11-21 17:13-20:33 and 2026-11-22 13:59-23:00, 4 runs in parallel, CUDA.
