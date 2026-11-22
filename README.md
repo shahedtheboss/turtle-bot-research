@@ -1,6 +1,7 @@
 <div align="center">
 
-# 🐢 turtle-bot-research
+# Deep Reinforcement Learning for TurtleBot3 Autonomous Navigation
+
 
 ### Learning to navigate without a map: deep reinforcement learning for a TurtleBot3
 
