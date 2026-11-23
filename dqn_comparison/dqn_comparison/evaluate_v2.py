@@ -3,7 +3,9 @@
 Poses = the world's start + 4 test poses (worlds_v2.LAYOUTS), goals = its 4 goals -> 20 combinations,
 each repeated --repeats times (default 2 -> 40 episodes). Every episode starts with prepare_episode_v2
 (reset, warm-up W, teleport), so the obstacle phase is identical. Greedy: no epsilon, no noise, no guide.
---policy heuristic evaluates the scripted guide alone (baseline H), as in v1.
+--policy heuristic evaluates the scripted guide alone (baseline H), as in v1. With --guide-noise 0.15 (H_noisy,
+deviation 4) each action is replaced, with that probability, by the forward-biased random action used in training;
+--seed makes that noise reproducible.
 Needs DQN_SIM_TIME_STEP=1 and Gazebo from turtlebot3_drl_v2.launch.py stage:=<world>.
 
   DQN_SIM_TIME_STEP=1 python3 -m dqn_comparison.evaluate_v2 --world 4 \
@@ -12,12 +14,13 @@ Needs DQN_SIM_TIME_STEP=1 and Gazebo from turtlebot3_drl_v2.launch.py stage:=<wo
 import argparse
 import csv
 import os
+import random
 import sys
 
 import rclpy
 from rclpy.utilities import remove_ros_args
 
-from dqn_comparison.common import heuristic_action, wait_for_sensors, MAX_STEPS
+from dqn_comparison.common import GUIDED_NOISE_WEIGHTS, heuristic_action, wait_for_sensors, MAX_STEPS
 from dqn_comparison.environment import RobotEnvironment
 from dqn_comparison.episode_v2 import prepare_episode_v2
 from dqn_comparison.learning import load_greedy_agent
@@ -44,6 +47,13 @@ def greedy_rollout(env, choose, rng, guide_noise):
     return outcome, total_reward, steps
 
 
+def heuristic_choice(state, max_lidar, rng, noise):
+    """Baseline H (noise 0) or H_noisy: with probability noise, the training guide's forward-biased random action."""
+    if noise > 0 and rng.random() < noise:
+        return rng.choices(range(7), weights=GUIDED_NOISE_WEIGHTS)[0]
+    return heuristic_action(state, max_lidar)
+
+
 def combinations(world, repeats):
     """(pose_index, pose, goal_index, goal, repeat) in a fixed order: pose-major, then goal, then repeat."""
     lay = W.LAYOUTS[world]
@@ -57,12 +67,16 @@ def parse_args(argv):
     ap.add_argument("--world", type=world_arg, required=True)
     ap.add_argument("--policy", choices=["greedy", "heuristic"], default="greedy")
     ap.add_argument("--model", help="checkpoint (required for --policy greedy)")
+    ap.add_argument("--guide-noise", type=float, default=0.0, help="heuristic only: noise probability (0 = H)")
+    ap.add_argument("--seed", type=int, default=1, help="heuristic only: RNG seed of the noise")
     ap.add_argument("--repeats", type=int, default=2)
     ap.add_argument("--label", default="")
     ap.add_argument("--out-csv", required=True)
     a = ap.parse_args(remove_ros_args(argv)[1:])
     if a.policy == "greedy" and not a.model:
         ap.error("--model is required for --policy greedy")
+    if a.policy == "greedy" and a.guide_noise != 0:
+        ap.error("--guide-noise is only for --policy heuristic")
     return a
 
 
@@ -83,11 +97,12 @@ def main(argv=None):
                 return agent.select_greedy_action(state)
         else:
             def choose(state, rng, noise):
-                return heuristic_action(state, env.MAX_LIDAR)
+                return heuristic_choice(state, env.MAX_LIDAR, rng, noise)
 
+        rng = random.Random(a.seed)
         for pi, pose, gi, goal, rep in combinations(a.world, a.repeats):
             t_start = prepare_episode_v2(env, a.world, pose, goal)
-            outcome, reward, steps = greedy_rollout(env, choose, None, 0.0)
+            outcome, reward, steps = greedy_rollout(env, choose, rng, a.guide_noise)
             x, y, _ = env.get_world_pose()
             rows.append({"world": a.world, "label": a.label, "pose_index": pi, "pose_x": pose[0],
                          "pose_y": pose[1], "pose_yaw": pose[2], "goal_index": gi, "goal_x": goal[0],

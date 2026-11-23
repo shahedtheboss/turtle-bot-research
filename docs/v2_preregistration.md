@@ -64,3 +64,16 @@ Added after deviation 2 and before any main run (decided before any run of the s
 epsilon decay length and target update period (DQN, DDQN, D3QN) and NoisyNet sigma0 and n-step (Rainbow), 2 values
 each, equal budget, same selection rule. Selected (`TUNED_EXTRA` in train_v2.py): DQN 10k / 1000, DDQN 10k / 250,
 D3QN 20k / 1000, Rainbow and `rainbow_g` sigma0 0.5 / n-step 3. Frozen by tag `v2-prereg-1.2`.
+
+## Deviation 4 (2026-11-23): heuristic baselines H and H_noisy added before the main runs
+**Why:** `rainbow_g` uses a scripted guide, so the guide's own performance is needed to interpret it, and a
+guide-alone baseline is standard in guided DRL navigation (it was also reported in v1). Decided before any H or
+H_noisy result of v2 was seen (a blind Gazebo check of the code recorded only that the robot moved, not outcomes).
+**Arms (no training):**
+- **H:** `heuristic_action` alone, no noise; deterministic, so one evaluation per world.
+- **H_noisy:** the guide exactly as used in training (15% forward-biased random actions, `GUIDED_NOISE`), seeds 1-5 per world.
+**Protocol:** the final evaluation of the main runs (5 poses x 4 goals x 2 repeats = 40 episodes per world, same
+simulation settings); `scripts/run_baseline_v2.sh`, results in `results_v2/w<world>_heuristic[_noisy_s<seed>]/`.
+**Metrics and analysis:** final success and collision rate with Wilson intervals; no E* (nothing is learned).
+**Descriptive only, no significance tests:** each arm's 5 seeds are shown next to H (one value) and H_noisy (5 seeds).
+These baselines do not change the primary analysis (E* between the 5 learning arms). Frozen by tag `v2-prereg-1.3`.

@@ -20,6 +20,7 @@ GUIDED_START = 0.8
 GUIDED_END = 0.1
 GUIDED_EPISODES = 100
 GUIDED_NOISE = 0.15           # chance the guided action is replaced by a forward-biased random one
+GUIDED_NOISE_WEIGHTS = [4, 1, 1, 1, 1, 1, 1]   # that random action: forward 4x as likely as each other
 
 
 def select_device():

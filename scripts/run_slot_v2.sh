@@ -9,12 +9,15 @@
 # after the long load test). Gazebo: turtlebot3_drl_v2.launch.py stage:=WORLD rtf_cap:=$V2_RTF_CAP (default 3).
 # Steps: start Gazebo, wait for /scan, train (train_v2), evaluate the FINAL checkpoint (evaluate_v2,
 # EVAL_REPEATS x 20 episodes, default 2), stop ONLY this slot's Gazebo (matched by its port; also on Ctrl+C).
+# Baselines (deviation 4): ARM heuristic (H, scripted guide alone, no noise; SEED unused) or heuristic_noisy
+# (H_noisy, guide noise 0.15 seeded by SEED) skip training and run only the final evaluation.
 set -eo pipefail
 if [ $# -lt 4 ]; then echo "usage: $0 SLOT(1-8) WORLD(2|3|4s|4|6) ARM SEED [train_v2 flags]" >&2; exit 1; fi
 SLOT=$1; WORLD=$2; ARM=$3; SEED=$4; shift 4
 case "$SLOT" in 1|2|3|4|5|6|7|8) ;; *) echo "SLOT must be 1-8" >&2; exit 1 ;; esac
 case "$WORLD" in 2|3|4s|4|6) ;; *) echo "WORLD must be 2, 3, 4s, 4 or 6" >&2; exit 1 ;; esac
-case "$ARM" in dqn|ddqn|d3qn|rainbow|rainbow_g) ;; *) echo "ARM must be dqn ddqn d3qn rainbow rainbow_g" >&2; exit 1 ;; esac
+case "$ARM" in dqn|ddqn|d3qn|rainbow|rainbow_g|heuristic|heuristic_noisy) ;;
+    *) echo "ARM must be dqn ddqn d3qn rainbow rainbow_g heuristic heuristic_noisy" >&2; exit 1 ;; esac
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO"
@@ -31,6 +34,7 @@ source "$REPO/install/setup.bash"
 source "$HOME/pytorch-env/bin/activate"
 
 RUN_NAME="w${WORLD}_${ARM}_s${SEED}"; RESULTS_DIR="results_v2"
+[ "$ARM" = heuristic ] && RUN_NAME="w${WORLD}_heuristic"         # deterministic: one run per world, no seed
 args=("$@")
 for ((i = 0; i < ${#args[@]}; i++)); do
     case "${args[$i]}" in --run-name) RUN_NAME="${args[$((i + 1))]}" ;; --results-dir) RESULTS_DIR="${args[$((i + 1))]}" ;; esac
@@ -65,6 +69,16 @@ until timeout 10 ros2 topic echo /scan --once --no-daemon > /dev/null 2>&1; do
 done
 sleep 3
 
+if [ "$ARM" = heuristic ] || [ "$ARM" = heuristic_noisy ]; then
+    NOISE=0; [ "$ARM" = heuristic_noisy ] && NOISE=0.15        # = GUIDED_NOISE in common.py
+    mkdir -p "$RUN_DIR"
+    printf '{"run_name": "%s", "world": "%s", "arm": "%s", "seed": %s, "guide_noise": %s, "hostname": "%s", "git_commit": "%s", "start_time": "%s"}\n' \
+        "$RUN_NAME" "$WORLD" "$ARM" "$SEED" "$NOISE" "$(hostname)" "$(git rev-parse --short HEAD)" "$(date '+%FT%T')" \
+        > "$RUN_DIR/${RUN_NAME}_baseline_meta.json"
+    python3 -m dqn_comparison.evaluate_v2 --world "$WORLD" --policy heuristic --guide-noise "$NOISE" --seed "$SEED" \
+        --repeats "${EVAL_REPEATS:-2}" --label "$RUN_NAME" --out-csv "$RUN_DIR/${RUN_NAME}_final_eval.csv"
+    exit 0
+fi
 python3 -m dqn_comparison.train_v2 --world "$WORLD" --arm "$ARM" --seed "$SEED" "$@"
 python3 -m dqn_comparison.evaluate_v2 --world "$WORLD" --model "$RUN_DIR/${RUN_NAME}_model_final.pth" \
     --repeats "${EVAL_REPEATS:-2}" --label "$RUN_NAME" --out-csv "$RUN_DIR/${RUN_NAME}_final_eval.csv"
