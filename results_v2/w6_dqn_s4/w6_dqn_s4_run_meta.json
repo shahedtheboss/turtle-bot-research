@@ -1,0 +1,134 @@
+{
+  "study": "v2",
+  "run_name": "w6_dqn_s4",
+  "world": 6,
+  "arm": "dqn",
+  "algo": "dqn",
+  "guide": false,
+  "seed": 4,
+  "episodes": 500,
+  "eval_every": 20,
+  "max_steps": 250,
+  "updates_per_step": 2,
+  "layout": {
+    "W": 5.0,
+    "start": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "goals": [
+      [
+        1.75,
+        -1.0
+      ],
+      [
+        -1.75,
+        1.0
+      ],
+      [
+        0.5,
+        1.75
+      ],
+      [
+        -1.75,
+        -0.5
+      ]
+    ],
+    "tests": [
+      [
+        -1.25,
+        1.75,
+        -0.9505
+      ],
+      [
+        0.5,
+        -1.75,
+        1.8491
+      ],
+      [
+        0.75,
+        0.75,
+        -2.3562
+      ],
+      [
+        -1.0,
+        -1.0,
+        0.7854
+      ]
+    ]
+  },
+  "goal_rng_seed": 10004,
+  "goal_counts": [
+    125,
+    125,
+    125,
+    125
+  ],
+  "sim_time_stepping": true,
+  "rtf_cap": "3",
+  "clock_hz": "200",
+  "sim_poll_s": "0.005",
+  "reward_scale": 1.0,
+  "rainbow_support": [
+    -75.0,
+    125.0
+  ],
+  "diag_goal": null,
+  "diagnostic": false,
+  "per_beta_schedule": "0.4 + 0.6 * episode / episodes (Rainbow only)",
+  "q_logging": "q_start_mean and q_probe_mean are divided by reward_scale (environment reward units)",
+  "guide_schedule": {
+    "start": 0.8,
+    "end": 0.1,
+    "episodes": 100,
+    "noise": 0.15
+  },
+  "hostname": "shahed-Aspire-A715-79G",
+  "git_commit": "37230b80a2cffe2e181af20d0e994df0d7cf6aad",
+  "git_dirty": false,
+  "git_untracked_code": [],
+  "torch_version": "2.14.1+cu130",
+  "slot": "3",
+  "ros_domain_id": "33",
+  "gazebo_master_uri": "http://localhost:11348",
+  "parallel_runs": "4",
+  "start_time": "2026-11-24T20:19:14",
+  "end_time": "2026-11-24T22:03:46",
+  "status": "completed",
+  "learning_rate_source": "tuned (TUNED_LR)",
+  "device": "cuda",
+  "hyperparameters": {
+    "learning_rate": 0.00025,
+    "gamma": 0.99,
+    "batch_size": 128,
+    "memory_size": 50000,
+    "target_update_every": 1000,
+    "warmup_transitions": 1000,
+    "grad_clip": 10.0,
+    "epsilon_start": 1.0,
+    "epsilon_end": 0.05,
+    "epsilon_decay_steps": 10000,
+    "hidden": 256,
+    "head_hidden": 128
+  },
+  "extra_settings": {
+    "epsilon_decay_steps": 10000,
+    "target_update_every": 1000
+  },
+  "initial_greedy_action_hist": [
+    0,
+    0,
+    6,
+    3,
+    218,
+    73,
+    0
+  ],
+  "learning_steps": 36622,
+  "episodes_completed": 500,
+  "env_steps_total": 19310,
+  "wall_time_h": 1.742,
+  "rtf_mean": 2.315,
+  "rtf_min": 2.182
+}
